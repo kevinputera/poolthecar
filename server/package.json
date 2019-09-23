@@ -1,0 +1,17 @@
+{
+  "name": "poolthecar-server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinputera/poolthecar.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinputera/poolthecar/issues"
+  },
+  "homepage": "https://github.com/kevinputera/poolthecar#readme"
+}
