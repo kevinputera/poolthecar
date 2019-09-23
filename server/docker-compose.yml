@@ -1,0 +1,21 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:11-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - poolthecar_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+  
+  pgweb:
+    image: sosedoff/pgweb:latest
+    ports:
+      - 8081:8081
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+volumes:
+  poolthecar_postgres_data:
