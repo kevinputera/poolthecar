@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:table": "node scripts/table.js",
+    "db:seed": "node scripts/seed.js"
   },
   "repository": {
     "type": "git",
@@ -13,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/kevinputera/poolthecar/issues"
   },
-  "homepage": "https://github.com/kevinputera/poolthecar#readme"
+  "homepage": "https://github.com/kevinputera/poolthecar#readme",
+  "dependencies": {
+    "dotenv": "^8.1.0",
+    "pg": "^7.12.1"
+  }
 }
