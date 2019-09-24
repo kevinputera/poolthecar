@@ -15,7 +15,7 @@ CREATE TABLE accounts (
   name varchar(255) NOT NULL,
   gender gender NOT NULL,
   phone varchar(50) NOT NULL,
-  profile_photo_url varchar(1023),
+  profile_photo_url varchar(1023) NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
