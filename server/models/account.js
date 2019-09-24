@@ -29,6 +29,17 @@ class Account {
     });
   }
 
+  async delete() {
+    const client = await getClient();
+    await client.query({
+      text: /* sql */ `
+        DELETE FROM accounts
+        WHERE email = $1
+      `,
+      values: [this.email]
+    });
+  }
+
   static async findAll() {
     const client = await getClient();
     const accounts = await client.query(/* sql */ `
