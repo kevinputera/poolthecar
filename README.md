@@ -1,7 +1,5 @@
 # poolthecar
 
-# Server
-
 ## Development setup
 
 1. Install [Docker for Mac](https://docs.docker.com/docker-for-mac/install) or [Docker for Windows](https://docs.docker.com/docker-for-windows/install) if you wish to use `docker-compose`.
