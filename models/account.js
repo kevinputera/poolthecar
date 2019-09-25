@@ -1,4 +1,4 @@
-const { getClient } = require("../db");
+const { getClient } = require('../db');
 
 class Account {
   constructor(email, secret, name, gender, phone, profile_photo_url) {
@@ -24,8 +24,8 @@ class Account {
         this.name,
         this.gender,
         this.phone,
-        this.profile_photo_url
-      ]
+        this.profile_photo_url,
+      ],
     });
   }
 
@@ -36,7 +36,7 @@ class Account {
         DELETE FROM accounts
         WHERE email = $1
       `,
-      values: [this.email]
+      values: [this.email],
     });
   }
 
