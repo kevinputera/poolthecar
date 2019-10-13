@@ -12,9 +12,9 @@ class Car {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO cars (license, model, seats, year)
+        INSERT INTO Cars (license, model, seats, year)
         VALUES ($1, $2, $3, $4)
-			`,
+      `,
       values: [this.license, this.model, this.seats, this.year],
     });
   }
@@ -23,9 +23,9 @@ class Car {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        DELETE FROM cars
+        DELETE FROM Cars
         WHERE license = $1
-			`,
+      `,
       values: [this.license],
     });
   }
@@ -34,8 +34,8 @@ class Car {
     const client = await getClient();
     const cars = await client.query(/* sql */ `
       SELECT license, model, seats, year
-      FROM cars
-		`);
+      FROM Cars
+    `);
     return cars.rows.map(
       car => new Car(car.license, car.model, car.seats, car.year)
     );

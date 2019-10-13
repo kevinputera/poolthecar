@@ -20,18 +20,18 @@ CREATE TABLE accounts (
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE drivers (
+CREATE TABLE Drivers (
   email varchar(255) PRIMARY KEY
 );
 
-CREATE TABLE cars (
+CREATE TABLE Cars (
   license varchar(255) PRIMARY KEY,
   model varchar(255) NOT NULL,
   seats integer NOT NULL,
   year integer NOT NULL
 );
 
-CREATE TABLE owns (
+CREATE TABLE Owns (
   email varchar(255),
   license varchar(255),
   PRIMARY KEY(email, license)

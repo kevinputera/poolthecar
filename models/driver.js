@@ -9,9 +9,9 @@ class Driver {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO drivers (email)
+        INSERT INTO Drivers (email)
         VALUES ($1)
-			`,
+      `,
       values: [this.email],
     });
   }
@@ -20,9 +20,9 @@ class Driver {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        DELETE FROM drivers
+        DELETE FROM Drivers
         WHERE email = $1
-			`,
+      `,
       values: [this.email],
     });
   }
@@ -31,8 +31,8 @@ class Driver {
     const client = await getClient();
     const drivers = await client.query(/* sql */ `
       SELECT email
-      FROM accounts
-		`);
+      FROM Drivers
+    `);
     return drivers.rows.map(driver => new Driver(driver.email));
   }
 }
