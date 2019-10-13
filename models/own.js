@@ -8,46 +8,34 @@ class Own {
 
   async save() {
     const client = await getClient();
-		await client.query({
-			text: /* sql */ `
+    await client.query({
+      text: /* sql */ `
 				INSERT INTO owns (email, license)
 				VALUES ($1, $2)
 			`,
-			values: [
-          this.email,
-          this.license
-			]
-		});
-	}
-	
-	async delete() {
-		const client = await getClient();
-		await client.query({
-			text: /* sql */ `
+      values: [this.email, this.license],
+    });
+  }
+
+  async delete() {
+    const client = await getClient();
+    await client.query({
+      text: /* sql */ `
 				DELETE FROM owns
 				WHERE email = $1 AND license = $2
 			`,
-      values: [
-        this.email,
-        this.license
-      ],
-		});
-	}
+      values: [this.email, this.license],
+    });
+  }
 
-	static async findll() {
-		const client = await getClient();
-		const owns = await client.query(/* sql */ `
+  static async findll() {
+    const client = await getClient();
+    const owns = await client.query(/* sql */ `
 			SELECT email, license
 			FROM owns
 		`);
-		return owns.rows.map(
-			own =>
-				new Own(
-          own.email,
-          own.license
-				)
-		);
-	}
+    return owns.rows.map(own => new Own(own.email, own.license));
+  }
 }
 
 module.exports = { Own };
