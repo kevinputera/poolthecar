@@ -29,9 +29,9 @@ CREATE TABLE accounts (
 CREATE TABLE Trips (
   tid integer PRIMARY KEY,
   license varchar(255) NOT NULL, /*References Cars(license)*/
-  status trip_status NOT NULL,
+  status trip_status NOT NULL DEFAULT 'created',
   origin varchar(100) NOT NULL,
-  seats int NOT NULL,
+  seats integer NOT NULL,
   departing_on timestamptz NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
@@ -40,7 +40,7 @@ CREATE TABLE Trips (
 
 CREATE TABLE StopsInTrip (
   min_price numeric NOT NULL DEFAULT 0,
-  address varchar(100) NOT NULL,
+  address varchar(100),
   tid integer,
   CHECK (min_price >= 0),
   PRIMARY KEY(tid,address),
