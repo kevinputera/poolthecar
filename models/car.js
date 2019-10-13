@@ -24,6 +24,7 @@ class Car {
         this.manufacturedOn,
       ],
     });
+    return this;
   }
 
   async delete() {
@@ -35,6 +36,7 @@ class Car {
       `,
       values: [this.license],
     });
+    return this;
   }
 
   static async findAll() {
