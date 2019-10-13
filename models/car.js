@@ -39,24 +39,6 @@ class Car {
     return this;
   }
 
-  static async findAll() {
-    const client = await getClient();
-    const cars = await client.query(/* sql */ `
-      SELECT license, email, model, seats, manufacturedOn
-      FROM Cars
-    `);
-    return cars.rows.map(
-      car =>
-        new Car(
-          car.license,
-          car.email,
-          car.model,
-          car.seats,
-          car.manufacturedOn
-        )
-    );
-  }
-
   static async findByDriver(driver) {
     const client = await getClient();
     const driverEmail = driver.email;
@@ -69,7 +51,14 @@ class Car {
       values: [driverEmail],
     });
     return cars.rows.map(
-      car => (car.license, car.email, car.model, car.seats, car.manufacturedOn)
+      car =>
+        new Car(
+          car.license,
+          car.email,
+          car.model,
+          car.seats,
+          car.manufacturedOn
+        )
     );
   }
 }

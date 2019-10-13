@@ -27,7 +27,7 @@ CREATE TABLE Drivers (
 
 CREATE TABLE Cars (
   license varchar(255) PRIMARY KEY,
-  email varchar(255) REFERENCES Users(email) NOT NULL
+  email varchar(255) REFERENCES Drivers(email) NOT NULL
     ON DELETE CASCADE ON UPDATE CASCADE,
   model varchar(255) NOT NULL,
   seats integer NOT NULL CHECK (seats > 0),

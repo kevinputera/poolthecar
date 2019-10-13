@@ -14,6 +14,7 @@ class Driver {
       `,
       values: [this.email],
     });
+    return this;
   }
 
   async delete() {
@@ -25,15 +26,7 @@ class Driver {
       `,
       values: [this.email],
     });
-  }
-
-  static async findAll() {
-    const client = await getClient();
-    const drivers = await client.query(/* sql */ `
-      SELECT email
-      FROM Drivers
-    `);
-    return drivers.rows.map(driver => new Driver(driver.email));
+    return this;
   }
 }
 
