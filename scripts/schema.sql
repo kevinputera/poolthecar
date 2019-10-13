@@ -29,5 +29,5 @@ CREATE TABLE Cars (
   email varchar(255) NOT NULL,
   model varchar(255) NOT NULL,
   seats integer NOT NULL,
-  year integer NOT NULL
+  manufactured_on integer NOT NULL
 );
