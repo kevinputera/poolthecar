@@ -16,8 +16,8 @@ class Trip {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO Trips (tid, license, status, origin,seats,departing_on)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO Trips (tid,license,status,origin,seats,departing_on,created_on,updated_on)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *
       `,
       values: [
@@ -26,8 +26,31 @@ class Trip {
         this.status,
         this.origin,
         this.seats,
-        this.departing_on
+        this.departing_on,
+        this.created_on,
+        this.updated_on
       ],
+    });
+    return this;
+  }
+
+  async update() {
+    this.updated_on = new Date();
+    const client = await getClient();
+    await client.query({
+      text: /*sql*/ `
+        UPDATE Trips SET license = $2, status = $3, origin = $4, 
+               seats = $5, departing_on = $6
+        WHERE tid = $1
+        `,
+        values: [
+          this.tid,
+          this.license,
+          this.status,
+          this.origin,
+          this.seats,
+          this.departing_on
+        ],
     });
     return this;
   }
@@ -58,7 +81,7 @@ class Trip {
           trip.status,
           trip.origin,
           trip.seats,
-          trip.departing_on
+          trip.departing_on 
         )
     );
   }

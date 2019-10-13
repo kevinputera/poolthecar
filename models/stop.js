@@ -23,6 +23,18 @@ class Stop {
     return this;
   }
 
+  async update() {
+    const client = await getClient();
+    await client.query({
+      text: /* sql */ `
+        UPDATE Stops SET min_price = $1
+        WHERE tid = $3 AND address = $2
+      `,
+      values: [this.min_price,this.address, this.tid],
+    });
+    return this;
+  }
+
   async delete() {
     const client = await getClient();
     await client.query({
