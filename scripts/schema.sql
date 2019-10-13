@@ -26,13 +26,8 @@ CREATE TABLE Drivers (
 
 CREATE TABLE Cars (
   license varchar(255) PRIMARY KEY,
+  email varchar(255) NOT NULL,
   model varchar(255) NOT NULL,
   seats integer NOT NULL,
   year integer NOT NULL
-);
-
-CREATE TABLE Owns (
-  email varchar(255) REFERENCES Drivers(email),
-  license varchar(255) REFERENCES Cars(license),
-  PRIMARY KEY(email, license)
 );

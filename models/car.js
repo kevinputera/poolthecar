@@ -1,8 +1,9 @@
 const { getClient } = require('../db');
 
 class Car {
-  constructor(license, model, seats, year) {
+  constructor(license, email, model, seats, year) {
     this.license = license;
+    this.email = email;
     this.model = model;
     this.seats = seats;
     this.year = year;
@@ -12,10 +13,10 @@ class Car {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO Cars (license, model, seats, year)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO Cars (license, email, model, seats, year)
+        VALUES ($1, $2, $3, $4, $5)
       `,
-      values: [this.license, this.model, this.seats, this.year],
+      values: [this.license, this.email, this.model, this.seats, this.year],
     });
   }
 
@@ -33,11 +34,11 @@ class Car {
   static async findAll() {
     const client = await getClient();
     const cars = await client.query(/* sql */ `
-      SELECT license, model, seats, year
+      SELECT license, email, model, seats, year
       FROM Cars
     `);
     return cars.rows.map(
-      car => new Car(car.license, car.model, car.seats, car.year)
+      car => new Car(car.license, car.email, car.model, car.seats, car.year)
     );
   }
 }
