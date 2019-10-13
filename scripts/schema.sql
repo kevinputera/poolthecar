@@ -19,3 +19,13 @@ CREATE TABLE accounts (
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE Messages (
+  id serial PRIMARY KEY,
+  sender varchar(255) REFERENCES accounts(email) 
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  receiver varchar(255) REFERENCES accounts(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  content varchar(255),
+  sent_on timestamptz NOT NULL DEFAULT NOW()
+);
