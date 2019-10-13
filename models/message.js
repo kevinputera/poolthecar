@@ -15,7 +15,7 @@ class Message {
       text: /* sql */ `
         INSERT INTO Messages (sender, receiver, content)
         VALUES ($1, $2, $3)
-        RETURNING *
+        RETURNING id, sent_on
       `,
       values: [this.sender, this.receiver, this.content],
     });
@@ -41,7 +41,7 @@ class Message {
         FROM Messages
         WHERE (sender = $1 AND receiver = $2)
         OR    (sender = $2 AND receiver = $1)
-        ORDER BY sent_on ASC
+        ORDER BY sent_on DESC
       `,
       values: [user1, user2],
     });

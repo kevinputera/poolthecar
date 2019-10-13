@@ -21,7 +21,7 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE Messages (
-  id serial PRIMARY KEY,
+  mid serial PRIMARY KEY,
   sender varchar(255) REFERENCES Users(email) 
     ON DELETE CASCADE ON UPDATE CASCADE,
   receiver varchar(255) REFERENCES Users(email)
