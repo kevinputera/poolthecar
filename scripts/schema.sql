@@ -22,9 +22,9 @@ CREATE TABLE accounts (
 
 CREATE TABLE Messages (
   id serial PRIMARY KEY,
-  sender varchar(255) REFERENCES accounts(email) 
+  sender varchar(255) REFERENCES Users(email) 
     ON DELETE CASCADE ON UPDATE CASCADE,
-  receiver varchar(255) REFERENCES accounts(email)
+  receiver varchar(255) REFERENCES Users(email)
     ON DELETE CASCADE ON UPDATE CASCADE,
   content varchar(255),
   sent_on timestamptz NOT NULL DEFAULT NOW()
