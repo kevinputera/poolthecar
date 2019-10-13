@@ -20,6 +20,7 @@ class Stop {
         this.tid,
       ],
     });
+    return this;
   }
 
   async delete() {
@@ -34,6 +35,7 @@ class Stop {
           this.tid,
         ],
     });
+    return this;
   }
 
   static async findAll() {

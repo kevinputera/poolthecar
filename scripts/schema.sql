@@ -31,7 +31,7 @@ CREATE TABLE Trips (
   license varchar(255) NOT NULL, /*References Cars(license)*/
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
-  seats integer NOT NULL CHECK (seats > 0)
+  seats integer NOT NULL CHECK (seats > 0),
   departing_on timestamptz NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW()

@@ -1,21 +1,24 @@
 const { getClient } = require('../db');
 
 class Trip {
-  constructor(tid,license,status,origin,seats,departing_on) {
+  constructor(tid,license,status,origin,seats,departing_on,created_on,updated_on) {
     this.tid = tid;
     this.license = license;
     this.status = status;
     this.origin = origin;
     this.seats = seats;
     this.departing_on = departing_on;
+    this.created_on = created_on;
+    this.updated_on = updated_on;
   }
 
   async save() {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO Trips (tid, license, status, origin, seats,departing_on)
+        INSERT INTO Trips (tid, license, status, origin,seats,departing_on)
         VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
       `,
       values: [
         this.tid,
@@ -26,6 +29,7 @@ class Trip {
         this.departing_on
       ],
     });
+    return this;
   }
 
   async delete() {
@@ -37,6 +41,7 @@ class Trip {
       `,
       values: [this.tid],
     });
+    return this;
   }
 
   static async findAll() {
