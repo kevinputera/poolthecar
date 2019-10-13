@@ -19,7 +19,8 @@ class Car {
           this.license,
           this.model,
           this.seats,
-          this.year
+					this.year
+					// test
 			]
 		});
 	}
