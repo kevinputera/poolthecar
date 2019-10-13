@@ -27,7 +27,7 @@ class Driver {
     });
   }
 
-  static async findll() {
+  static async findAll() {
     const client = await getClient();
     const drivers = await client.query(/* sql */ `
       SELECT email

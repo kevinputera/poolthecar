@@ -30,7 +30,7 @@ class Car {
     });
   }
 
-  static async findll() {
+  static async findAll() {
     const client = await getClient();
     const cars = await client.query(/* sql */ `
       SELECT license, model, seats, year
