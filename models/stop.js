@@ -11,7 +11,7 @@ class Stop {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO StopsInTrip (min_price, address, tid)
+        INSERT INTO Stops (min_price, address, tid)
         VALUES ($1, $2, $3)
       `,
       values: [
@@ -26,7 +26,7 @@ class Stop {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        DELETE FROM StopsInTrip
+        DELETE FROM Stops
         WHERE address = $2 AND tid = $3
       `,
       values: [
@@ -40,7 +40,7 @@ class Stop {
     const client = await getClient();
     const stops = await client.query(/* sql */ `
       SELECT min_price, address, tid
-      FROM StopsInTrip
+      FROM Stops
     `);
     return stops.rows.map(
       stop =>

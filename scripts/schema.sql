@@ -37,7 +37,7 @@ CREATE TABLE Trips (
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE StopsInTrip (
+CREATE TABLE Stops (
   min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
   address varchar(255),
   tid integer,
