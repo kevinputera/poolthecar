@@ -21,7 +21,7 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE Drivers (
-  email varchar(255) PRIMARY KEY
+  email varchar(255) PRIMARY KEY REFERENCES Accounts(email)
 );
 
 CREATE TABLE Cars (
@@ -32,7 +32,7 @@ CREATE TABLE Cars (
 );
 
 CREATE TABLE Owns (
-  email varchar(255),
-  license varchar(255),
+  email varchar(255) REFERENCES Drivers(email),
+  license varchar(255) REFERENCES Cars(license),
   PRIMARY KEY(email, license)
 );
