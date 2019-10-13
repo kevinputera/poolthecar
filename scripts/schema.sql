@@ -21,12 +21,12 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE Drivers (
-  email varchar(255) PRIMARY KEY REFERENCES Accounts(email)
+  email varchar(255) PRIMARY KEY REFERENCES Users(email)
 );
 
 CREATE TABLE Cars (
   license varchar(255) PRIMARY KEY,
-  email varchar(255) NOT NULL,
+  email varchar(255) REFERENCES Users(email) NOT NULL,
   model varchar(255) NOT NULL,
   seats integer NOT NULL,
   manufactured_on integer NOT NULL
