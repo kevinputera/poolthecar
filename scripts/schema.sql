@@ -31,18 +31,16 @@ CREATE TABLE Trips (
   license varchar(255) NOT NULL, /*References Cars(license)*/
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
-  seats integer NOT NULL,
+  seats integer NOT NULL CHECK (seats > 0)
   departing_on timestamptz NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
-  updated_on timestamptz NOT NULL DEFAULT NOW(),
-  CHECK (seats > 0)
+  updated_on timestamptz NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE StopsInTrip (
-  min_price numeric NOT NULL DEFAULT 0,
+  min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
   address varchar(255),
   tid integer,
-  CHECK (min_price >= 0),
   PRIMARY KEY(tid,address),
-  FOREIGN KEY (tid) REFERENCES Trips ON DELETE cascade
+  FOREIGN KEY (tid) REFERENCES Trips ON DELETE CASCADE
 );
