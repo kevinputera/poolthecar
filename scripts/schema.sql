@@ -10,8 +10,8 @@ CREATE TYPE gender AS ENUM (
 );
 
 CREATE TYPE trip_status as ENUM (
-  'created'
-  'ongoing'
+  'created',
+  'ongoing',
   'finished'
 );
 
@@ -32,8 +32,8 @@ CREATE TABLE Trips (
   status trip_status NOT NULL,
   origin varchar(100) NOT NULL,
   seats int NOT NULL,
-  departing_on timestamptz NOT NULL DEFAULT NOW(),
-  
+  departing_on timestamptz NOT NULL,
+  created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
   CHECK (seats > 0)
 );
