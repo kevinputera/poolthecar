@@ -1,8 +1,6 @@
 const { getClient } = require('../db');
 
 class User {
-  static tableName = 'Users';
-
   constructor(email, secret, name, gender, phone, profile_photo_url) {
     this.email = email;
     // TODO: Hash secret and save it
@@ -17,11 +15,10 @@ class User {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO $1 (email, secret, name, gender, phone, profile_photo_url)
-        VALUES ($2, $3, $4, $5, $6, $7)
+        INSERT INTO Users (email, secret, name, gender, phone, profile_photo_url)
+        VALUES ($1, $2, $3, $4, $5, $6)
       `,
       values: [
-        tableName,
         this.email,
         this.secret,
         this.name,
@@ -36,10 +33,10 @@ class User {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        DELETE FROM $1
-        WHERE email = $2
+        DELETE FROM Users
+        WHERE email = $1
       `,
-      values: [tableName, this.email],
+      values: [this.email],
     });
   }
 
@@ -48,9 +45,8 @@ class User {
     const users = await client.query({
       text: /* sql */ `
       SELECT email, secret, name, gender, phone, profile_photo_url
-      FROM $1
+      FROM Users
     `,
-      values: [this.tableName],
     });
     return users.rows.map(
       user =>

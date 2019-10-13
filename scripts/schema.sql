@@ -33,7 +33,7 @@ CREATE TABLE Customers (
 CREATE TABLE Bids (
   email varchar(255) REFERENCES Customers(email),
   tid varchar(255) /*REFERENCES Trips(tid)*/,
-  status bid_status NOT NULL,
+  status bid_status NOT NULL DEFAULT 'pending',
   value numeric NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
