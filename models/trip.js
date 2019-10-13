@@ -35,13 +35,14 @@ class Trip {
   }
 
   async update() {
-    this.updated_on = new Date();
+    this.updated_on = Date.now();
     const client = await getClient();
     await client.query({
       text: /*sql*/ `
         UPDATE Trips SET license = $2, status = $3, origin = $4, 
-               seats = $5, departing_on = $6
+               seats = $5, departing_on = $6, updated_on = $8
         WHERE tid = $1
+        RETURNING *
         `,
         values: [
           this.tid,
@@ -49,7 +50,8 @@ class Trip {
           this.status,
           this.origin,
           this.seats,
-          this.departing_on
+          this.departing_on,
+          this.updated_on
         ],
     });
     return this;
