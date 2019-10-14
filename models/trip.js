@@ -1,24 +1,24 @@
 const { getClient } = require('../db');
 
 class Trip {
-  constructor(tid,license,status,origin,seats,departing_on,created_on,updated_on) {
+  constructor(tid,license,status,origin,seats,departing_on,createdOn,updatedOn) {
     this.tid = tid;
     this.license = license;
     this.status = status;
     this.origin = origin;
     this.seats = seats;
-    this.departing_on = departing_on;
-    this.created_on = created_on;
-    this.updated_on = updated_on;
+    this.departingOn = departingOn;
+    this.createdOn = createdOn;
+    this.updatedOn = updatedOn;
   }
 
   async save() {
     const client = await getClient();
-    await client.query({
+    const trips = await client.query({
       text: /* sql */ `
-        INSERT INTO Trips (tid,license,status,origin,seats,departing_on,created_on,updated_on)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING *
+        INSERT INTO Trips (tid,license,status,origin,seats,departing_on)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING created_on,updated_on;
       `,
       values: [
         this.tid,
@@ -26,23 +26,22 @@ class Trip {
         this.status,
         this.origin,
         this.seats,
-        this.departing_on,
-        this.created_on,
-        this.updated_on
+        this.departingOn
       ],
     });
+    this.createdOn = trips.rows[0].created_on;
+    this.updatedOn = trips.rows[0].updated_on;
     return this;
   }
 
   async update() {
-    this.updated_on = Date.now();
+    this.updatedOn = new Date();
     const client = await getClient();
     await client.query({
       text: /*sql*/ `
         UPDATE Trips SET license = $2, status = $3, origin = $4, 
                seats = $5, departing_on = $6, updated_on = $8
         WHERE tid = $1
-        RETURNING *
         `,
         values: [
           this.tid,
