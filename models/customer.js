@@ -2,7 +2,7 @@ import { User } from './user';
 
 class Customer extends User {
   constructor(email, secret, name, gender, phone, profile_photo_url) {
-    super(email, secret, name, gender, phone, profile_photo_url);
+    return super(email, secret, name, gender, phone, profile_photo_url);
   }
 
   async save() {
@@ -28,6 +28,7 @@ class Customer extends User {
       `,
       values: [this.email],
     });
+    return this;
   }
 
   async delete() {
@@ -46,16 +47,17 @@ class Customer extends User {
       `,
       values: [this.email],
     });
+    return this;
   }
 
   static async findAll() {
     const client = await getClient();
-    const customers = await client.query({
-      text: /* sql */ `
+    const customers = await client.query(
+      `
       SELECT email, secret, name, gender, phone, profile_photo_url
       FROM Users NATURAL JOIN Customers
-    `,
-    });
+    `
+    );
     return customers.rows.map(
       customer =>
         new User(
@@ -70,4 +72,4 @@ class Customer extends User {
   }
 }
 
-module.exports = { Customer: Customer };
+module.exports = { Customer };

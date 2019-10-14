@@ -37,7 +37,8 @@ CREATE TABLE Bids (
   value numeric NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid)
+  PRIMARY KEY (email, tid),
+  CHECK (value >= 0)
 );
 
 CREATE TABLE Reviews (
@@ -45,5 +46,8 @@ CREATE TABLE Reviews (
   tid varchar(255) /* REFERENCES Trips(tid) */,
   score numeric NOT NULL DEFAULT 5,
   content text,
-  PRIMARY KEY (email, tid)
+  created_on timestamptz NOT NULL DEFAULT NOW(),
+  updated_on timestamptz NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (email, tid),
+  CHECK (score >= 0 AND score <= 5)
 );

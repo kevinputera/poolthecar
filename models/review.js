@@ -17,17 +17,19 @@ class Review {
       `,
       values: [this.email, this.tid, this.score, this.content],
     });
+    return this;
   }
 
   async update() {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        UPDATE Reviews SET score = $3, content = $4
+        UPDATE Reviews SET score = $3, content = $4, updated_on = CURRENT_TIMESTAMP
         WHERE email = $1 AND tid = $2
       `,
       values: [this.email, this.tid, this.score, this.content],
     });
+    return this;
   }
 
   async delete() {
@@ -39,14 +41,34 @@ class Review {
       `,
       values: [this.email, this.tid],
     });
+    return this;
   }
 
-  static async findAll() {
+  static async findByDriver(email) {
     const client = await getClient();
     const reviews = await client.query({
-      text: /* sql */ `
-        SELECT email, tid, score, content FROM Reviews
+      text: `
+        SELECT email, tid, score, content
+        FROM Reviews NATURAL JOIN Drivers
+        WHERE email = $1
       `,
+      values: [email],
+    });
+    return reviews.rows.map(
+      review =>
+        new Review(review.email, review.tid, review.score, review.content)
+    );
+  }
+
+  static async findByCustomer(email) {
+    const client = await getClient();
+    const reviews = await client.query({
+      text: `
+        SELECT email, tid, score, content
+        FROM Reviews NATURAL JOIN Customers
+        WHERE email = $1
+      `,
+      values: [email],
     });
     return reviews.rows.map(
       review =>
@@ -55,4 +77,4 @@ class Review {
   }
 }
 
-module.exports = { Review: Review };
+module.exports = { Review };

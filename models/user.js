@@ -9,6 +9,7 @@ class User {
     this.gender = gender;
     this.phone = phone;
     this.profile_photo_url = profile_photo_url;
+    return this;
   }
 
   async save() {
@@ -27,6 +28,7 @@ class User {
         this.profile_photo_url,
       ],
     });
+    return this;
   }
 
   async delete() {
@@ -38,16 +40,17 @@ class User {
       `,
       values: [this.email],
     });
+    return this;
   }
 
   static async findAll() {
     const client = await getClient();
-    const users = await client.query({
-      text: /* sql */ `
+    const users = await client.query(
+      `
       SELECT email, secret, name, gender, phone, profile_photo_url
       FROM Users
-    `,
-    });
+    `
+    );
     return users.rows.map(
       user =>
         new User(
@@ -62,4 +65,4 @@ class User {
   }
 }
 
-module.exports = { User: User };
+module.exports = { User };
