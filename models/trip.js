@@ -1,7 +1,16 @@
 const { getClient } = require('../db');
 
 class Trip {
-  constructor(tid,license,status,origin,seats,departing_on,createdOn,updatedOn) {
+  constructor(
+    tid,
+    license,
+    status,
+    origin,
+    seats,
+    departingOn,
+    createdOn,
+    updatedOn
+  ) {
     this.tid = tid;
     this.license = license;
     this.status = status;
@@ -26,7 +35,7 @@ class Trip {
         this.status,
         this.origin,
         this.seats,
-        this.departingOn
+        this.departingOn,
       ],
     });
     this.createdOn = trips.rows[0].created_on;
@@ -40,18 +49,18 @@ class Trip {
     await client.query({
       text: /*sql*/ `
         UPDATE Trips SET license = $2, status = $3, origin = $4, 
-               seats = $5, departing_on = $6, updated_on = $8
+               seats = $5, departing_on = $6, updated_on = $7
         WHERE tid = $1
         `,
-        values: [
-          this.tid,
-          this.license,
-          this.status,
-          this.origin,
-          this.seats,
-          this.departing_on,
-          this.updated_on
-        ],
+      values: [
+        this.tid,
+        this.license,
+        this.status,
+        this.origin,
+        this.seats,
+        this.departing_on,
+        this.updated_on,
+      ],
     });
     return this;
   }
@@ -68,23 +77,57 @@ class Trip {
     return this;
   }
 
-  static async findAll() {
+  static async findAllCreatedWithStops() {
     const client = await getClient();
-    const trips = await client.query(/* sql */ `
-      SELECT tid,license,status,origin,seats,departing_on
-      FROM Trips
+    const res = await client.query(/* sql */ `
+      SELECT * 
+      FROM Trips NATURAL JOIN Stops
+      WHERE Trips.status = 'created'
     `);
-    return trips.rows.map(
-      trip =>
-        new Trip(
-          trip.tid,
-          trip.license,
-          trip.status,
-          trip.origin,
-          trip.seats,
-          trip.departing_on 
-        )
-    );
+    const tripsMapping = {};
+    res.rows.forEach(row => {
+      if (tripsMapping[row.tid]) {
+        tripsMapping[row.tid].stops.push(
+          new Stop(row.min_price, row.address, row.tid)
+        );
+      } else {
+        tripsMapping[row.tid].stops = [
+          new Stop(row.min_price, row.address, row.tid),
+        ];
+      }
+    });
+    return Objects.values(tripsMapping);
+  }
+
+  static async findByDriverWithStops(driver) {
+    const client = await getClient();
+    const driverEmail = driver.email;
+    /*
+     * For now, I am returning just the car license. For future if we want we
+     * can actually include all the car details
+     */
+    const res = await client.query({
+      text: /*sql*/ `
+      SELECT *
+      FROM (SELECT * FROM (SELECT Cars.license FROM Cars NATURAL JOIN Driver
+            WHERE Driver.email = $1) AS CarsOfDriver NATURAL JOIN Trips) AS 
+            TripsOfDriver NATURAL JOIN Stops
+      `,
+      values: [driverEmail],
+    });
+    const tripsMapping = {};
+    res.rows.forEach(row => {
+      if (tripsMapping[row.tid]) {
+        tripsMapping[row.tid].stops.push(
+          new Stop(row.min_price, row.address, row.tid)
+        );
+      } else {
+        tripsMapping[row.tid].stops = [
+          new Stop(row.min_price, row.address, row.tid),
+        ];
+      }
+    });
+    return Objects.values(tripsMapping);
   }
 }
 
