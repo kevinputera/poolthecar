@@ -57,7 +57,7 @@ class Car {
           car.email,
           car.model,
           car.seats,
-          car.manufacturedOn
+          car.manufactured_on
         )
     );
   }
