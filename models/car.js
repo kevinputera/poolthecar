@@ -13,7 +13,7 @@ class Car {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO Cars (license, email, model, seats, manufacturedOn)
+        INSERT INTO Cars (license, email, model, seats, manufactured_on)
         VALUES ($1, $2, $3, $4, $5)
       `,
       values: [
@@ -44,7 +44,7 @@ class Car {
     const driverEmail = driver.email;
     const cars = await client.query({
       text: /* sql */ `
-      SELECT license, email, model, seats, manufacturedOn
+      SELECT license, email, model, seats, manufactured_on
       FROM Cars
       WHERE email = ($1)
       `,
