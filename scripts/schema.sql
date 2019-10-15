@@ -28,4 +28,16 @@ CREATE TABLE Messages (
     ON DELETE CASCADE ON UPDATE CASCADE,
   content varchar(255),
   sent_on timestamptz NOT NULL DEFAULT NOW()
+
+CREATE TABLE Drivers (
+  email varchar(255) PRIMARY KEY REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE Cars (
+  license varchar(255) PRIMARY KEY,
+  email varchar(255) REFERENCES Drivers(email) NOT NULL
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  model varchar(255) NOT NULL,
+  seats integer NOT NULL CHECK (seats > 0),
+  manufactured_on integer NOT NULL,
