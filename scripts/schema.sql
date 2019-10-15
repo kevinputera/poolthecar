@@ -34,20 +34,18 @@ CREATE TABLE Bids (
   email varchar(255) REFERENCES Customers(email),
   tid varchar(255) /*REFERENCES Trips(tid)*/,
   status bid_status NOT NULL DEFAULT 'pending',
-  value numeric NOT NULL,
+  value numeric NOT NULL CHECK (value >= 0),
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid),
-  CHECK (value >= 0)
+  PRIMARY KEY (email, tid)
 );
 
 CREATE TABLE Reviews (
   email varchar(255) REFERENCES Customers(email),
   tid varchar(255) /* REFERENCES Trips(tid) */,
-  score numeric NOT NULL DEFAULT 5,
+  score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
   content text,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid),
-  CHECK (score >= 0 AND score <= 5)
+  PRIMARY KEY (email, tid)
 );

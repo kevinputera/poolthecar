@@ -8,10 +8,9 @@ class Bid {
     this.value = value;
     this.created_on = created_on;
     this.updated_on = updated_on;
-    return this;
   }
 
-  async add() {
+  async save() {
     const client = await getClient();
     const bids = await client.query({
       text: /* sql */ `
@@ -21,21 +20,22 @@ class Bid {
       `,
       values: [this.email, this.tid, this.status, this.value],
     });
-    this.created_on = bids.created_on;
-    this.updated_on = bids.updated_on;
+    this.created_on = bids.rows[0].created_on;
+    this.updated_on = bids.rows[0].updated_on;
     return this;
   }
 
   async update() {
     const client = await getClient();
-    await client.query({
+    bids = await client.query({
       text: /* sql */ `
-        UPDATE Bids SET status = $3, value = $4, updated_on = CURRENT_TIMESTAMP
+        UPDATE Bids SET status = $3, value = $4, updated_on = NOW()
         WHERE email = $1 AND tid = $2
         RETURNING created_on, updated_on
       `,
       values: [this.email, this.tid, this.status, this.value],
     });
+    this.updated_on = bids.rows[0].updated_on;
     return this;
   }
 

@@ -9,7 +9,6 @@ class User {
     this.gender = gender;
     this.phone = phone;
     this.profile_photo_url = profile_photo_url;
-    return this;
   }
 
   async save() {
