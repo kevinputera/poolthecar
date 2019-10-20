@@ -63,7 +63,7 @@ class User {
     const client = await getClient();
     const users = await client.query({
       text: /* sql */ `
-        SELECT *
+        SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
         FROM Users
         WHERE email = $1
       `,
@@ -85,7 +85,7 @@ class User {
   static async findAll() {
     const client = await getClient();
     const users = await client.query(/* sql */ `
-      SELECT *
+      SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
       FROM Users
     `);
     return users.rows.map(
