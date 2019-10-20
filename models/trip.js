@@ -91,15 +91,24 @@ class Trip {
           new Stop(row.min_price, row.address, row.tid)
         );
       } else {
-        tripsMapping[row.tid].stops = [
-          new Stop(row.min_price, row.address, row.tid),
-        ];
+        const trip = new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        );
+        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
+        tripsMapping[row.tid].stops = trip;
       }
     });
     return Objects.values(tripsMapping);
   }
 
-  static async findByDriverWithStops(driver) {
+  static async findByDriverWithCarAndStops(driver) {
     const client = await getClient();
     const driverEmail = driver.email;
     /*
@@ -122,9 +131,18 @@ class Trip {
           new Stop(row.min_price, row.address, row.tid)
         );
       } else {
-        tripsMapping[row.tid].stops = [
-          new Stop(row.min_price, row.address, row.tid),
-        ];
+        const trip = new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        );
+        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
+        tripsMapping[row.tid].stops = trip;
       }
     });
     return Objects.values(tripsMapping);

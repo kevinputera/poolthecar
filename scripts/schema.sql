@@ -28,7 +28,7 @@ CREATE TABLE accounts (
 
 CREATE TABLE Trips (
   tid integer PRIMARY KEY,
-  license varchar(255) NOT NULL, /*References Cars(license)*/
+  license varchar(255) NOT NULL REFERENCES Cars(license),
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
   seats integer NOT NULL CHECK (seats > 0),
