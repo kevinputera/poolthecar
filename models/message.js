@@ -45,7 +45,7 @@ class Message {
         LIMIT  $3
         OFFSET $4
       `,
-      values: [user1, user2, (page - 1) * limit, page * limit],
+      values: [user1, user2, page * limit, (page - 1) * limit],
     });
     return messages.rows.map(
       message =>
