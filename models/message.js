@@ -26,11 +26,34 @@ class Message {
 
   async delete() {
     const client = await getClient();
-    await client.query(/* sql */ `
-      DELETE FROM Messages
-      WHERE mid = this.mid
-    `);
+    await client.query({
+      text: /* sql */ `
+        DELETE FROM Messages
+        WHERE mid = $1
+      `,
+      values: [this.mid],
+    });
     return this;
+  }
+
+  static async findByMid(mid) {
+    const client = await getClient();
+    const messages = await client.query({
+      text: /* sql */ `
+        SELECT mid, sender, receiver, content, sent_on
+        FROM Messages
+        WHERE mid = $1
+      `,
+      values: [mid],
+    });
+    const message = new Message(
+      messages.rows[0].mid,
+      messages.rows[0].sender,
+      messages.rows[0].receiver,
+      messages.rows[0].content,
+      messages.rows[0].sent_on
+    );
+    return message;
   }
 
   static async findByUsers(user1, user2, page, limit) {
@@ -42,10 +65,10 @@ class Message {
         WHERE (sender = $1 AND receiver = $2)
         OR    (sender = $2 AND receiver = $1)
         ORDER BY sent_on DESC
-        LIMIT  $3
-        OFFSET $4
+        LIMIT   $3
+        OFFSET  $4
       `,
-      values: [user1, user2, page * limit, (page - 1) * limit],
+      values: [user1, user2, limit, (page - 1) * limit],
     });
     return messages.rows.map(
       message =>
