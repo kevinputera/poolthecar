@@ -10,13 +10,11 @@ router.post('/:tid/reviews/:email', async (req, res) => {
   const review = new Review(email, tid, score, content, null, null);
   try {
     await review.save();
+    res.send(review);
   } catch (err) {
-    console.log(err);
     res.status(500);
-    res.send('DB exception');
-    return;
+    res.send(err);
   }
-  res.send(review);
 });
 
 router.put('/:tid/reviews/:email', async (req, res) => {
@@ -24,93 +22,69 @@ router.put('/:tid/reviews/:email', async (req, res) => {
   const tid = req.params.tid;
   const score = req.query.score;
   const content = req.query.content;
-  var review;
+  let review;
   try {
-    review = await Review.find(email, tid);
-  } catch (err) {
-    console.log(err);
-    res.status(500);
-    res.send('DB exception');
-    return;
-  }
-  if (review == null) {
-    res.status(400);
-    res.send({ Error: 'Review not found' });
-    return;
-  }
-  review.score = score;
-  review.content = content;
-  try {
+    review = await Review.findByEmailAndTid(email, tid);
+    if (review == null) {
+      res.status(400);
+      res.send({ Error: 'Review not found' });
+    }
+    review.score = score;
+    review.content = content;
     await review.update();
+    res.send(review);
   } catch (err) {
-    console.log(err);
     res.status(500);
-    res.send('DB exception');
-    return;
+    res.send(err);
   }
-  res.send(review);
 });
 
 router.get('/:tid/reviews/:email', async (req, res) => {
   const tid = req.params.tid;
   const email = req.params.email;
-  var review;
+  let review;
   try {
-    review = await Review.find(email, tid);
+    review = await Review.findByEmailAndTid(email, tid);
+    if (review == null) {
+      res.status(400);
+      res.send({ Error: 'Review not found' });
+      return;
+    }
+    res.send(review);
   } catch (err) {
-    console.log(err);
     res.status(500);
-    res.send('DB exception');
-    return;
+    res.send(err);
   }
-  if (review == null) {
-    res.status(400);
-    res.send({ Error: 'Review not found' });
-    return;
-  }
-  res.send(review);
 });
 
 router.delete('/:tid/reviews/:email', async (req, res) => {
   const tid = req.params.tid;
   const email = req.params.email;
-  var review;
+  let review;
   try {
-    review = await Review.find(email, tid);
-  } catch (err) {
-    console.log(err);
-    res.status(500);
-    res.send('DB exception');
-    return;
-  }
-  if (review == null) {
-    res.status(400);
-    res.send({ Error: 'Review not found' });
-    return;
-  }
-  try {
+    review = await Review.findByEmailAndTid(email, tid);
+    if (review == null) {
+      res.status(400);
+      res.send({ Error: 'Review not found' });
+    }
     await review.delete();
+    res.send(review);
   } catch (err) {
-    console.log(err);
     res.status(500);
-    res.send('DB exception');
-    return;
+    res.send(err);
   }
-  res.send(review);
 });
 
 router.get('/:tid/reviews/', async (req, res) => {
   const tid = req.params.tid;
-  var reviews;
+  let reviews;
   try {
     reviews = await Review.findByTrip(tid);
+    res.send(reviews);
   } catch (err) {
-    console.log(err);
     res.status(500);
-    res.send('DB exception');
-    return;
+    res.send(err);
   }
-  res.send(reviews);
 });
 
 module.exports = { tripRouter: router };

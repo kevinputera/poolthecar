@@ -51,7 +51,7 @@ class Review {
     return this;
   }
 
-  static async find(email, tid) {
+  static async findByEmailAndTid(email, tid) {
     const client = await getClient();
     const reviews = await client.query({
       text: /* sql */ `
