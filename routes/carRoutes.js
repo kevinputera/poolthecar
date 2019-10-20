@@ -16,12 +16,10 @@ router.get('/driver', async (req, res) => {
   }
 });
 
-router.get('/license/', async (req, res) => {
+router.get('/license', async (req, res) => {
   const license = req.query.license;
-  const page = req.query.page;
-  const limit = req.query.limit;
   try {
-    const cars = await Car.findByLicense(license, page, limit);
+    const cars = await Car.findByLicense(license);
     res.json(cars);
   } catch (error) {
     res.status(500).send(error);
@@ -33,6 +31,20 @@ router.post('/', async (req, res) => {
   const car = new Car(license, email, model, seats, manufacturedOn);
   try {
     await car.save();
+    res.json(car);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.delete('/', async (req, res) => {
+  const license = req.query.license;
+  try {
+    const car = await Car.findByLicense(license);
+    if (!car) {
+      res.status(401).send('car does not exist');
+    }
+    await car.delete();
     res.json(car);
   } catch (error) {
     res.status(500).send(error);

@@ -49,7 +49,7 @@ class Car {
       LIMIT  $2
       OFFSET $3
       `,
-      values: [email, page * limit, (page - 1) * limit],
+      values: [email, limit, (page - 1) * limit],
     });
     return cars.rows.map(
       car =>
@@ -63,19 +63,25 @@ class Car {
     );
   }
 
-  static async findByLicense(license, page, limit) {
+  static async findByLicense(license) {
     const client = await getClient();
     const cars = await client.query({
       text: /* sql */ `
       SELECT license, email, model, seats, manufactured_on
       FROM Cars
       WHERE license = $1
-      LIMIT  $2
-      OFFSET $3
       `,
-      values: [license, page * limit, (page - 1) * limit],
+      values: [license],
     });
-    return cars.rows[0];
+
+    const car = new Car(
+      cars.rows[0].license,
+      cars.rows[0].email,
+      cars.rows[0].model,
+      cars.rows[0].seats,
+      cars.rows[0].manufactured_on
+    );
+    return car;
   }
 }
 
