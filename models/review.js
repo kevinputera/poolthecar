@@ -71,7 +71,7 @@ class Review {
       review.score,
       review.content,
       review.created_on,
-      review.update
+      review.updated_on
     );
   }
 

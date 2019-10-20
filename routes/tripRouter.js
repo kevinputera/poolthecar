@@ -7,7 +7,7 @@ router.post('/:tid/reviews/:email', async (req, res) => {
   const tid = req.params.tid;
   const score = req.query.score;
   const content = req.query.content;
-  const review = new Review(email, tid, score, content, null, null);
+  const review = new Review(email, tid, score, content);
   try {
     await review.save();
     res.send(review);
@@ -27,7 +27,8 @@ router.put('/:tid/reviews/:email', async (req, res) => {
     review = await Review.findByEmailAndTid(email, tid);
     if (review == null) {
       res.status(400);
-      res.send({ Error: 'Review not found' });
+      res.send({ Message: 'Review not found' });
+      return;
     }
     review.score = score;
     review.content = content;
@@ -47,7 +48,7 @@ router.get('/:tid/reviews/:email', async (req, res) => {
     review = await Review.findByEmailAndTid(email, tid);
     if (review == null) {
       res.status(400);
-      res.send({ Error: 'Review not found' });
+      res.send({ Message: 'Review not found' });
       return;
     }
     res.send(review);
@@ -65,7 +66,8 @@ router.delete('/:tid/reviews/:email', async (req, res) => {
     review = await Review.findByEmailAndTid(email, tid);
     if (review == null) {
       res.status(400);
-      res.send({ Error: 'Review not found' });
+      res.send({ Message: 'Review not found' });
+      return;
     }
     await review.delete();
     res.send(review);
