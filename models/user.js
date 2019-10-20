@@ -1,32 +1,49 @@
 const { getClient } = require('../db');
+const { SHA256 } = require('crypto-js');
 
 class User {
-  constructor(email, secret, name, gender, phone, profile_photo_url) {
+  constructor(
+    email,
+    secret,
+    name,
+    gender,
+    phone,
+    profilePhotoUrl,
+    createdOn,
+    updatedOn
+  ) {
     this.email = email;
-    // TODO: Hash secret and save it
     this.secret = secret;
     this.name = name;
     this.gender = gender;
     this.phone = phone;
-    this.profile_photo_url = profile_photo_url;
+    // TODO: Remove default value below
+    this.profilePhotoUrl =
+      profilePhotoUrl ||
+      'https://avatars2.githubusercontent.com/u/46835051?s=460&v=4';
+    this.createdOn = createdOn;
+    this.updatedOn = updatedOn;
   }
 
   async save() {
     const client = await getClient();
-    await client.query({
+    const res = await client.query({
       text: /* sql */ `
         INSERT INTO Users (email, secret, name, gender, phone, profile_photo_url)
         VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING created_on, updated_on
       `,
       values: [
         this.email,
-        this.secret,
+        SHA256(this.secret).toString(),
         this.name,
         this.gender,
         this.phone,
-        this.profile_photo_url,
+        this.profilePhotoUrl,
       ],
     });
+    this.createdOn = res.rows[0].created_on;
+    this.updatedOn = res.rows[0].updated_on;
     return this;
   }
 
@@ -44,12 +61,10 @@ class User {
 
   static async findAll() {
     const client = await getClient();
-    const users = await client.query(
-      `
-      SELECT email, secret, name, gender, phone, profile_photo_url
+    const users = await client.query(/* sql */ `
+      SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
       FROM Users
-    `
-    );
+    `);
     return users.rows.map(
       user =>
         new User(
@@ -58,7 +73,9 @@ class User {
           user.name,
           user.gender,
           user.phone,
-          user.profile_photo_url
+          user.profile_photo_url,
+          user.created_on,
+          user.updated_on
         )
     );
   }
