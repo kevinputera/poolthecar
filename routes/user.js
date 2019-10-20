@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const users = await User.findAll();
-    res.send(users);
+    res.json(users);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
   try {
     const user = new User(email, secret, name, gender, phone, profilePhotoUrl);
     await user.save();
-    res.send(user);
+    res.json(user);
   } catch (error) {
     res.status(500).send(error);
   }
