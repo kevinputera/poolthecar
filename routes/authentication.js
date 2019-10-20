@@ -17,7 +17,7 @@ router.post('/authenticate', async (req, res) => {
     res.send('Authentication successful');
   } catch (error) {
     req.session.email = null;
-    res.status(500).send(error.message);
+    res.status(500).send(error);
   }
 });
 
