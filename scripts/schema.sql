@@ -9,6 +9,12 @@ CREATE TYPE gender AS ENUM (
   'non binary'
 );
 
+CREATE TYPE trip_status as ENUM (
+  'created',
+  'ongoing',
+  'finished'
+);
+
 CREATE TYPE bid_status AS ENUM (
   'won',
   'failed',
@@ -26,12 +32,8 @@ CREATE TABLE Users (
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE Customers (
-  email varchar(255) PRIMARY KEY REFERENCES Users(email)
-);
-
 CREATE TABLE Bids (
-  email varchar(255) REFERENCES Customers(email),
+  email varchar(255) REFERENCES Users(email),
   tid varchar(255) /*REFERENCES Trips(tid)*/,
   status bid_status NOT NULL DEFAULT 'pending',
   value numeric NOT NULL CHECK (value >= 0),
@@ -41,11 +43,54 @@ CREATE TABLE Bids (
 );
 
 CREATE TABLE Reviews (
-  email varchar(255) REFERENCES Customers(email),
+  email varchar(255) REFERENCES Users(email),
   tid varchar(255) /* REFERENCES Trips(tid) */,
   score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
   content text,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
   PRIMARY KEY (email, tid)
+);
+
+CREATE TABLE Messages (
+  mid serial PRIMARY KEY,
+  sender varchar(255) REFERENCES Users(email) 
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  receiver varchar(255) REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  content varchar(255),
+  sent_on timestamptz NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE Drivers (
+  email varchar(255) PRIMARY KEY REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Cars (
+  license varchar(255) PRIMARY KEY,
+  email varchar(255) REFERENCES Drivers(email)
+    ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+  model varchar(255) NOT NULL,
+  seats integer NOT NULL CHECK (seats > 0),
+  manufactured_on integer NOT NULL
+);
+
+CREATE TABLE Trips (
+  tid integer PRIMARY KEY,
+  license varchar(255) NOT NULL REFERENCES Cars(license),
+  status trip_status NOT NULL DEFAULT 'created',
+  origin varchar(255) NOT NULL,
+  seats integer NOT NULL CHECK (seats > 0),
+  departing_on timestamptz NOT NULL,
+  created_on timestamptz NOT NULL DEFAULT NOW(),
+  updated_on timestamptz NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE Stops (
+  min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
+  address varchar(255),
+  tid integer,
+  PRIMARY KEY(tid,address),
+  FOREIGN KEY (tid) REFERENCES Trips ON DELETE CASCADE
 );
