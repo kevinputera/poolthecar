@@ -7,18 +7,25 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   const user1 = req.query.user1;
   const user2 = req.query.user2;
-  const messages = await Message.findByUsers(user1, user2);
-
-  res.json(messages);
+  const page = req.query.page;
+  const limit = req.query.page;
+  try {
+    const messages = await Message.findByUsers(user1, user2, page, limit);
+    res.json(messages);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 router.post('/', async (req, res) => {
-  console.log(req.body);
   const { sender, receiver, content } = req.body;
   const message = new Message(null, sender, receiver, content, null);
-  console.log(message);
-  await message.save();
-  res.json(message);
+  try {
+    await message.save();
+    res.json(message);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 module.exports = { messageRoutes: router };

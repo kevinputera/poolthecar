@@ -33,7 +33,7 @@ class Message {
     return this;
   }
 
-  static async findByUsers(user1, user2) {
+  static async findByUsers(user1, user2, page, limit) {
     const client = await getClient();
     const messages = await client.query({
       text: /* sql */ `
@@ -42,8 +42,10 @@ class Message {
         WHERE (sender = $1 AND receiver = $2)
         OR    (sender = $2 AND receiver = $1)
         ORDER BY sent_on DESC
+        LIMIT  $3
+        OFFSET $4
       `,
-      values: [user1, user2],
+      values: [user1, user2, (page - 1) * limit, page * limit],
     });
     return messages.rows.map(
       message =>
