@@ -12,7 +12,7 @@ class Review {
 
   async save() {
     const client = await getClient();
-    reviews = await client.query({
+    const reviews = await client.query({
       text: /* sql */ `
         INSERT INTO Reviews (email, tid, score, content)
         VALUES ($1, $2, $3, $4)
@@ -27,10 +27,11 @@ class Review {
 
   async update() {
     const client = await getClient();
-    reviews = await client.query({
+    const reviews = await client.query({
       text: /* sql */ `
         UPDATE Reviews SET score = $3, content = $4, updated_on = NOW()
         WHERE email = $1 AND tid = $2
+        RETURNING updated_on
       `,
       values: [this.email, this.tid, this.score, this.content],
     });
@@ -48,6 +49,30 @@ class Review {
       values: [this.email, this.tid],
     });
     return this;
+  }
+
+  static async findByEmailAndTid(email, tid) {
+    const client = await getClient();
+    const reviews = await client.query({
+      text: /* sql */ `
+        SELECT email, tid, score, content, created_on, updated_on
+        FROM Reviews
+        WHERE email = $1 AND tid = $2
+      `,
+      values: [email, tid],
+    });
+    if (reviews.rows.length < 1) {
+      return null;
+    }
+    const review = reviews.rows[0];
+    return new Review(
+      review.email,
+      review.tid,
+      review.score,
+      review.content,
+      review.created_on,
+      review.updated_on
+    );
   }
 
   static async findByDriver(email) {
@@ -82,6 +107,29 @@ class Review {
         WHERE email = $1
       `,
       values: [email],
+    });
+    return reviews.rows.map(
+      review =>
+        new Review(
+          review.email,
+          review.tid,
+          review.score,
+          review.content,
+          review.created_on,
+          review.updated_on
+        )
+    );
+  }
+
+  static async findByTrip(tid) {
+    const client = await getClient();
+    const reviews = await client.query({
+      text: `
+        SELECT email, tid, score, content, created_on, updated_on
+        FROM Reviews
+        WHERE tid = $1
+      `,
+      values: [tid],
     });
     return reviews.rows.map(
       review =>

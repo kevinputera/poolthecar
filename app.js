@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const { join } = require('path');
+const { tripRouter } = require('./routes/tripRouter');
 
 const { authenticationRoutes } = require('./routes/authentication');
 const { userRoutes } = require('./routes/user');
@@ -20,6 +21,7 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: false }));
+app.use('/trips', tripRouter);
 
 app.use('/', authenticationRoutes);
 app.use('/users', userRoutes);
