@@ -26,6 +26,28 @@ CREATE TABLE accounts (
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE Messages (
+  mid serial PRIMARY KEY,
+  sender varchar(255) REFERENCES Users(email) 
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  receiver varchar(255) REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  content varchar(255),
+  sent_on timestamptz NOT NULL DEFAULT NOW()
+
+CREATE TABLE Drivers (
+  email varchar(255) PRIMARY KEY REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Cars (
+  license varchar(255) PRIMARY KEY,
+  email varchar(255) REFERENCES Drivers(email) NOT NULL
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  model varchar(255) NOT NULL,
+  seats integer NOT NULL CHECK (seats > 0),
+  manufactured_on integer NOT NULL,
+
 CREATE TABLE Trips (
   tid integer PRIMARY KEY,
   license varchar(255) NOT NULL REFERENCES Cars(license),
