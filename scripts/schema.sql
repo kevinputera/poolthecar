@@ -15,7 +15,13 @@ CREATE TYPE trip_status as ENUM (
   'finished'
 );
 
-CREATE TABLE accounts (
+CREATE TYPE bid_status AS ENUM (
+  'won',
+  'failed',
+  'pending'
+);
+
+CREATE TABLE Users (
   email varchar(255) PRIMARY KEY,
   secret char(64) NOT NULL, -- SHA256 hash of the account's password
   name varchar(255) NOT NULL,
@@ -24,6 +30,26 @@ CREATE TABLE accounts (
   profile_photo_url varchar(1023) NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE Bids (
+  email varchar(255) REFERENCES Users(email),
+  tid varchar(255) /*REFERENCES Trips(tid)*/,
+  status bid_status NOT NULL DEFAULT 'pending',
+  value numeric NOT NULL CHECK (value >= 0),
+  created_on timestamptz NOT NULL DEFAULT NOW(),
+  updated_on timestamptz NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (email, tid)
+);
+
+CREATE TABLE Reviews (
+  email varchar(255) REFERENCES Users(email),
+  tid varchar(255) /* REFERENCES Trips(tid) */,
+  score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
+  content text,
+  created_on timestamptz NOT NULL DEFAULT NOW(),
+  updated_on timestamptz NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (email, tid)
 );
 
 CREATE TABLE Messages (

@@ -1,6 +1,6 @@
 const { getClient } = require('../db');
 
-class Account {
+class User {
   constructor(email, secret, name, gender, phone, profile_photo_url) {
     this.email = email;
     // TODO: Hash secret and save it
@@ -15,7 +15,7 @@ class Account {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        INSERT INTO accounts (email, secret, name, gender, phone, profile_photo_url)
+        INSERT INTO Users (email, secret, name, gender, phone, profile_photo_url)
         VALUES ($1, $2, $3, $4, $5, $6)
       `,
       values: [
@@ -27,37 +27,41 @@ class Account {
         this.profile_photo_url,
       ],
     });
+    return this;
   }
 
   async delete() {
     const client = await getClient();
     await client.query({
       text: /* sql */ `
-        DELETE FROM accounts
+        DELETE FROM Users
         WHERE email = $1
       `,
       values: [this.email],
     });
+    return this;
   }
 
   static async findAll() {
     const client = await getClient();
-    const accounts = await client.query(/* sql */ `
+    const users = await client.query(
+      `
       SELECT email, secret, name, gender, phone, profile_photo_url
-      FROM accounts
-    `);
-    return accounts.rows.map(
-      account =>
-        new Account(
-          account.email,
-          account.secret,
-          account.name,
-          account.gender,
-          account.phone,
-          account.profile_photo_url
+      FROM Users
+    `
+    );
+    return users.rows.map(
+      user =>
+        new User(
+          user.email,
+          user.secret,
+          user.name,
+          user.gender,
+          user.phone,
+          user.profile_photo_url
         )
     );
   }
 }
 
-module.exports = { Account };
+module.exports = { User };
