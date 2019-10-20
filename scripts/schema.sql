@@ -54,10 +54,10 @@ CREATE TABLE Reviews (
 
 CREATE TABLE Messages (
   mid serial PRIMARY KEY,
-  sender varchar(255) /*REFERENCES Users(email) 
-    ON DELETE CASCADE ON UPDATE CASCADE*/,
-  receiver varchar(255) /*REFERENCES Users(email)
-    ON DELETE CASCADE ON UPDATE CASCADE*/,
+  sender varchar(255) REFERENCES Users(email) 
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  receiver varchar(255) REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   content varchar(255),
   sent_on timestamptz NOT NULL DEFAULT NOW()
 );
