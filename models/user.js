@@ -59,10 +59,33 @@ class User {
     return this;
   }
 
+  static async findByEmail(email) {
+    const client = await getClient();
+    const users = await client.query({
+      text: /* sql */ `
+        SELECT *
+        FROM Users
+        WHERE email = $1
+      `,
+      values: [email],
+    });
+    const user = users.rows[0];
+    return new User(
+      user.email,
+      user.secret,
+      user.name,
+      user.gender,
+      user.phone,
+      user.profile_photo_url,
+      user.created_on,
+      user.updated_on
+    );
+  }
+
   static async findAll() {
     const client = await getClient();
     const users = await client.query(/* sql */ `
-      SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
+      SELECT *
       FROM Users
     `);
     return users.rows.map(
