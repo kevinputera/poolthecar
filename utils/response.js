@@ -1,22 +1,56 @@
 const ok = (res, payload) => {
   res.status(200).json({
-    error: '',
+    error: null,
     data: payload,
   });
 };
 
-const badRequest = (res, message) => {
+const okMessage = (res, message) => {
+  res.status(200).json({
+    error: null,
+    data: {
+      message,
+    },
+  });
+};
+
+const badRequest = (res, error) => {
   res.status(400).json({
-    error: message,
+    error,
     data: null,
   });
 };
 
-const internalError = (res, message) => {
+const badRequestMessage = (res, message) => {
+  res.status(400).json({
+    error: {
+      message,
+    },
+    data: null,
+  });
+};
+
+const internalError = (res, error) => {
   res.status(500).json({
-    error: message,
+    error,
     data: null,
   });
 };
 
-module.exports = { ok, badRequest, internalError };
+const internalErrorMessage = (res, message) => {
+  res.status(500).json({
+    error: {
+      message,
+    },
+    data: null,
+  });
+};
+
+module.exports = {
+  ok,
+  okMessage,
+  badRequest,
+  badRequestMessage,
+  internalError,
+  internalErrorMessage,
+};
