@@ -69,16 +69,18 @@ class User {
       `,
       values: [email],
     });
-    const user = users.rows[0];
+    if (users.rows.length === 0) {
+      return null;
+    }
     return new User(
-      user.email,
-      user.secret,
-      user.name,
-      user.gender,
-      user.phone,
-      user.profile_photo_url,
-      user.created_on,
-      user.updated_on
+      users.rows[0].email,
+      users.rows[0].secret,
+      users.rows[0].name,
+      users.rows[0].gender,
+      users.rows[0].phone,
+      users.rows[0].profile_photo_url,
+      users.rows[0].created_on,
+      users.rows[0].updated_on
     );
   }
 
