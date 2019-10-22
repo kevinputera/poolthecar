@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Trip {
   constructor(
@@ -22,8 +22,7 @@ class Trip {
   }
 
   async save() {
-    const client = await getClient();
-    const trips = await client.query({
+    const trips = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Trips (tid,license,status,origin,seats,departing_on)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -45,8 +44,7 @@ class Trip {
 
   async update() {
     this.updatedOn = new Date();
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /*sql*/ `
         UPDATE Trips SET license = $2, status = $3, origin = $4, 
                seats = $5, departing_on = $6, updated_on = $7
@@ -66,8 +64,7 @@ class Trip {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Trips
         WHERE tid = $1
@@ -78,8 +75,7 @@ class Trip {
   }
 
   static async findAllCreatedWithStops() {
-    const client = await getClient();
-    const res = await client.query(/* sql */ `
+    const res = await makeSingleQuery(/* sql */ `
       SELECT * 
       FROM Trips NATURAL JOIN Stops
       WHERE Trips.status = 'created'
@@ -109,13 +105,12 @@ class Trip {
   }
 
   static async findByDriverWithCarAndStops(driver) {
-    const client = await getClient();
     const driverEmail = driver.email;
     /*
      * For now, I am returning just the car license. For future if we want we
      * can actually include all the car details
      */
-    const res = await client.query({
+    const res = await makeSingleQuery({
       text: /*sql*/ `
       SELECT *
       FROM (SELECT * FROM (SELECT Cars.license FROM Cars NATURAL JOIN Driver
