@@ -1,16 +1,13 @@
 const { promises } = require('fs');
 const { join } = require('path');
-const { getClient } = require('../db');
-const { initTestData } = require('./testData');
+const { makeSingleQuery } = require('../db');
 
 const SCHEMA_DIR = join(__dirname, 'schema.sql');
 
-async function createTables() {
+const createTables = async () => {
   const createTableString = (await promises.readFile(SCHEMA_DIR)).toString();
-  const client = await getClient();
-  await client.query(createTableString);
-  await initTestData();
-}
+  await makeSingleQuery(createTableString);
+};
 
 createTables()
   .then(() => {
