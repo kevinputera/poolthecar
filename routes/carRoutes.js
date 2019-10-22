@@ -1,5 +1,4 @@
 const express = require('express');
-const { Database } = require('../db');
 const { Car } = require('../models/car.js');
 
 const router = express.Router();
@@ -37,12 +36,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/', async (req, res) => {
-  const license = req.query.license;
+router.delete('/:license', async (req, res) => {
+  const license = req.params.license;
   try {
     const car = await Car.findByLicense(license);
     if (!car) {
       res.status(401).send('car does not exist');
+      return;
     }
     await car.delete();
     res.json(car);
