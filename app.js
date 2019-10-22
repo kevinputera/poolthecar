@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const { join } = require('path');
+const { messageRoutes } = require('./routes/messageRoutes');
 
 const { requireAuthentication } = require('./middlewares/authentication');
 
@@ -24,6 +25,7 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: false }));
+app.use('/messages', messageRoutes);
 
 // Authentication
 app.use('/', authenticationRoutes);
