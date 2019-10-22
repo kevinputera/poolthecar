@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Message {
   constructor(mid, sender, receiver, content, sent_on) {
@@ -10,8 +10,7 @@ class Message {
   }
 
   async save() {
-    const client = await getClient();
-    const res = await client.query({
+    const res = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Messages (sender, receiver, content)
         VALUES ($1, $2, $3)
@@ -25,8 +24,7 @@ class Message {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Messages
         WHERE mid = $1
@@ -37,8 +35,7 @@ class Message {
   }
 
   static async findByMid(mid) {
-    const client = await getClient();
-    const messages = await client.query({
+    const messages = await makeSingleQuery({
       text: /* sql */ `
         SELECT mid, sender, receiver, content, sent_on
         FROM Messages
@@ -57,8 +54,7 @@ class Message {
   }
 
   static async findByUsers(user1, user2, page, limit) {
-    const client = await getClient();
-    const messages = await client.query({
+    const messages = makeSingleQuery({
       text: /* sql */ `
         SELECT mid, sender, receiver, content, sent_on
         FROM Messages

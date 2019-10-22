@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Stop {
   constructor(min_price, address, tid) {
@@ -8,8 +8,7 @@ class Stop {
   }
 
   async save() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Stops (min_price, address, tid)
         VALUES ($1, $2, $3)
@@ -20,8 +19,7 @@ class Stop {
   }
 
   async update() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         UPDATE Stops SET min_price = $1
         WHERE tid = $3 AND address = $2
@@ -32,8 +30,7 @@ class Stop {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Stops
         WHERE address = $2 AND tid = $3

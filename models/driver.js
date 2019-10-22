@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Driver {
   constructor(email) {
@@ -6,8 +6,7 @@ class Driver {
   }
 
   async save() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Drivers (email)
         VALUES ($1)
@@ -18,8 +17,7 @@ class Driver {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Drivers
         WHERE email = $1

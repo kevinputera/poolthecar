@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Car {
   constructor(license, email, model, seats, manufacturedOn) {
@@ -10,8 +10,7 @@ class Car {
   }
 
   async save() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Cars (license, email, model, seats, manufactured_on)
         VALUES ($1, $2, $3, $4, $5)
@@ -28,8 +27,7 @@ class Car {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Cars
         WHERE license = $1
@@ -40,8 +38,7 @@ class Car {
   }
 
   static async findByDriver(email, page, limit) {
-    const client = await getClient();
-    const cars = await client.query({
+    const cars = await makeSingleQuery({
       text: /* sql */ `
       SELECT license, email, model, seats, manufactured_on
       FROM Cars
@@ -64,8 +61,7 @@ class Car {
   }
 
   static async findByLicense(license) {
-    const client = await getClient();
-    const cars = await client.query({
+    const cars = await makeSingleQuery({
       text: /* sql */ `
       SELECT license, email, model, seats, manufactured_on
       FROM Cars

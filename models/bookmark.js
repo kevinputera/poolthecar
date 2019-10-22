@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Bookmark {
   constructor(email, name, address) {
@@ -8,8 +8,7 @@ class Bookmark {
   }
 
   async save() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Bookmarks (email, name, address)
         VALUES ($1, $2, $3)
@@ -20,8 +19,7 @@ class Bookmark {
   }
 
   async update() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         UPDATE Bookmarks SET address = $1,
         WHERE email = $2 AND name = $3
@@ -32,8 +30,7 @@ class Bookmark {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Bookmarks
         WHERE email = $1 AND name = $2       
@@ -44,8 +41,7 @@ class Bookmark {
   }
 
   static async findByEmailAndName(email, name) {
-    const client = await getClient();
-    const res = await client.query({
+    const res = await makeSingleQuery({
       text: /* sql */ `
         SELECT email, name, address
         FROM Bookmarks
