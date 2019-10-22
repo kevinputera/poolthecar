@@ -1,15 +1,16 @@
 const express = require('express');
 const { User } = require('../models/user');
 const { Bookmark } = require('../models/bookmark');
+const { ok, badRequestMessage, internalError } = require('../utils/response');
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
     const users = await User.findAll();
-    res.json(users);
+    ok(res, users);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 
@@ -18,9 +19,9 @@ router.post('/', async (req, res) => {
   try {
     const user = new User(email, secret, name, gender, phone, profilePhotoUrl);
     const savedUser = await user.save();
-    res.json(savedUser);
+    ok(res, savedUser);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 
@@ -30,9 +31,9 @@ router.post('/:email/bookmarks', async (req, res) => {
   try {
     const bookmark = new Bookmark(email, name, address);
     const savedBookmark = await bookmark.save();
-    res.json(savedBookmark);
+    ok(res, savedBookmark);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 
@@ -42,14 +43,14 @@ router.put('/:email/bookmarks/:name', async (req, res) => {
   try {
     const bookmark = Bookmark.findByEmailAndName(email, name);
     if (!bookmark) {
-      res.status(400).send('Bookmark does not exist');
+      badRequestMessage(res, 'Bookmark does not exist');
       return;
     }
     bookmark.address = address;
     const updatedBookmark = await bookmark.update();
-    res.json(updatedBookmark);
+    ok(res, updatedBookmark);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 
