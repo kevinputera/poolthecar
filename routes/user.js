@@ -54,4 +54,19 @@ router.put('/:email/bookmarks/:name', async (req, res) => {
   }
 });
 
+router.delete('/:email/bookmarks/:name', async (req, res) => {
+  const { email, name } = req.params;
+  try {
+    const bookmark = Bookmark.findByEmailAndName(email, name);
+    if (!bookmark) {
+      badRequestMessage(res, 'Bookmark does not exist');
+      return;
+    }
+    const deletedBookmark = bookmark.delete();
+    ok(res, deletedBookmark);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 module.exports = { userRoutes: router };
