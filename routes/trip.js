@@ -24,7 +24,7 @@ router.put('/:tid/reviews/:email', async (req, res) => {
   const content = req.query.content;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
-    if (review == null) {
+    if (!review) {
       res.status(400);
       res.send({ Message: 'Review not found' });
       return;
@@ -44,7 +44,7 @@ router.get('/:tid/reviews/:email', async (req, res) => {
   const email = req.params.email;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
-    if (review == null) {
+    if (!review) {
       res.status(400);
       res.send({ Message: 'Review not found' });
       return;
@@ -61,7 +61,7 @@ router.delete('/:tid/reviews/:email', async (req, res) => {
   const email = req.params.email;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
-    if (review == null) {
+    if (!review) {
       res.status(400);
       res.send({ Message: 'Review not found' });
       return;
@@ -74,7 +74,7 @@ router.delete('/:tid/reviews/:email', async (req, res) => {
   }
 });
 
-router.get('/:tid/reviews/', async (req, res) => {
+router.get('/:tid/reviews', async (req, res) => {
   const tid = req.params.tid;
   try {
     const reviews = await Review.findByTrip(tid);
@@ -85,4 +85,4 @@ router.get('/:tid/reviews/', async (req, res) => {
   }
 });
 
-module.exports = { tripRouter: router };
+module.exports = { tripRoutes: router };
