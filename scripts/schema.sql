@@ -9,18 +9,6 @@ CREATE TYPE gender AS ENUM (
   'non binary'
 );
 
-CREATE TYPE trip_status as ENUM (
-  'created',
-  'ongoing',
-  'finished'
-);
-
-CREATE TYPE bid_status AS ENUM (
-  'won',
-  'failed',
-  'pending'
-);
-
 CREATE TABLE Users (
   email varchar(255) PRIMARY KEY,
   secret char(64) NOT NULL, -- SHA256 hash of the account's password
@@ -38,26 +26,6 @@ CREATE TABLE Bookmarks (
   name varchar(255),
   address varchar(255) NOT NULL,
   PRIMARY KEY (email, name)
-);
-
-CREATE TABLE Bids (
-  email varchar(255) REFERENCES Users(email),
-  tid varchar(255) /*REFERENCES Trips(tid)*/,
-  status bid_status NOT NULL DEFAULT 'pending',
-  value numeric NOT NULL CHECK (value >= 0),
-  created_on timestamptz NOT NULL DEFAULT NOW(),
-  updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid)
-);
-
-CREATE TABLE Reviews (
-  email varchar(255) REFERENCES Users(email),
-  tid varchar(255) /* REFERENCES Trips(tid) */,
-  score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
-  content text,
-  created_on timestamptz NOT NULL DEFAULT NOW(),
-  updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid)
 );
 
 CREATE TABLE Messages (
@@ -84,8 +52,14 @@ CREATE TABLE Cars (
   manufactured_on integer NOT NULL
 );
 
+CREATE TYPE trip_status as ENUM (
+  'created',
+  'ongoing',
+  'finished'
+);
+
 CREATE TABLE Trips (
-  tid integer PRIMARY KEY,
+  tid serial PRIMARY KEY,
   license varchar(255) NOT NULL REFERENCES Cars(license),
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
@@ -98,7 +72,33 @@ CREATE TABLE Trips (
 CREATE TABLE Stops (
   min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
   address varchar(255),
-  tid integer,
-  PRIMARY KEY(tid,address),
-  FOREIGN KEY (tid) REFERENCES Trips ON DELETE CASCADE
+  tid integer REFERENCES Trips(tid)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  PRIMARY KEY(tid, address)
+);
+
+CREATE TYPE bid_status AS ENUM (
+  'won',
+  'failed',
+  'pending'
+);
+
+CREATE TABLE Bids (
+  email varchar(255) REFERENCES Users(email),
+  tid integer REFERENCES Trips(tid),
+  status bid_status NOT NULL DEFAULT 'pending',
+  value numeric NOT NULL CHECK (value >= 0),
+  created_on timestamptz NOT NULL DEFAULT NOW(),
+  updated_on timestamptz NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (email, tid)
+);
+
+CREATE TABLE Reviews (
+  email varchar(255) REFERENCES Users(email),
+  tid integer REFERENCES Trips(tid),
+  score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
+  content text,
+  created_on timestamptz NOT NULL DEFAULT NOW(),
+  updated_on timestamptz NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (email, tid)
 );
