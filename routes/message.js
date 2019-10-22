@@ -1,19 +1,17 @@
 const express = require('express');
-const { Database } = require('../db');
 const { Message } = require('../models/message.js');
+const { ok, badRequestMessage, internalError } = require('../utils/response');
 
 const router = express.Router();
 
+// TODO: Remove this
 router.get('/', async (req, res) => {
-  const user1 = req.query.user1;
-  const user2 = req.query.user2;
-  const page = req.query.page;
-  const limit = req.query.limit;
+  const { user1, user2, page, limit } = req.query;
   try {
     const messages = await Message.findByUsers(user1, user2, page, limit);
-    res.json(messages);
+    ok(res, messages);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 
@@ -21,24 +19,25 @@ router.post('/', async (req, res) => {
   const { sender, receiver, content } = req.body;
   const message = new Message(null, sender, receiver, content, null);
   try {
-    await message.save();
-    res.json(message);
+    const savedMessage = await message.save();
+    ok(res, savedMessage);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 
-router.delete('/', async (req, res) => {
-  const mid = req.query.mid;
+router.delete('/:mid', async (req, res) => {
+  const mid = req.params.mid;
   try {
     const message = await Message.findByMid(mid);
     if (!message) {
-      res.status(401).send('message does not exist');
+      badRequestMessage(res, 'Message does not exist');
+      return;
     }
-    await message.delete();
-    res.json(message);
+    const deletedMessage = await message.delete();
+    ok(res, deletedMessage);
   } catch (error) {
-    res.status(500).send(error);
+    internalError(res, error);
   }
 });
 

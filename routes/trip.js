@@ -1,87 +1,77 @@
 const express = require('express');
-const router = express.Router();
 const { Review } = require('../models/review');
+const { ok, badRequestMessage, internalError } = require('../utils/response');
 
-router.post('/:tid/reviews/:email', async (req, res) => {
-  const email = req.params.email;
+const router = express.Router();
+
+router.post('/:tid/reviews', async (req, res) => {
   const tid = req.params.tid;
-  const score = req.query.score;
-  const content = req.query.content;
+  const { email, score, content } = req.body;
   const review = new Review(email, tid, score, content);
   try {
-    await review.save();
-    res.send(review);
-  } catch (err) {
-    res.status(500);
-    res.send(err);
+    const savedReview = await review.save();
+    ok(res, savedReview);
+  } catch (error) {
+    internalError(res, error);
   }
 });
 
 router.put('/:tid/reviews/:email', async (req, res) => {
-  const email = req.params.email;
-  const tid = req.params.tid;
-  const score = req.query.score;
-  const content = req.query.content;
+  const { tid, email } = req.params;
+  const { score, content } = req.query;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
-      res.status(400);
-      res.send({ Message: 'Review not found' });
+      badRequestMessage(res, 'Review does not exist');
       return;
     }
     review.score = score;
     review.content = content;
-    await review.update();
-    res.send(review);
-  } catch (err) {
-    res.status(500);
-    res.send(err);
+    const updatedReview = await review.update();
+    ok(res, updatedReview);
+  } catch (error) {
+    internalError(res, error);
   }
 });
 
+// TODO: Remove this
 router.get('/:tid/reviews/:email', async (req, res) => {
-  const tid = req.params.tid;
-  const email = req.params.email;
+  const { tid, email } = req.params;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
-      res.status(400);
-      res.send({ Message: 'Review not found' });
+      badRequestMessage(res, 'Review does not exist');
       return;
     }
-    res.send(review);
-  } catch (err) {
-    res.status(500);
-    res.send(err);
+    ok(res, review);
+  } catch (error) {
+    internalError(res, error);
   }
 });
 
 router.delete('/:tid/reviews/:email', async (req, res) => {
-  const tid = req.params.tid;
-  const email = req.params.email;
+  const { tid, email } = req.params;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
-      res.status(400);
-      res.send({ Message: 'Review not found' });
+      badRequestMessage(res, 'Review does not exist');
       return;
     }
-    await review.delete();
-    res.send(review);
-  } catch (err) {
-    res.status(500);
-    res.send(err);
+    const deletedReview = await review.delete();
+    ok(res, deletedReview);
+  } catch (error) {
+    internalError(res, error);
   }
 });
 
+// TODO: Remove this
 router.get('/:tid/reviews', async (req, res) => {
   const tid = req.params.tid;
   try {
     const reviews = await Review.findByTrip(tid);
-    res.send(reviews);
-  } catch (err) {
-    res.status(500);
-    res.send(err);
+    ok(res, reviews);
+  } catch (error) {
+    internalError(res, error);
   }
 });
 
