@@ -39,16 +39,17 @@ class Car {
     return this;
   }
 
-  static async findByDriver(driver) {
+  static async findByDriver(email, page, limit) {
     const client = await getClient();
-    const driverEmail = driver.email;
     const cars = await client.query({
       text: /* sql */ `
       SELECT license, email, model, seats, manufactured_on
       FROM Cars
-      WHERE email = ($1)
+      WHERE email = $1
+      LIMIT  $2
+      OFFSET $3
       `,
-      values: [driverEmail],
+      values: [email, limit, (page - 1) * limit],
     });
     return cars.rows.map(
       car =>
@@ -60,6 +61,27 @@ class Car {
           car.manufactured_on
         )
     );
+  }
+
+  static async findByLicense(license) {
+    const client = await getClient();
+    const cars = await client.query({
+      text: /* sql */ `
+      SELECT license, email, model, seats, manufactured_on
+      FROM Cars
+      WHERE license = $1
+      `,
+      values: [license],
+    });
+
+    const car = new Car(
+      cars.rows[0].license,
+      cars.rows[0].email,
+      cars.rows[0].model,
+      cars.rows[0].seats,
+      cars.rows[0].manufactured_on
+    );
+    return car;
   }
 }
 
