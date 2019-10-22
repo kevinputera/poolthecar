@@ -26,8 +26,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/', async (req, res) => {
-  const mid = req.query.mid;
+router.delete('/:mid', async (req, res) => {
+  const mid = req.params.mid;
   try {
     const message = await Message.findByMid(mid);
     if (!message) {
