@@ -32,6 +32,14 @@ CREATE TABLE Users (
   updated_on timestamptz NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE Bookmarks (
+  email varchar(255) REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  name varchar(255),
+  address varchar(255) NOT NULL,
+  PRIMARY KEY (email, name)
+);
+
 CREATE TABLE Bids (
   email varchar(255) REFERENCES Users(email),
   tid varchar(255) /*REFERENCES Trips(tid)*/,
