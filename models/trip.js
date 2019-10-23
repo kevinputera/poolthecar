@@ -26,7 +26,7 @@ class Trip {
       text: /* sql */ `
         INSERT INTO Trips (tid,license,status,origin,seats,departing_on)
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING created_on,updated_on;
+        RETURNING created_on, updated_on;
       `,
       values: [
         this.tid,
@@ -74,6 +74,28 @@ class Trip {
     return this;
   }
 
+  static async findByTid(tid) {
+    const trips = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on 
+        FROM    Trips
+        WHERE   tid = $1
+      `,
+      values: [tid],
+    });
+    const trip = new Trip(
+      trips.rows[0].tid,
+      trips.rows[0].license,
+      trips.rows[0].status,
+      trips.rows[0].origin,
+      trips.rows[0].seats,
+      trips.rows[0].departing_on,
+      trips.rows[0].created_on,
+      trips.rows[0].updated_on
+    );
+    return trip;
+  }
+
   static async findAllCreatedWithStops() {
     const res = await makeSingleQuery(/* sql */ `
       SELECT * 
@@ -104,8 +126,7 @@ class Trip {
     return Objects.values(tripsMapping);
   }
 
-  static async findByDriverWithCarAndStops(driver) {
-    const driverEmail = driver.email;
+  static async findByDriverEmailWithCarAndStops(driverEmail) {
     /*
      * For now, I am returning just the car license. For future if we want we
      * can actually include all the car details
@@ -113,11 +134,46 @@ class Trip {
     const res = await makeSingleQuery({
       text: /*sql*/ `
       SELECT *
-      FROM (SELECT * FROM (SELECT Cars.license FROM Cars NATURAL JOIN Driver
-            WHERE Driver.email = $1) AS CarsOfDriver NATURAL JOIN Trips) AS 
-            TripsOfDriver NATURAL JOIN Stops
+      FROM (SELECT * FROM 
+            (SELECT Cars.license FROM Cars 
+              NATURAL JOIN Driver WHERE Driver.email = $1) AS CarsOfDriver 
+            NATURAL JOIN Trips) AS TripsOfDriver 
+            NATURAL JOIN Stops
       `,
       values: [driverEmail],
+    });
+    const tripsMapping = {};
+    res.rows.forEach(row => {
+      if (tripsMapping[row.tid]) {
+        tripsMapping[row.tid].stops.push(
+          new Stop(row.min_price, row.address, row.tid)
+        );
+      } else {
+        const trip = new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        );
+        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
+        tripsMapping[row.tid].stops = trip;
+      }
+    });
+    return Objects.values(tripsMapping);
+  }
+
+  static async findByAddressWithCarAndStops(address) {
+    const res = await makeSingleQuery({
+      text: /*sql*/ `
+        SELECT * 
+        FROM  Trips NATURAL JOIN Stops
+        WHERE Stops.address = $1
+      `,
+      values: [address],
     });
     const tripsMapping = {};
     res.rows.forEach(row => {

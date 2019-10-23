@@ -1,5 +1,6 @@
 const express = require('express');
 const { Review } = require('../models/review');
+const { Trip } = require('../models/trip');
 const { ok, badRequestMessage, internalError } = require('../utils/response');
 
 const router = express.Router();
@@ -70,6 +71,91 @@ router.get('/:tid/reviews', async (req, res) => {
   try {
     const reviews = await Review.findByTrip(tid);
     ok(res, reviews);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.get('/driver/:email', async (req, res) => {
+  const email = req.params.email;
+  try {
+    const trips = await Trip.findByDriverEmailWithCarAndStops(id);
+    ok(res, trips);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.get('/address/:address', async (req, res) => {
+  const address = req.params.id;
+  try {
+    const trips = await Trip.findByAddressWithCarAndStops(address);
+    ok(res, trips);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.post('/', async (req, res) => {
+  const { tid, license, status, origin, seats, departingOn } = req.query;
+  const trip = new Trip(
+    tid,
+    license,
+    status,
+    origin,
+    seats,
+    departingOn,
+    null,
+    null
+  );
+  try {
+    const savedTrip = await trip.save();
+    ok(res, savedTrip);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.delete('/:tid', async (req, res) => {
+  const tid = req.params.tid;
+  try {
+    const trip = await Trip.findByTid(tid);
+    if (!trip) {
+      badRequestMessage(res, 'Trip does not exist');
+      return;
+    }
+    const deletedTrip = await trip.delete();
+    ok(res, deletedTrip);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    const trips = Trip.findAllCreatedWithStops();
+    ok(res, trips);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.put('/update/:tid', async (req, res) => {
+  const tid = req.params.tid;
+  const { license, status, origin, seats, departingOn } = req.query;
+  try {
+    const trip = await Trip.findByTid(tid);
+    if (!trip) {
+      badRequestMessage(res, 'Trip does not exist');
+      return;
+    }
+    trip.license = license;
+    trip.status = status;
+    trip.origin = origin;
+    trip.seats = seats;
+    trip.departingOn = departingOn;
+    const updatedTrip = await trip.update();
+    ok(res, updatedTrip);
   } catch (error) {
     internalError(res, error);
   }
