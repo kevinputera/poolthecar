@@ -18,7 +18,7 @@ router.post('/:tid/reviews', async (req, res) => {
 
 router.put('/:tid/reviews/:email', async (req, res) => {
   const { tid, email } = req.params;
-  const { score, content } = req.query;
+  const { score, content } = req.body;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
@@ -35,8 +35,9 @@ router.put('/:tid/reviews/:email', async (req, res) => {
 });
 
 // TODO: Remove this
-router.get('/:tid/reviews/:email', async (req, res) => {
-  const { tid, email } = req.params;
+router.get('/:tid/reviews/', async (req, res) => {
+  const { tid } = req.params;
+  const email = req.query.email;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
@@ -64,15 +65,11 @@ router.delete('/:tid/reviews/:email', async (req, res) => {
   }
 });
 
-// TODO: Remove this
-router.get('/:tid/reviews', async (req, res) => {
-  const tid = req.params.tid;
-  try {
-    const reviews = await Review.findByTrip(tid);
-    ok(res, reviews);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
+//Save bid
+router.post('/:tid/stop/:address', async (req, res) => {});
+//Update bid
+//Delete bid
+//Get pending bid by trip
+//Get won bid by trip
 
 module.exports = { tripRoutes: router };
