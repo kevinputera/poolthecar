@@ -140,6 +140,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/trip/:tid', async (req, res) => {
+  const tid = req.params.tid;
+  try {
+    const trip = new Trip.findByTid(tid);
+    ok(res, trips);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 router.put('/update/:tid', async (req, res) => {
   const tid = req.params.tid;
   const { license, status, origin, seats, departingOn } = req.query;
