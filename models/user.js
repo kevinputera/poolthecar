@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 const { SHA256 } = require('crypto-js');
 
 class User {
@@ -17,17 +17,13 @@ class User {
     this.name = name;
     this.gender = gender;
     this.phone = phone;
-    // TODO: Remove default value below
-    this.profilePhotoUrl =
-      profilePhotoUrl ||
-      'https://avatars2.githubusercontent.com/u/46835051?s=460&v=4';
+    this.profilePhotoUrl = profilePhotoUrl;
     this.createdOn = createdOn;
     this.updatedOn = updatedOn;
   }
 
   async save() {
-    const client = await getClient();
-    const res = await client.query({
+    const res = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Users (email, secret, name, gender, phone, profile_photo_url)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -48,8 +44,7 @@ class User {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Users
         WHERE email = $1
@@ -60,8 +55,7 @@ class User {
   }
 
   static async findByEmail(email) {
-    const client = await getClient();
-    const users = await client.query({
+    const users = await makeSingleQuery({
       text: /* sql */ `
         SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
         FROM Users
@@ -69,22 +63,23 @@ class User {
       `,
       values: [email],
     });
-    const user = users.rows[0];
+    if (users.rows.length === 0) {
+      return null;
+    }
     return new User(
-      user.email,
-      user.secret,
-      user.name,
-      user.gender,
-      user.phone,
-      user.profile_photo_url,
-      user.created_on,
-      user.updated_on
+      users.rows[0].email,
+      users.rows[0].secret,
+      users.rows[0].name,
+      users.rows[0].gender,
+      users.rows[0].phone,
+      users.rows[0].profile_photo_url,
+      users.rows[0].created_on,
+      users.rows[0].updated_on
     );
   }
 
   static async findAll() {
-    const client = await getClient();
-    const users = await client.query(/* sql */ `
+    const users = await makeSingleQuery(/* sql */ `
       SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
       FROM Users
     `);

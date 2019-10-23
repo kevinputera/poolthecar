@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Review {
   constructor(email, tid, score, content, created_on, updated_on) {
@@ -11,8 +11,7 @@ class Review {
   }
 
   async save() {
-    const client = await getClient();
-    const reviews = await client.query({
+    const reviews = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Reviews (email, tid, score, content)
         VALUES ($1, $2, $3, $4)
@@ -26,8 +25,7 @@ class Review {
   }
 
   async update() {
-    const client = await getClient();
-    const reviews = await client.query({
+    const reviews = await makeSingleQuery({
       text: /* sql */ `
         UPDATE Reviews SET score = $3, content = $4, updated_on = NOW()
         WHERE email = $1 AND tid = $2
@@ -40,8 +38,7 @@ class Review {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Reviews
         WHERE email = $1 AND tid = $2
@@ -52,8 +49,7 @@ class Review {
   }
 
   static async findByEmailAndTid(email, tid) {
-    const client = await getClient();
-    const reviews = await client.query({
+    const reviews = await makeSingleQuery({
       text: /* sql */ `
         SELECT email, tid, score, content, created_on, updated_on
         FROM Reviews
@@ -76,9 +72,8 @@ class Review {
   }
 
   static async findByDriver(email) {
-    const client = await getClient();
-    const reviews = await client.query({
-      text: `
+    const reviews = await makeSingleQuery({
+      text: /* sql */ `
         SELECT email, tid, score, content, created_on, updated_on
         FROM Reviews NATURAL JOIN Drivers
         WHERE email = $1
@@ -99,9 +94,8 @@ class Review {
   }
 
   static async findByCustomer(email) {
-    const client = await getClient();
-    const reviews = await client.query({
-      text: `
+    const reviews = await makeSingleQuery({
+      text: /* sql */ `
         SELECT email, tid, score, content, created_on, updated_on
         FROM Reviews NATURAL JOIN Customers
         WHERE email = $1
@@ -122,9 +116,8 @@ class Review {
   }
 
   static async findByTrip(tid) {
-    const client = await getClient();
-    const reviews = await client.query({
-      text: `
+    const reviews = await makeSingleQuery({
+      text: /* sql */ `
         SELECT email, tid, score, content, created_on, updated_on
         FROM Reviews
         WHERE tid = $1

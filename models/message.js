@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Message {
   constructor(mid, sender, receiver, content, sent_on) {
@@ -10,8 +10,7 @@ class Message {
   }
 
   async save() {
-    const client = await getClient();
-    const res = await client.query({
+    const res = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Messages (sender, receiver, content)
         VALUES ($1, $2, $3)
@@ -25,25 +24,47 @@ class Message {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query(/* sql */ `
-      DELETE FROM Messages
-      WHERE mid = this.mid
-    `);
+    await makeSingleQuery({
+      text: /* sql */ `
+        DELETE FROM Messages
+        WHERE mid = $1
+      `,
+      values: [this.mid],
+    });
     return this;
   }
 
-  static async findByUsers(user1, user2) {
-    const client = await getClient();
-    const messages = await client.query({
+  static async findByMid(mid) {
+    const messages = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT mid, sender, receiver, content, sent_on
+        FROM Messages
+        WHERE mid = $1
+      `,
+      values: [mid],
+    });
+    const message = new Message(
+      messages.rows[0].mid,
+      messages.rows[0].sender,
+      messages.rows[0].receiver,
+      messages.rows[0].content,
+      messages.rows[0].sent_on
+    );
+    return message;
+  }
+
+  static async findByUsers(user1, user2, page, limit) {
+    const messages = makeSingleQuery({
       text: /* sql */ `
         SELECT mid, sender, receiver, content, sent_on
         FROM Messages
         WHERE (sender = $1 AND receiver = $2)
         OR    (sender = $2 AND receiver = $1)
         ORDER BY sent_on DESC
+        LIMIT   $3
+        OFFSET  $4
       `,
-      values: [user1, user2],
+      values: [user1, user2, limit, (page - 1) * limit],
     });
     return messages.rows.map(
       message =>
