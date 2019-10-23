@@ -76,20 +76,33 @@ router.get('/:tid/reviews', async (req, res) => {
   }
 });
 
-router.get('/driver/:email', async (req, res) => {
-  const email = req.params.email;
+router.get('/', async (req, res) => {
   try {
-    const trips = await Trip.findByDriverEmailWithCarAndStops(id);
+    const trips = Trip.findAllCreatedWithStops();
     ok(res, trips);
   } catch (error) {
     internalError(res, error);
   }
 });
 
-router.get('/address/:address', async (req, res) => {
-  const address = req.params.id;
+router.get('/:tid', async (req, res) => {
+  const tid = req.params.tid;
   try {
-    const trips = await Trip.findByAddressWithCarAndStops(address);
+    const trip = new Trip.findByTid(tid);
+    if (!trip) {
+      badRequestMessage(res, 'Trip does not exist');
+      return;
+    }
+    ok(res, trips);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.get('/address', async (req, res) => {
+  const address = req.query.address;
+  try {
+    const trips = await Trip.findByAddressWithStops(address);
     ok(res, trips);
   } catch (error) {
     internalError(res, error);
@@ -97,7 +110,7 @@ router.get('/address/:address', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { tid, license, status, origin, seats, departingOn } = req.query;
+  const { tid, license, status, origin, seats, departingOn } = req.body;
   const trip = new Trip(
     tid,
     license,
@@ -131,39 +144,30 @@ router.delete('/:tid', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
-  try {
-    const trips = Trip.findAllCreatedWithStops();
-    ok(res, trips);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.get('/trip/:tid', async (req, res) => {
+router.put('/:tid', async (req, res) => {
   const tid = req.params.tid;
-  try {
-    const trip = new Trip.findByTid(tid);
-    ok(res, trips);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.put('/update/:tid', async (req, res) => {
-  const tid = req.params.tid;
-  const { license, status, origin, seats, departingOn } = req.query;
+  const { license, status, origin, seats, departingOn } = req.body;
   try {
     const trip = await Trip.findByTid(tid);
     if (!trip) {
       badRequestMessage(res, 'Trip does not exist');
       return;
     }
-    trip.license = license;
-    trip.status = status;
-    trip.origin = origin;
-    trip.seats = seats;
-    trip.departingOn = departingOn;
+    if (license !== undefined) {
+      trip.license = license;
+    }
+    if (status !== undefined) {
+      trip.status = status;
+    }
+    if (origin !== undefined) {
+      trip.origin = origin;
+    }
+    if (seats !== undefined) {
+      trip.seats = seats;
+    }
+    if (departingOn !== undefined) {
+      trip.departingOn = departingOn;
+    }
     const updatedTrip = await trip.update();
     ok(res, updatedTrip);
   } catch (error) {

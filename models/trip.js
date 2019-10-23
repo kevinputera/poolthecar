@@ -83,6 +83,9 @@ class Trip {
       `,
       values: [tid],
     });
+    if (res.rows.length === 0) {
+      return null;
+    }
     const trip = new Trip(
       trips.rows[0].tid,
       trips.rows[0].license,
@@ -166,12 +169,21 @@ class Trip {
     return Objects.values(tripsMapping);
   }
 
-  static async findByAddressWithCarAndStops(address) {
+  static async findByAddressWithStops(address) {
     const res = await makeSingleQuery({
       text: /*sql*/ `
-        SELECT * 
+        SELECT  tid, 
+                license, 
+                status, 
+                origin, 
+                seats, 
+                departing_on, 
+                created_on, 
+                updated_on,
+                min_price,
+                address
         FROM  Trips NATURAL JOIN Stops
-        WHERE Stops.address = $1
+        WHERE Stops.address LIKE $1 + %
       `,
       values: [address],
     });

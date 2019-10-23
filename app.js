@@ -9,6 +9,7 @@ const { userRoutes } = require('./routes/user');
 const { tripRoutes } = require('./routes/trip');
 const { carRoutes } = require('./routes/car');
 const { messageRoutes } = require('./routes/message');
+const { driverRoutes } = require('./routes/driver');
 
 // Load env variables
 require('dotenv').config({ path: join(__dirname, '.env') });
