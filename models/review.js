@@ -71,50 +71,6 @@ class Review {
     );
   }
 
-  static async findByDriver(email) {
-    const reviews = await makeSingleQuery({
-      text: /* sql */ `
-        SELECT email, tid, score, content, created_on, updated_on
-        FROM Reviews NATURAL JOIN Drivers
-        WHERE email = $1
-      `,
-      values: [email],
-    });
-    return reviews.rows.map(
-      review =>
-        new Review(
-          review.email,
-          review.tid,
-          review.score,
-          review.content,
-          review.created_on,
-          review.updated_on
-        )
-    );
-  }
-
-  static async findByCustomer(email) {
-    const reviews = await makeSingleQuery({
-      text: /* sql */ `
-        SELECT email, tid, score, content, created_on, updated_on
-        FROM Reviews NATURAL JOIN Customers
-        WHERE email = $1
-      `,
-      values: [email],
-    });
-    return reviews.rows.map(
-      review =>
-        new Review(
-          review.email,
-          review.tid,
-          review.score,
-          review.content,
-          review.created_on,
-          review.updated_on
-        )
-    );
-  }
-
   static async findByTrip(tid) {
     const reviews = await makeSingleQuery({
       text: /* sql */ `

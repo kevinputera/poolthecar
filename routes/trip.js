@@ -1,12 +1,14 @@
 const express = require('express');
 const { Review } = require('../models/review');
+const { Bid } = require('../models/bid');
 const { ok, badRequestMessage, internalError } = require('../utils/response');
 
 const router = express.Router();
 
 router.post('/:tid/reviews', async (req, res) => {
+  const { email } = req.session;
   const tid = req.params.tid;
-  const { email, score, content } = req.body;
+  const { score, content } = req.body;
   const review = new Review(email, tid, score, content);
   try {
     const savedReview = await review.save();
@@ -16,8 +18,9 @@ router.post('/:tid/reviews', async (req, res) => {
   }
 });
 
-router.put('/:tid/reviews/:email', async (req, res) => {
-  const { tid, email } = req.params;
+router.put('/:tid/reviews/', async (req, res) => {
+  const { email } = req.session;
+  const { tid } = req.params;
   const { score, content } = req.body;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
@@ -37,7 +40,7 @@ router.put('/:tid/reviews/:email', async (req, res) => {
 // TODO: Remove this
 router.get('/:tid/reviews/', async (req, res) => {
   const { tid } = req.params;
-  const email = req.query.email;
+  const { email } = req.session;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
@@ -50,8 +53,9 @@ router.get('/:tid/reviews/', async (req, res) => {
   }
 });
 
-router.delete('/:tid/reviews/:email', async (req, res) => {
-  const { tid, email } = req.params;
+router.delete('/:tid/reviews/', async (req, res) => {
+  const { email } = req.session;
+  const { tid } = req.params;
   try {
     const review = await Review.findByEmailAndTid(email, tid);
     if (!review) {
@@ -65,11 +69,83 @@ router.delete('/:tid/reviews/:email', async (req, res) => {
   }
 });
 
+//Get bid
+router.get('/:tid/bidding/stop/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { email } = req.session;
+  try {
+    const bid = await Bid.findByUserAndStop(email, tid, address);
+    if (!bid) {
+      badRequestMessage(res, 'Bid does not exist');
+      return;
+    }
+    ok(res, bid);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 //Save bid
-router.post('/:tid/stop/:address', async (req, res) => {});
+router.post('/:tid/bidding/stop/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { status, value } = req.body;
+  const { email } = req.session;
+  const bid = new Bid(email, tid, address, status, value);
+  try {
+    savedBid = await bid.save();
+    ok(res, savedBid);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 //Update bid
+router.put('/:tid/bidding/stop/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { value } = req.body;
+  const { email } = req.session;
+  try {
+    let bid = await Bid.findByUserAndStop(email, tid, address);
+    if (!bid) {
+      badRequestMessage(res, 'Bid does not exist');
+      return;
+    }
+    if (bid.status !== 'pending') {
+      badRequestMessage(res, 'Bid not in pending stage');
+      return;
+    }
+    bid.value = value;
+    const updatedBid = await bid.update();
+    ok(res, updatedBid);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 //Delete bid
-//Get pending bid by trip
-//Get won bid by trip
+router.delete('/:tid/bidding/stop/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { email } = req.session;
+  const bid = new Bid(email, tid, address);
+  try {
+    const deletedBid = await bid.delete();
+    ok(res, deletedBid);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+//Get bid by trip and status of driver
+router.get('/:tid/bidding', async (req, res) => {
+  const { tid } = req.params;
+  const { status } = req.query;
+  const { email } = req.session; //driver email
+  try {
+    const bids = await Bid.findDriverBidByTripAndStatus(tid, email, status);
+    ok(res, bids);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
 
 module.exports = { tripRoutes: router };

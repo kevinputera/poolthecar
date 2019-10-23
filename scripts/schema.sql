@@ -91,7 +91,7 @@ CREATE TABLE Bids (
   value numeric NOT NULL CHECK (value >= 0),
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid),
+  PRIMARY KEY (email, tid, address),
   FOREIGN KEY (tid, address) REFERENCES Stops(tid, address)
 );
 

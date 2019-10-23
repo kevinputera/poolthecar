@@ -49,42 +49,49 @@ class Bid {
     return this;
   }
 
-  static async findByDriver(email) {
+  static async findByUserAndStop(email, tid, address) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, status, value, created_on, updated_on
-      FROM Bids NATURAL JOIN Drivers
-      WHERE email = $1
-    `,
-      values: [email],
+        SELECT Bids.email, tid, address, status, value, Bids.created_on, Bids.updated_on
+        FROM Bids JOIN Users
+        ON Bids.email = Users.email
+        WHERE Bids.email = $1 AND tid = $2 AND address = $3
+      `,
+      values: [email, tid, address],
     });
-    return bids.rows.map(
-      bid =>
-        new Bid(
-          bid.email,
-          bid.tid,
-          bid.status,
-          bid.value,
-          bid.created_on,
-          bid.updated_on
-        )
+    if (bids.rows.length < 1) {
+      return null;
+    }
+    const bid = bids.rows[0];
+    return new Bid(
+      bid.email,
+      bid.tid,
+      bid.address,
+      bid.status,
+      bid.value,
+      bid.created_on,
+      bid.updated_on
     );
   }
 
-  static async findByCustomer(email) {
+  static async findDriverBidByTripAndStatus(tid, email, status) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, status, value, created_on, updated_on
-      FROM Bids NATURAL JOIN Customers
-      WHERE email = $1
-    `,
-      values: [email],
+        SELECT Bids.email, Bids.tid, address, Bids.status, value, Bids.created_on, Bids.updated_on
+        FROM Bids
+        JOIN Trips ON Bids.tid = Trips.tid
+        JOIN Cars ON Trips.license = Cars.license
+        JOIN Drivers ON Cars.email = Drivers.email
+        WHERE Bids.tid = $1 AND Drivers.email = $2 AND Bids.status = $3
+      `,
+      values: [tid, email, status],
     });
     return bids.rows.map(
       bid =>
         new Bid(
           bid.email,
           bid.tid,
+          bid.address,
           bid.status,
           bid.value,
           bid.created_on,
