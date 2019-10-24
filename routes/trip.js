@@ -1,6 +1,7 @@
 const express = require('express');
 const { Review } = require('../models/review');
 const { Trip } = require('../models/trip');
+const { Stop } = require('../models/stop');
 const { ok, badRequestMessage, internalError } = require('../utils/response');
 
 const router = express.Router();
@@ -78,7 +79,17 @@ router.get('/:tid/reviews', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const trips = Trip.findAllCreatedWithStops();
+    const trips = await Trip.findAllCreatedWithStops();
+    ok(res, trips);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.get('/address/', async (req, res) => {
+  const address = req.query.address;
+  try {
+    const trips = await Trip.findByAddressWithStops(address);
     ok(res, trips);
   } catch (error) {
     internalError(res, error);
@@ -88,22 +99,12 @@ router.get('/', async (req, res) => {
 router.get('/:tid', async (req, res) => {
   const tid = req.params.tid;
   try {
-    const trip = new Trip.findByTid(tid);
+    const trip = await Trip.findByTid(tid);
     if (!trip) {
       badRequestMessage(res, 'Trip does not exist');
       return;
     }
-    ok(res, trips);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.get('/address', async (req, res) => {
-  const address = req.query.address;
-  try {
-    const trips = await Trip.findByAddressWithStops(address);
-    ok(res, trips);
+    ok(res, trip);
   } catch (error) {
     internalError(res, error);
   }
@@ -153,19 +154,19 @@ router.put('/:tid', async (req, res) => {
       badRequestMessage(res, 'Trip does not exist');
       return;
     }
-    if (license !== undefined) {
+    if (license) {
       trip.license = license;
     }
-    if (status !== undefined) {
+    if (status) {
       trip.status = status;
     }
-    if (origin !== undefined) {
+    if (origin) {
       trip.origin = origin;
     }
-    if (seats !== undefined) {
+    if (seats) {
       trip.seats = seats;
     }
-    if (departingOn !== undefined) {
+    if (departingOn) {
       trip.departingOn = departingOn;
     }
     const updatedTrip = await trip.update();
