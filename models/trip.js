@@ -1,4 +1,5 @@
 const { makeSingleQuery } = require('../db');
+const { Stop } = require('./stop');
 
 class Trip {
   constructor(
@@ -26,7 +27,7 @@ class Trip {
       text: /* sql */ `
         INSERT INTO Trips (tid,license,status,origin,seats,departing_on)
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING created_on,updated_on;
+        RETURNING created_on, updated_on;
       `,
       values: [
         this.tid,
@@ -46,9 +47,14 @@ class Trip {
     this.updatedOn = new Date();
     await makeSingleQuery({
       text: /*sql*/ `
-        UPDATE Trips SET license = $2, status = $3, origin = $4, 
-               seats = $5, departing_on = $6, updated_on = $7
-        WHERE tid = $1
+        UPDATE  Trips 
+        SET     license = $2, 
+                status = $3, 
+                origin = $4, 
+                seats = $5, 
+                departing_on = $6, 
+                updated_on = $7
+        WHERE   tid = $1
         `,
       values: [
         this.tid,
@@ -56,8 +62,8 @@ class Trip {
         this.status,
         this.origin,
         this.seats,
-        this.departing_on,
-        this.updated_on,
+        this.departingOn,
+        this.updatedOn,
       ],
     });
     return this;
@@ -74,9 +80,34 @@ class Trip {
     return this;
   }
 
+  static async findByTid(tid) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on 
+        FROM    Trips
+        WHERE   tid = $1
+      `,
+      values: [tid],
+    });
+    if (res.rows.length === 0) {
+      return null;
+    }
+    const trip = new Trip(
+      res.rows[0].tid,
+      res.rows[0].license,
+      res.rows[0].status,
+      res.rows[0].origin,
+      res.rows[0].seats,
+      res.rows[0].departing_on,
+      res.rows[0].created_on,
+      res.rows[0].updated_on
+    );
+    return trip;
+  }
+
   static async findAllCreatedWithStops() {
     const res = await makeSingleQuery(/* sql */ `
-      SELECT * 
+      SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on, min_price, address
       FROM Trips NATURAL JOIN Stops
       WHERE Trips.status = 'created'
     `);
@@ -98,24 +129,20 @@ class Trip {
           row.updated_on
         );
         trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid].stops = trip;
+        tripsMapping[row.tid] = trip;
       }
     });
-    return Objects.values(tripsMapping);
+    return Object.values(tripsMapping);
   }
 
-  static async findByDriverWithCarAndStops(driver) {
-    const driverEmail = driver.email;
-    /*
-     * For now, I am returning just the car license. For future if we want we
-     * can actually include all the car details
-     */
+  static async findByDriverEmailWithCarAndStops(driverEmail) {
     const res = await makeSingleQuery({
       text: /*sql*/ `
-      SELECT *
-      FROM (SELECT * FROM (SELECT Cars.license FROM Cars NATURAL JOIN Driver
-            WHERE Driver.email = $1) AS CarsOfDriver NATURAL JOIN Trips) AS 
-            TripsOfDriver NATURAL JOIN Stops
+      SELECT tid, T.license, status, origin, T.seats, departing_on, created_on, updated_on, min_price, address
+      FROM (Trips T JOIN Cars C ON T.license = C.license)
+      NATURAL JOIN Drivers D
+      NATURAL JOIN Stops S
+      WHERE D.email = $1
       `,
       values: [driverEmail],
     });
@@ -137,10 +164,44 @@ class Trip {
           row.updated_on
         );
         trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid].stops = trip;
+        tripsMapping[row.tid] = trip;
       }
     });
-    return Objects.values(tripsMapping);
+    return Object.values(tripsMapping);
+  }
+
+  static async findByAddressWithStops(address) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on, min_price, address
+        FROM    Trips NATURAL JOIN Stops
+        WHERE   address LIKE $1
+      `,
+      values: ['%' + address + '%'],
+    });
+
+    const tripsMapping = {};
+    res.rows.forEach(row => {
+      if (tripsMapping[row.tid]) {
+        tripsMapping[row.tid].stops.push(
+          new Stop(row.min_price, row.address, row.tid)
+        );
+      } else {
+        const trip = new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        );
+        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
+        tripsMapping[row.tid] = trip;
+      }
+    });
+    return Object.values(tripsMapping);
   }
 }
 
