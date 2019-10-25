@@ -36,6 +36,7 @@ app.use('/users', userRoutes);
 app.use('/trips', tripRoutes);
 app.use('/cars', carRoutes);
 app.use('/messages', messageRoutes);
+app.use('/drivers', driverRoutes);
 
 app.listen(process.env.APP_PORT, () =>
   console.log(`App started on port ${process.env.APP_PORT}!`)

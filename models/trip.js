@@ -107,7 +107,7 @@ class Trip {
 
   static async findAllCreatedWithStops() {
     const res = await makeSingleQuery(/* sql */ `
-      SELECT * 
+      SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on, min_price, address
       FROM Trips NATURAL JOIN Stops
       WHERE Trips.status = 'created'
     `);
@@ -136,18 +136,13 @@ class Trip {
   }
 
   static async findByDriverEmailWithCarAndStops(driverEmail) {
-    /*
-     * For now, I am returning just the car license. For future if we want we
-     * can actually include all the car details
-     */
     const res = await makeSingleQuery({
       text: /*sql*/ `
-      SELECT *
-      FROM (SELECT * FROM 
-            (SELECT Cars.license FROM Cars 
-              NATURAL JOIN Driver WHERE Driver.email = $1) AS CarsOfDriver 
-            NATURAL JOIN Trips) AS TripsOfDriver 
-            NATURAL JOIN Stops
+      SELECT tid, T.license, status, origin, T.seats, departing_on, created_on, updated_on, min_price, address
+      FROM (Trips T JOIN Cars C ON T.license = C.license)
+      NATURAL JOIN Drivers D
+      NATURAL JOIN Stops S
+      WHERE D.email = $1
       `,
       values: [driverEmail],
     });
@@ -186,7 +181,6 @@ class Trip {
     });
 
     const tripsMapping = {};
-    console.log(res.rows[0]);
     res.rows.forEach(row => {
       if (tripsMapping[row.tid]) {
         tripsMapping[row.tid].stops.push(

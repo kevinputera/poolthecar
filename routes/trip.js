@@ -78,19 +78,15 @@ router.get('/:tid/reviews', async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  try {
-    const trips = await Trip.findAllCreatedWithStops();
-    ok(res, trips);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.get('/address/', async (req, res) => {
   const address = req.query.address;
   try {
-    const trips = await Trip.findByAddressWithStops(address);
-    ok(res, trips);
+    if (!address) {
+      const trips = await Trip.findAllCreatedWithStops();
+      ok(res, trips);
+    } else {
+      const trips = await Trip.findByAddressWithStops(address);
+      ok(res, trips);
+    }
   } catch (error) {
     internalError(res, error);
   }
