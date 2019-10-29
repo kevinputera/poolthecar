@@ -1,0 +1,14 @@
+include mixins/profile
+include mixins/trips
+
+html
+  head
+    title= title
+  body
+    h1= message
+    a(href="/profile")
+      button(type='button') Profile
+    a(href='/trips')
+      button(type='button') Trips
+    +profile(pageShown)
+    +trips(pageShown)

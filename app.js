@@ -11,6 +11,8 @@ const { carRoutes } = require('./routes/car');
 const { messageRoutes } = require('./routes/message');
 const { driverRoutes } = require('./routes/driver');
 
+const { indexRoutes } = require('./routes/index');
+
 // Load env variables
 require('dotenv').config({ path: join(__dirname, '.env') });
 
@@ -29,14 +31,15 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 
 // Authentication
-app.use('/', authenticationRoutes);
-app.use(requireAuthentication);
+app.use('/api', authenticationRoutes);
+app.use('/api', requireAuthentication);
 
-app.use('/users', userRoutes);
-app.use('/trips', tripRoutes);
-app.use('/cars', carRoutes);
-app.use('/messages', messageRoutes);
-app.use('/drivers', driverRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/trips', tripRoutes);
+app.use('/api/cars', carRoutes);
+app.use('/api/messages', messageRoutes);
+
+app.use('/', indexRoutes);
 
 app.listen(process.env.APP_PORT, () =>
   console.log(`App started on port ${process.env.APP_PORT}!`)
