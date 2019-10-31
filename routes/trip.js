@@ -141,7 +141,7 @@ router.get('/:tid/bidding', async (req, res) => {
   const { status } = req.query;
   const { email } = req.session; //driver email
   try {
-    const bids = await Bid.findDriverBidByTripAndStatus(tid, email, status);
+    const bids = await Bid.findBidByTripDriverStatus(tid, email, status);
     ok(res, bids);
   } catch (error) {
     internalError(res, error);

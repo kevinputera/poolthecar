@@ -53,8 +53,6 @@ class Bid {
     const bids = await makeSingleQuery({
       text: /* sql */ `
         SELECT Bids.email, tid, address, status, value, Bids.created_on, Bids.updated_on
-        FROM Bids JOIN Users
-        ON Bids.email = Users.email
         WHERE Bids.email = $1 AND tid = $2 AND address = $3
       `,
       values: [email, tid, address],
@@ -74,7 +72,7 @@ class Bid {
     );
   }
 
-  static async findDriverBidByTripAndStatus(tid, email, status) {
+  static async findBidByTripDriverStatus(tid, email, status) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
         SELECT Bids.email, Bids.tid, address, Bids.status, value, Bids.created_on, Bids.updated_on
