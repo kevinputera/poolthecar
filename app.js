@@ -32,7 +32,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Authentication
 app.use('/api', authenticationRoutes);
-app.use(requireAuthentication);
+// app.use(requireAuthentication);
 
 app.use('/api/users', userRoutes);
 app.use('/api/trips', tripRoutes);
