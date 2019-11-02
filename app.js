@@ -37,11 +37,7 @@ app.get('/', (req, res) => {
 
 // Authentication
 app.use('/api', authenticationRoutes);
-<<<<<<< HEAD
 // app.use(requireAuthentication);
-=======
-app.use(requireAuthentication);
->>>>>>> Use page route
 
 app.use('/api/users', userRoutes);
 app.use('/api/trips', tripRoutes);
