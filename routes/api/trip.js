@@ -1,8 +1,12 @@
 const express = require('express');
-const { Review } = require('../models/review');
-const { Trip } = require('../models/trip');
-const { Stop } = require('../models/stop');
-const { ok, badRequestMessage, internalError } = require('../utils/response');
+const { Review } = require('../../models/review');
+const { Trip } = require('../../models/trip');
+const { Stop } = require('../../models/stop');
+const {
+  ok,
+  badRequestMessage,
+  internalError,
+} = require('../../utils/response');
 
 const router = express.Router();
 

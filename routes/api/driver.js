@@ -1,7 +1,11 @@
 const express = require('express');
-const { Driver } = require('../models/driver');
-const { Trip } = require('../models/trip');
-const { ok, badRequestMessage, internalError } = require('../utils/response');
+const { Driver } = require('../../models/driver');
+const { Trip } = require('../../models/trip');
+const {
+  ok,
+  badRequestMessage,
+  internalError,
+} = require('../../utils/response');
 
 const router = express.Router();
 

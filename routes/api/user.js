@@ -1,7 +1,11 @@
 const express = require('express');
-const { User } = require('../models/user');
-const { Bookmark } = require('../models/bookmark');
-const { ok, badRequestMessage, internalError } = require('../utils/response');
+const { User } = require('../../models/user');
+const { Bookmark } = require('../../models/bookmark');
+const {
+  ok,
+  badRequestMessage,
+  internalError,
+} = require('../../utils/response');
 
 const router = express.Router();
 
@@ -9,17 +13,6 @@ router.get('/', async (req, res) => {
   try {
     const users = await User.findAll();
     ok(res, users);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.post('/', async (req, res) => {
-  const { email, secret, name, gender, phone, profilePhotoUrl } = req.body;
-  try {
-    const user = new User(email, secret, name, gender, phone, profilePhotoUrl);
-    const savedUser = await user.save();
-    ok(res, savedUser);
   } catch (error) {
     internalError(res, error);
   }
