@@ -7,8 +7,6 @@ const router = express.Router();
 
 router.post('/authenticate', async (req, res) => {
   const { email, secret } = req.body;
-  console.log({ email });
-  console.log({ secret });
   try {
     const user = await User.findByEmail(email);
     if (!user || user.secret !== SHA256(secret).toString()) {
