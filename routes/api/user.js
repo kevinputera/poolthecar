@@ -9,10 +9,23 @@ const {
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.put('/', async (req, res) => {
+  const { name, gender, phone, profilePhotoUrl } = req.body;
   try {
-    const users = await User.findAll();
-    ok(res, users);
+    const user = await User.findByEmail(req.session.email);
+
+    if (!user) {
+      badRequestMessage(res, 'User does not exist');
+      return;
+    }
+
+    user.name = name;
+    user.gender = gender;
+    user.phone = phone;
+    user.profilePhotoUrl = profilePhotoUrl;
+    const updatedUser = await user.update();
+
+    ok(res, updatedUser);
   } catch (error) {
     internalError(res, error);
   }
