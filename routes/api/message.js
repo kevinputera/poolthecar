@@ -1,6 +1,10 @@
 const express = require('express');
-const { Message } = require('../models/message.js');
-const { ok, badRequestMessage, internalError } = require('../utils/response');
+const { Message } = require('../../models/message.js');
+const {
+  ok,
+  badRequestMessage,
+  internalError,
+} = require('../../utils/response');
 
 const router = express.Router();
 

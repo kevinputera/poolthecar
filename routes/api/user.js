@@ -1,7 +1,11 @@
 const express = require('express');
-const { User } = require('../models/user');
-const { Bookmark } = require('../models/bookmark');
-const { ok, badRequestMessage, internalError } = require('../utils/response');
+const { User } = require('../../models/user');
+const { Bookmark } = require('../../models/bookmark');
+const {
+  ok,
+  badRequestMessage,
+  internalError,
+} = require('../../utils/response');
 
 const router = express.Router();
 

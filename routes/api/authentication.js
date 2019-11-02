@@ -1,7 +1,7 @@
 const express = require('express');
 const { SHA256 } = require('crypto-js');
-const { User } = require('../models/user');
-const { redirect, internalError } = require('../utils/response');
+const { User } = require('../../models/user');
+const { redirect, internalError } = require('../../utils/response');
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.post('/authenticate', async (req, res) => {
     const user = await User.findByEmail(email);
     if (!user || user.secret !== SHA256(secret).toString()) {
       req.session.email = null;
-      redirect(res, '/p-auth/login');
+      redirect(res, '/p/auth/login');
       return;
     }
     req.session.email = email;
@@ -24,7 +24,7 @@ router.post('/authenticate', async (req, res) => {
 
 router.post('/deauthenticate', async (req, res) => {
   req.session.email = null;
-  redirect(res, '/p-auth/login');
+  redirect(res, '/p/auth/login');
 });
 
 module.exports = { authenticationRoutes: router };

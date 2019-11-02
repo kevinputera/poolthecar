@@ -4,14 +4,18 @@ const { join } = require('path');
 
 const { requireAuthentication } = require('./middlewares/authentication');
 
-const { authenticationRoutes } = require('./routes/authentication');
-const { userRoutes } = require('./routes/user');
-const { tripRoutes } = require('./routes/trip');
-const { carRoutes } = require('./routes/car');
-const { messageRoutes } = require('./routes/message');
-const { driverRoutes } = require('./routes/driver');
+const { authenticationPageRoutes } = require('./routes/page/authentication');
+const { accountPageRoutes } = require('./routes/page/account');
+const { tripPageRoutes } = require('./routes/page/trip');
 
-const { pageRoutes } = require('./routes/page');
+const { authenticationRoutes } = require('./routes/api/authentication');
+const { userRoutes } = require('./routes/api/user');
+const { tripRoutes } = require('./routes/api/trip');
+const { carRoutes } = require('./routes/api/car');
+const { messageRoutes } = require('./routes/api/message');
+const { driverRoutes } = require('./routes/api/driver');
+
+const { permanentRedirect } = require('./utils/response');
 
 // Load env variables
 require('dotenv').config({ path: join(__dirname, '.env') });
@@ -28,24 +32,28 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 
-// Permanent redirection
+// Permanent redirection from / to /p/trips
 app.get('/', (req, res) => {
-  res.status(301).redirect('/p/trips');
+  permanentRedirect(res, '/p/trips');
 });
 
 // Authentication
+app.use('/p/auth', authenticationPageRoutes);
 app.use('/api', authenticationRoutes);
-// app.use(requireAuthentication);
 
+// Block of all the routes below from unauthenticated users
+app.use(requireAuthentication);
+
+app.use('/p/account', accountPageRoutes);
+app.use('/p/trips', tripPageRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/cars', carRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/drivers', driverRoutes);
-
-app.use('/p', pageRoutes);
 
 app.listen(process.env.APP_PORT, () =>
   console.log(`App started on port ${process.env.APP_PORT}!`)
