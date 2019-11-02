@@ -1,10 +1,16 @@
 extends base.pug
 
+append scripts
+  script(src="/app.js")
+
 block body
-  .row
-    .col-md-2
-      nav(class="nav nav-pills flex-column")
-        a(class="nav-link" href="/p/trips") Trips
-        a(class="nav-link" href="/p/account") Account
-    .col-md-10
-      block content
+  div(class="container-fluid vh-100 py-2")
+    div(class="row h-100")
+      .col-md-2
+        div(class="d-flex flex-column justify-content-between h-100")
+          nav(class="nav nav-pills flex-column")
+            a(class="nav-link" href="/p/trips") Browse
+            a(class="nav-link" href="/p/account") Manage account
+          button(id="logout-button" class="btn btn-danger") Log out
+      .col-md-10
+        block content
