@@ -3,14 +3,17 @@ extends base.pug
 append scripts
   script(src="/app.js")
 
+append styles
+  link(rel="stylesheet" href="/app.css")
+
 block body
-  div(class="container-fluid vh-100 py-2")
+  div(class="container-fluid vh-100")
     div(class="row h-100")
-      .col-md-2
+      div(class="app-sidebar col-md-2 py-2")
         div(class="d-flex flex-column justify-content-between h-100")
           nav(class="nav nav-pills flex-column")
             a(class="nav-link" href="/p/trips") Browse
             a(class="nav-link" href="/p/account") Manage account
           button(id="logout-button" class="btn btn-danger") Log out
-      .col-md-10
+      div(class="col-md-10 py-2")
         block content

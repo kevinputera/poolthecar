@@ -2,7 +2,7 @@ extends layouts/form.pug
 
 block form
   h4.mb-3 Log in
-  form(action="/api/authenticate" method="POST")
+  form(action="/api/auth/login" method="POST")
     .form-group
       label(for="login-email") Email address
       input(

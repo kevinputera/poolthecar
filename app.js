@@ -42,18 +42,16 @@ app.get('/', (req, res) => {
 
 // Authentication
 app.use('/p/auth', authenticationPageRoutes);
-app.use('/api', authenticationRoutes);
+app.use('/api/auth', authenticationRoutes);
 
 // Block of all the routes below from unauthenticated users
-app.use(requireAuthentication);
-
-app.use('/p/account', accountPageRoutes);
-app.use('/p/trips', tripPageRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/trips', tripRoutes);
-app.use('/api/cars', carRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/drivers', driverRoutes);
+app.use('/p/account', requireAuthentication, accountPageRoutes);
+app.use('/p/trips', requireAuthentication, tripPageRoutes);
+app.use('/api/trips', requireAuthentication, tripRoutes);
+app.use('/api/users', requireAuthentication, userRoutes);
+app.use('/api/cars', requireAuthentication, carRoutes);
+app.use('/api/messages', requireAuthentication, messageRoutes);
+app.use('/api/drivers', requireAuthentication, driverRoutes);
 
 app.listen(process.env.APP_PORT, () =>
   console.log(`App started on port ${process.env.APP_PORT}!`)

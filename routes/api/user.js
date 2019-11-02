@@ -18,17 +18,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
-  const { email, secret, name, gender, phone, profilePhotoUrl } = req.body;
-  try {
-    const user = new User(email, secret, name, gender, phone, profilePhotoUrl);
-    const savedUser = await user.save();
-    ok(res, savedUser);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
 router.post('/:email/bookmarks', async (req, res) => {
   const email = req.params.email;
   const { name, address } = req.body;
