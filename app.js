@@ -30,6 +30,11 @@ app.use(
 );
 app.use(express.urlencoded({ extended: false }));
 
+// Permanent redirection
+app.get('/', (req, res) => {
+  res.status(301).redirect('/p/trips');
+});
+
 // Authentication
 app.use('/api', authenticationRoutes);
 // app.use(requireAuthentication);
