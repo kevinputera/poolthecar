@@ -15,7 +15,7 @@ window.addEventListener('load', () => {
     const urlEncodedBody = urlEncodedPairs.join('&').replace(/%20/g, '+');
 
     try {
-      const res = await fetch(`/api/users`, {
+      const res = await fetch('/api/users', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: urlEncodedBody,
