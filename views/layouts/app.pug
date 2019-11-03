@@ -10,7 +10,6 @@ block body
   div(class="container-fluid vh-100")
     div(class="row h-100")
       div(class="app-sidebar col-md-2 py-2")
-        if isLoggedIn
           div(class="d-flex flex-column justify-content-between h-100")
             nav(class="nav nav-pills flex-column")
               a(
@@ -39,6 +38,6 @@ block body
                     id="driver-signup-button"
                     class="btn btn-secondary"
                   ) Be a driver!
-                button(id="logout-button" class="btn btn-danger logout-btn") Log out
-      div(class="col-md-10")
+                button(id="logout-button" class="btn btn-danger") Log out
+      div(class="app-content col-md-10")
         block content
