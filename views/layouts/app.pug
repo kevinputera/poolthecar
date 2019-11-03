@@ -13,13 +13,13 @@ block body
         div(class="d-flex flex-column justify-content-between h-100")
           nav(class="nav nav-pills flex-column")
             a(
-              class="nav-link" + (title === "Trips" ? " active" : "")
-              href="/p/trips"
+              class="nav-link" + (title === "Browse" ? " active" : "")
+              href="/p/browse"
             ) Browse
             a(
               class="nav-link" + (title === "Account" ? " active" : "")
               href="/p/account"
             ) Manage account
           button(id="logout-button" class="btn btn-danger") Log out
-      div(class="col-md-10 py-2")
+      div(class="col-md-10")
         block content

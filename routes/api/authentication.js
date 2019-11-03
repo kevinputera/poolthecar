@@ -19,7 +19,7 @@ router.post('/login', async (req, res) => {
       return;
     }
     req.session.email = email;
-    redirect(res, '/p/trips');
+    redirect(res, '/p/browse');
   } catch (error) {
     req.session.email = null;
     internalError(res, error);
@@ -32,7 +32,7 @@ router.post('/new', async (req, res) => {
     const user = new User(email, secret, name, gender, phone, profilePhotoUrl);
     const newUser = await user.save();
     req.session.email = email;
-    redirect(res, '/p/trips');
+    redirect(res, '/p/browse');
   } catch (error) {
     req.session.email = null;
     internalError(res, error);
