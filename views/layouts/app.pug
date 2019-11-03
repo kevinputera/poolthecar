@@ -20,6 +20,12 @@ block body
               class="nav-link" + (title === "Account" ? " active" : "")
               href="/p/account"
             ) Manage account
-          button(id="logout-button" class="btn btn-danger") Log out
+          .app-sidebar-controls
+            if !isDriver
+              button(
+                id="driver-signup-button"
+                class="btn btn-secondary"
+              ) Be a driver!
+            button(id="logout-button" class="btn btn-danger") Log out
       div(class="col-md-10")
         block content

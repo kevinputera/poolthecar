@@ -1,6 +1,7 @@
 const express = require('express');
 const { SHA256 } = require('crypto-js');
 const { User } = require('../../models/user');
+const { Driver } = require('../../models/driver');
 const {
   redirect,
   badRequestMessage,
@@ -22,6 +23,7 @@ router.post('/login', async (req, res) => {
     redirect(res, '/p/browse');
   } catch (error) {
     req.session.email = null;
+    console.log(error);
     internalError(res, error);
   }
 });
