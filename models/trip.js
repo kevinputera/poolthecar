@@ -197,7 +197,7 @@ class Trip {
     return Object.values(tripsMapping);
   }
 
-  static async findByDriverEmailAndAddressWithStops(driverEmail, address) {
+  static async findAllByDriverEmailAndAddressWithStops(driverEmail, address) {
     const res = await makeSingleQuery({
       text: /* sql */ `
         SELECT  T.tid, T.license, T.status, T.origin, T.seats,
@@ -234,7 +234,7 @@ class Trip {
     return Object.values(tripsMapping);
   }
 
-  static async findByDriverEmailWithCarAndStops(driverEmail) {
+  static async findAllByDriverEmailWithCarAndStops(driverEmail) {
     const res = await makeSingleQuery({
       text: /*sql*/ `
       SELECT tid, T.license, status, origin, T.seats, departing_on, created_on, updated_on, min_price, address

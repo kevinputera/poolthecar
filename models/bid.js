@@ -71,13 +71,12 @@ class Bid {
     );
   }
 
-  static async findByCustomer(email) {
+  static async findAllByEmail(email) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT Bids.email, tid, status, value, Bids.created_on, Bids.updated_on
-      FROM Bids JOIN Users
-      ON Bids.email = Users.email
-      WHERE Bids.email = $1
+      SELECT email, tid, status, value, Bids.created_on, Bids.updated_on
+      FROM Bids
+      WHERE email = $1
     `,
       values: [email],
     });
@@ -94,8 +93,8 @@ class Bid {
     );
   }
 
-  static async findByCustomerWithTrip(email) {
-    let bids = await this.findByCustomer(email);
+  static async findAllByCustomerWithTrip(email) {
+    let bids = await this.findAllByEmail(email);
     const bidsWithTrip = bids.map(async bid => {
       const trip = await Trip.findByTid(bid.tid);
       bid.trip = trip;
@@ -105,7 +104,7 @@ class Bid {
   }
 
   static async findByCustomerAndAddressWithTrip(email, address) {
-    let bids = await this.findByCustomer(email);
+    let bids = await this.findAllByEmail(email);
     const bidsWithTripPromise = bids.map(async bid => {
       const trip = await Trip.findByTidAndStopAddress(bid.tid, address);
       if (trip != null) {
