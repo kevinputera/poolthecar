@@ -16,21 +16,23 @@ window.addEventListener('load', () => {
 
   // Driver signup logic
   const driverSignupButton = document.getElementById('driver-signup-button');
-  driverSignupButton.addEventListener('click', async event => {
-    try {
-      if (confirm('Would you wish to sign up as a driver?')) {
-        const res = await fetch('/api/drivers', { method: 'POST' });
-        if (res.ok) {
-          // Reload page to get most recent change
-          window.location.reload();
+  if (driverSignupButton) {
+    driverSignupButton.addEventListener('click', async event => {
+      try {
+        if (confirm('Would you wish to sign up as a driver?')) {
+          const res = await fetch('/api/drivers', { method: 'POST' });
+          if (res.ok) {
+            // Reload page to get most recent change
+            window.location.reload();
+          } else {
+            console.log('Driver signup failed');
+          }
         } else {
-          console.log('Driver signup failed');
+          console.log('Driver signup cancelled');
         }
-      } else {
-        console.log('Driver signup cancelled');
+      } catch (error) {
+        console.log('Driver signup error', error);
       }
-    } catch (error) {
-      console.log('Driver signup error', error);
-    }
-  });
+    });
+  }
 });
