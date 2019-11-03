@@ -43,6 +43,6 @@ block content
             tr
               td= stop.address
               td= stop.min_price
-              td= stopBiddingMap[stop.address] ? "Cancel" : "Bid"
-              td= stopBiddingMap[stop.address] ? bidWithTripAndStops.status : ""
-              td= stopBiddingMap[stop.address] ? bidWithTripAndStops.value : ""
+              td= bidMapWithStop[stop.address] ? "Cancel" : "Bid"
+              td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status : ""
+              td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].value : ""

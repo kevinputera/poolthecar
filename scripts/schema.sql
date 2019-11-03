@@ -85,12 +85,14 @@ CREATE TYPE bid_status AS ENUM (
 
 CREATE TABLE Bids (
   email varchar(255) REFERENCES Users(email),
-  tid integer REFERENCES Trips(tid),
+  tid integer,
+  address varchar(255),
   status bid_status NOT NULL DEFAULT 'pending',
   value numeric NOT NULL CHECK (value >= 0),
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid)
+  PRIMARY KEY (email, tid, address),
+  FOREIGN KEY (tid, address) REFERENCES Stops(tid, address)
 );
 
 CREATE TABLE Reviews (

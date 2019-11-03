@@ -1,7 +1,6 @@
 const express = require('express');
 const session = require('express-session');
 const { join } = require('path');
-
 const { requireAuthentication } = require('./middlewares/authentication');
 
 const { authenticationPageRoutes } = require('./routes/page/authentication');

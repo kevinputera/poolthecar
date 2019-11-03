@@ -3,9 +3,10 @@ const { Trip } = require('./trip');
 const { Stop } = require('./stop');
 
 class Bid {
-  constructor(email, tid, status, value, created_on, updated_on) {
+  constructor(email, tid, address, status, value, created_on, updated_on) {
     this.email = email;
     this.tid = tid;
+    this.address = address;
     this.status = status;
     this.value = value;
     this.created_on = created_on;
@@ -15,11 +16,11 @@ class Bid {
   async save() {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Bids (email, tid, status, value)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO Bids (email, tid, address, status, value)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING created_on, updated_on
       `,
-      values: [this.email, this.tid, this.status, this.value],
+      values: [this.email, this.tid, this.address, this.status, this.value],
     });
     this.created_on = bids.rows[0].created_on;
     this.updated_on = bids.rows[0].updated_on;
@@ -29,11 +30,11 @@ class Bid {
   async update() {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        UPDATE Bids SET status = $3, value = $4, updated_on = NOW()
-        WHERE email = $1 AND tid = $2
+        UPDATE Bids SET status = $4, value = $5, updated_on = NOW()
+        WHERE email = $1 AND tid = $2 AND address = $3
         RETURNING created_on, updated_on
       `,
-      values: [this.email, this.tid, this.status, this.value],
+      values: [this.email, this.tid, this.address, this.status, this.value],
     });
     this.updated_on = bids.rows[0].updated_on;
     return this;
@@ -43,33 +44,11 @@ class Bid {
     await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Bids
-        WHERE email = $1 AND tid = $2
+        WHERE email = $1 AND tid = $2 AND address = $3
       `,
-      values: [this.email, this.tid],
+      values: [this.email, this.tid, this.address],
     });
     return this;
-  }
-
-  static async findByDriver(email) {
-    const bids = await makeSingleQuery({
-      text: /* sql */ `
-      SELECT email, tid, status, value, created_on, updated_on
-      FROM Bids NATURAL JOIN Drivers
-      WHERE email = $1
-    `,
-      values: [email],
-    });
-    return bids.rows.map(
-      bid =>
-        new Bid(
-          bid.email,
-          bid.tid,
-          bid.status,
-          bid.value,
-          bid.created_on,
-          bid.updated_on
-        )
-    );
   }
 
   static async findAllByEmail(email) {
@@ -81,15 +60,19 @@ class Bid {
     `,
       values: [email],
     });
+    if (bids.rows.length < 1) {
+      return null;
+    }
     return bids.rows.map(
-      bid =>
+      row =>
         new Bid(
-          bid.email,
-          bid.tid,
-          bid.status,
-          bid.value,
-          bid.created_on,
-          bid.updated_on
+          row.email,
+          row.tid,
+          row.address,
+          row.status,
+          row.value,
+          row.created_on,
+          row.updated_on
         )
     );
   }
@@ -119,43 +102,37 @@ class Bid {
     return bidsWithTrip.filter(x => !!x);
   }
 
-  static async findByTidAndCustomerWithTripAndStops(email, tid) {
+  static async findAllByTidAndCustomerWithStops(email, tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
       SELECT  B.email, B.status, B.value, B.created_on, B.updated_on,
-              T.tid, T.license, T.status, T.origin, T.seats,
-              T.departing_on, T.min_price, T.address
+              S.min_price, S.address
       FROM Bids B
-      JOIN (Trips NATURAL JOIN Stops) T
-      ON B.tid = T.tid
-      WHERE B.tid = $2 AND B.email = $1
+      JOIN Stops S
+      ON B.tid = S.tid AND B.address = S.address
+      WHERE B.email = $1 AND B.tid = $2
       `,
       values: [email, tid],
     });
     if (res.rows.length < 1) {
       return null;
     }
-    let bid = new Bid(
-      res.rows[0].email,
-      res.rows[0].tid,
-      res.rows[0].status,
-      res.rows[0].value,
-      res.rows[0].created_on,
-      res.rows[0].updated_on
-    );
-    let trip = new Trip(
-      res.rows[0].tid,
-      res.rows[0].license,
-      res.rows[0].status,
-      res.rows[0].origin,
-      res.rows[0].seats,
-      res.rows[0].departing_on
-    );
-    bid.trip = trip;
-    trip.stops = res.rows.map(
-      row => new Stop(row.min_price, row.address, trip.tid)
-    );
-    return bid;
+    let bidMapWithStop = {};
+    res.rows.forEach(row => {
+      let bid = new Bid(
+        row.email,
+        row.tid,
+        row.address,
+        row.status,
+        row.value,
+        row.created_on,
+        row.updated_on
+      );
+      let stop = new Stop(row.min_price, row.address, tid);
+      bid.stop = stop;
+      bidMapWithStop[row.address] = bid;
+    });
+    return bidMapWithStop;
   }
 }
 

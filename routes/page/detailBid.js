@@ -12,27 +12,16 @@ router.get('/:tid', async (req, res) => {
   const isDriver = checkIsDriver(email);
 
   const driver = await Driver.findByTid(tid);
-  const bidWithTripAndStops = await Bid.findByTidAndCustomerWithTripAndStops(
-    email,
-    tid
-  );
+  const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStops(email, tid);
   const tripWithStops = await Trip.findByTidWithStops(tid);
-
-  let stopBiddingMap = {};
-  if (bidWithTripAndStops) {
-    for (var stop of bidWithTripAndStops.trip.stops) {
-      stopBiddingMap[stop.address] = stop;
-    }
-  }
 
   res.render('detailBid', {
     title: 'Detailed Bidding',
     isLoggedIn: true,
     isDriver,
     driver,
-    bidWithTripAndStops,
+    bidMapWithStop,
     tripWithStops,
-    stopBiddingMap,
   });
 });
 
