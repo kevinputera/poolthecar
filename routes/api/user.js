@@ -10,9 +10,10 @@ const {
 const router = express.Router();
 
 router.put('/', async (req, res) => {
+  const email = req.session.email;
   const { name, gender, phone, profilePhotoUrl } = req.body;
   try {
-    const user = await User.findByEmail(req.session.email);
+    const user = await User.findByEmail(email);
 
     if (!user) {
       badRequestMessage(res, 'User does not exist');
