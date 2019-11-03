@@ -21,7 +21,8 @@ class Bookmark {
   async update() {
     await makeSingleQuery({
       text: /* sql */ `
-        UPDATE Bookmarks SET address = $1,
+        UPDATE Bookmarks
+        SET address = $1
         WHERE email = $2 AND name = $3
       `,
       values: [this.address, this.email, this.name],
@@ -40,22 +41,52 @@ class Bookmark {
     return this;
   }
 
-  static async findByEmailAndName(email, name) {
-    const res = await makeSingleQuery({
+  static async findAllByEmail(email) {
+    const bookmarks = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT email, name, address 
+        FROM Bookmarks
+        WHERE email = $1
+      `,
+      values: [email],
+    });
+    return bookmarks.rows.map(
+      bookmark => new Bookmark(bookmark.email, bookmark.name, bookmark.address)
+    );
+  }
+
+  static async findAllByEmailAndLikeName(email, name) {
+    const bookmarks = await makeSingleQuery({
       text: /* sql */ `
         SELECT email, name, address
         FROM Bookmarks
-        WHERE email = $1 AND name = $2 
+        WHERE email = $1
+        AND LOWER(name) LIKE $2
+      `,
+      values: [email, '%' + name.toLowerCase() + '%'],
+    });
+    return bookmarks.rows.map(
+      bookmark => new Bookmark(bookmark.email, bookmark.name, bookmark.address)
+    );
+  }
+
+  static async findByEmailAndName(email, name) {
+    const bookmarks = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT email, name, address
+        FROM Bookmarks
+        WHERE email = $1
+        AND name = $2
       `,
       values: [email, name],
     });
-    if (res.rows.length === 0) {
+    if (bookmarks.rows.length === 0) {
       return null;
     }
     return new Bookmark(
-      res.rows[0].email,
-      res.rows[0].name,
-      res.rows[0].address
+      bookmarks.rows[0].email,
+      bookmarks.rows[0].name,
+      bookmarks.rows[0].address
     );
   }
 }

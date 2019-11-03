@@ -5,8 +5,9 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const currentUser = await User.findByEmail(req.session.email);
-  const isDriver = await checkIsDriver(req.session.email);
+  const { email } = req.session;
+  const currentUser = await User.findByEmail(email);
+  const isDriver = await checkIsDriver(email);
   res.render('account', {
     title: 'Account',
     isDriver,

@@ -7,9 +7,11 @@ const { requireAuthentication } = require('./middlewares/authentication');
 const { authenticationPageRoutes } = require('./routes/page/authentication');
 const { accountPageRoutes } = require('./routes/page/account');
 const { browsePageRoutes } = require('./routes/page/browse');
+const { bookmarkPageRoutes } = require('./routes/page/bookmark');
 
 const { authenticationRoutes } = require('./routes/api/authentication');
 const { userRoutes } = require('./routes/api/user');
+const { bookmarkRoutes } = require('./routes/api/bookmark');
 const { tripRoutes } = require('./routes/api/trip');
 const { carRoutes } = require('./routes/api/car');
 const { messageRoutes } = require('./routes/api/message');
@@ -47,8 +49,10 @@ app.use('/api/auth', authenticationRoutes);
 // Block of all the routes below from unauthenticated users
 app.use('/p/browse', requireAuthentication, browsePageRoutes);
 app.use('/p/account', requireAuthentication, accountPageRoutes);
+app.use('/p/bookmarks', requireAuthentication, bookmarkPageRoutes);
 app.use('/api/trips', requireAuthentication, tripRoutes);
 app.use('/api/users', requireAuthentication, userRoutes);
+app.use('/api/bookmarks', requireAuthentication, bookmarkRoutes);
 app.use('/api/cars', requireAuthentication, carRoutes);
 app.use('/api/messages', requireAuthentication, messageRoutes);
 app.use('/api/drivers', requireAuthentication, driverRoutes);
