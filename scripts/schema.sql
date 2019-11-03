@@ -102,3 +102,10 @@ CREATE TABLE Reviews (
   updated_on timestamptz NOT NULL DEFAULT NOW(),
   PRIMARY KEY (email, tid)
 );
+
+CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, departing_on) AS
+  SELECT D.email, T.tid, T.license, T.status, T.origin, T.seats, T.departing_on
+  FROM Trips T
+  JOIN Cars C ON T.license = C.license
+  JOIN Drivers D ON C.email = D.email;
+
