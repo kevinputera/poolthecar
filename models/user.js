@@ -1,65 +1,83 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
+const { SHA256 } = require('crypto-js');
 
 class User {
-  constructor(email, secret, name, gender, phone, profile_photo_url) {
+  constructor(
+    email,
+    secret,
+    name,
+    gender,
+    phone,
+    profilePhotoUrl,
+    createdOn,
+    updatedOn
+  ) {
     this.email = email;
-    // TODO: Hash secret and save it
     this.secret = secret;
     this.name = name;
     this.gender = gender;
     this.phone = phone;
-    this.profile_photo_url = profile_photo_url;
+    this.profilePhotoUrl = profilePhotoUrl;
+    this.createdOn = createdOn;
+    this.updatedOn = updatedOn;
   }
 
   async save() {
-    const client = await getClient();
-    await client.query({
+    const res = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Users (email, secret, name, gender, phone, profile_photo_url)
         VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING created_on, updated_on
       `,
       values: [
         this.email,
-        this.secret,
+        SHA256(this.secret).toString(),
         this.name,
         this.gender,
         this.phone,
-        this.profile_photo_url,
+        this.profilePhotoUrl,
       ],
     });
+    this.createdOn = res.rows[0].created_on;
+    this.updatedOn = res.rows[0].updated_on;
     return this;
   }
 
-  async delete() {
-    const client = await getClient();
-    await client.query({
+  async update() {
+    const res = await makeSingleQuery({
       text: /* sql */ `
-        DELETE FROM Users
+        UPDATE Users
+        SET name = $1, gender = $2,
+          phone = $3, profile_photo_url = $4, updated_on = NOW()
+        RETURNING updated_on
+      `,
+      values: [this.name, this.gender, this.phone, this.profilePhotoUrl],
+    });
+    this.updatedOn = res.rows[0].updated_on;
+    return this;
+  }
+
+  static async findByEmail(email) {
+    const users = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
+        FROM Users
         WHERE email = $1
       `,
-      values: [this.email],
+      values: [email],
     });
-    return this;
-  }
-
-  static async findAll() {
-    const client = await getClient();
-    const users = await client.query(
-      `
-      SELECT email, secret, name, gender, phone, profile_photo_url
-      FROM Users
-    `
-    );
-    return users.rows.map(
-      user =>
-        new User(
-          user.email,
-          user.secret,
-          user.name,
-          user.gender,
-          user.phone,
-          user.profile_photo_url
-        )
+    if (users.rows.length === 0) {
+      return null;
+    }
+    return new User(
+      users.rows[0].email,
+      users.rows[0].secret,
+      users.rows[0].name,
+      users.rows[0].gender,
+      users.rows[0].phone,
+      users.rows[0].profile_photo_url,
+      users.rows[0].created_on,
+      users.rows[0].updated_on
     );
   }
 }

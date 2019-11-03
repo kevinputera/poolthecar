@@ -1,0 +1,72 @@
+extends layouts/form.pug
+
+block form
+  h4.mb-3 Sign up
+  form(id="signup-form" action="/api/auth/new" method="POST")
+    .form-group
+      label(for="signup-email") Email address
+      input(
+        id="signup-email"
+        class="form-control"
+        name="email"
+        type="email"
+        placeholder="Enter email"
+      )
+    .form-group
+      label(for="signup-secret") Password
+      input(
+        id="signup-secret"
+        class="form-control"
+        name="secret"
+        type="password"
+        placeholder="Enter password"
+      )
+    .form-group
+      label(for="signup-name") Name
+      input(
+        id="signup-name"
+        class="form-control"
+        name="name"
+        type="text"
+        placeholder="Enter name"
+      )
+    .form-group
+      label(for="signup-gender") Gender
+      select(
+        id="signup-gender"
+        class="form-control"
+        name="gender"
+      )
+        option(value="male") Male
+        option(value="female") Female
+        option(value="non binary") Non binary
+    .form-group
+      label(for="signup-phone") Phone number
+      input(
+        id="signup-phone"
+        class="form-control"
+        name="phone"
+        type="tel"
+        placeholder="Enter phone number"
+      )
+    .form-group
+      label(for="signup-profile-photo") Profile photo url
+      //- |  #[small(class="font-italic text-muted") Optional]
+      input(
+        id="signup-profile-photo"
+        class="form-control"
+        name="profilePhotoUrl"
+        type="url"
+        placeholder="Enter profile photo url"
+      )
+    .d-flex
+      button(
+        id="signup-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Sign up
+      a(
+        class="ml-2 btn btn-secondary"
+        role="button"
+        href="/p/auth/login"
+      ) Log in

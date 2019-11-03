@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Bid {
   constructor(email, tid, status, value, created_on, updated_on) {
@@ -11,8 +11,7 @@ class Bid {
   }
 
   async save() {
-    const client = await getClient();
-    const bids = await client.query({
+    const bids = await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Bids (email, tid, status, value)
         VALUES ($1, $2, $3, $4)
@@ -26,8 +25,7 @@ class Bid {
   }
 
   async update() {
-    const client = await getClient();
-    bids = await client.query({
+    const bids = await makeSingleQuery({
       text: /* sql */ `
         UPDATE Bids SET status = $3, value = $4, updated_on = NOW()
         WHERE email = $1 AND tid = $2
@@ -40,8 +38,7 @@ class Bid {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Bids
         WHERE email = $1 AND tid = $2
@@ -52,8 +49,7 @@ class Bid {
   }
 
   static async findByDriver(email) {
-    const client = await getClient();
-    const bids = await client.query({
+    const bids = await makeSingleQuery({
       text: /* sql */ `
       SELECT email, tid, status, value, created_on, updated_on
       FROM Bids NATURAL JOIN Drivers
@@ -75,8 +71,7 @@ class Bid {
   }
 
   static async findByCustomer(email) {
-    const client = await getClient();
-    const bids = await client.query({
+    const bids = await makeSingleQuery({
       text: /* sql */ `
       SELECT email, tid, status, value, created_on, updated_on
       FROM Bids NATURAL JOIN Customers

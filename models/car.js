@@ -1,4 +1,4 @@
-const { getClient } = require('../db');
+const { makeSingleQuery } = require('../db');
 
 class Car {
   constructor(license, email, model, seats, manufacturedOn) {
@@ -10,8 +10,7 @@ class Car {
   }
 
   async save() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         INSERT INTO Cars (license, email, model, seats, manufactured_on)
         VALUES ($1, $2, $3, $4, $5)
@@ -28,8 +27,7 @@ class Car {
   }
 
   async delete() {
-    const client = await getClient();
-    await client.query({
+    await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Cars
         WHERE license = $1
@@ -39,16 +37,16 @@ class Car {
     return this;
   }
 
-  static async findByDriver(driver) {
-    const client = await getClient();
-    const driverEmail = driver.email;
-    const cars = await client.query({
+  static async findByDriver(email, page, limit) {
+    const cars = await makeSingleQuery({
       text: /* sql */ `
       SELECT license, email, model, seats, manufactured_on
       FROM Cars
-      WHERE email = ($1)
+      WHERE email = $1
+      LIMIT  $2
+      OFFSET $3
       `,
-      values: [driverEmail],
+      values: [email, limit, (page - 1) * limit],
     });
     return cars.rows.map(
       car =>
@@ -60,6 +58,26 @@ class Car {
           car.manufactured_on
         )
     );
+  }
+
+  static async findByLicense(license) {
+    const cars = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT license, email, model, seats, manufactured_on
+      FROM Cars
+      WHERE license = $1
+      `,
+      values: [license],
+    });
+
+    const car = new Car(
+      cars.rows[0].license,
+      cars.rows[0].email,
+      cars.rows[0].model,
+      cars.rows[0].seats,
+      cars.rows[0].manufactured_on
+    );
+    return car;
   }
 }
 

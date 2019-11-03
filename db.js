@@ -16,4 +16,8 @@ async function getClient() {
   return await pool.connect();
 }
 
-module.exports = { getClient };
+async function makeSingleQuery(query) {
+  return await pool.query(query);
+}
+
+module.exports = { getClient, makeSingleQuery };
