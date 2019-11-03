@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { address } = req.query;
+  const { email } = req.session;
 
   let tripsWithStops;
   if (address) {
@@ -14,11 +15,12 @@ router.get('/', async (req, res) => {
     tripsWithStops = await Trip.findAllCreatedWithStops();
   }
 
-  const isDriver = await checkIsDriver(req.session.email);
+  const isDriver = await checkIsDriver(email);
 
   res.render('browse', {
     title: 'Browse',
     query: req.query,
+    isLoggedIn: true,
     isDriver,
     tripsWithStops,
   });

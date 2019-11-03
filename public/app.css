@@ -10,3 +10,13 @@
 .app-sidebar-controls > * {
   margin-top: 5px;
 }
+
+.table-button {
+  display: inline-block;
+  color: #0000ff;
+  cursor: pointer;
+}
+
+.table-button:hover {
+  text-decoration: underline;
+}

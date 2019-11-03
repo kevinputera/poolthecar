@@ -1,0 +1,40 @@
+extends layouts/form.pug
+
+append scripts
+  script(src="/updateBookmark.js")
+
+block form
+  h4.mb-3 Update bookmark
+  form#update-bookmark-form
+    .form-group
+      label(for="bookmark-name") Bookmark name
+      input(
+        id="bookmark-name"
+        class="form-control"
+        readonly
+        name="name"
+        value=bookmark.name
+        type="text"
+        placeholder="Enter bookmark name"
+      )
+    .form-group
+      label(for="bookmark-address") Bookmark address
+      input(
+        id="bookmark-address"
+        class="form-control"
+        name="address"
+        value=bookmark.address
+        type="text"
+        placeholder="Enter bookmark address"
+      )
+    .d-flex
+      button(
+        id="update-bookmark-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Update
+      a(
+        class="ml-2 btn btn-secondary"
+        role="button"
+        href="/p/bookmarks"
+      ) Back
