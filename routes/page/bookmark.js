@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 
   const isDriver = await checkIsDriver(email);
 
-  res.render('bookmarks', {
+  res.render('bookmark/bookmarks', {
     title: 'Bookmarks',
     query: req.query,
     isDriver,
@@ -26,15 +26,18 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/new', async (req, res) => {
-  res.render('newBookmark', { title: 'New bookmark' });
+  const isDriver = await checkIsDriver(email);
+  res.render('bookmark/newBookmark', { title: 'New bookmark', isDriver });
 });
 
 router.get('/:name/update', async (req, res) => {
   const { email } = req.session;
   const { name } = req.params;
   const bookmark = await Bookmark.findByEmailAndName(email, name);
-  res.render('updateBookmark', {
+  const isDriver = await checkIsDriver(email);
+  res.render('bookmark/updateBookmark', {
     title: 'Update bookmark',
+    isDriver,
     bookmark,
   });
 });

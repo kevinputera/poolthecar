@@ -1,0 +1,53 @@
+extends ../layouts/appTable.pug
+
+append scripts
+  script(src="/scripts/cars.js")
+
+block header
+  div(class="d-flex my-1")
+    form(id="cars-filter-form" class="flex-grow-1")
+      div(class="d-flex flex-row")
+        input(
+          class="form-control flex-grow-1"
+          type="text"
+          name="search"
+          value=(search || "")
+          placeholder="Search for license or model"
+        )
+        button(
+          id="cars-filter-button"
+          class="ml-1 btn btn-primary flex-shrink-0" 
+          type="submit"
+        ) Search
+    a(
+      id="cars-add-button"
+      class="ml-1 btn btn-primary flex-shrink-0"
+      href="/p/cars/new"
+    ) New car
+
+block table
+  table(class="table table-hover table-bordered table-striped")
+    thead
+      th License
+      th Model
+      th #Seats
+      th Year
+      th
+    tbody
+      each car in cars 
+        tr
+          td= car.license
+          td= car.model
+          td= car.seats
+          td= car.manufacturedOn
+          td
+            a(
+              href="/p/cars/" + encodeURIComponent(car.license) + "/delete"
+              class="cars-delete-button"
+              for-license=car.license
+            ) Delete
+            a(
+              class="ml-2"
+              href="/p/cars/" + encodeURIComponent(car.license) + "/update"
+            ) Update
+    

@@ -1,19 +1,17 @@
-extends layouts/appForm.pug
+extends ../layouts/appForm.pug
 
 append scripts
-  script(src="/updateBookmark.js")
+  script(src="/scripts/newBookmark.js")
 
 block form
-  h4.mb-3 Update bookmark
-  form#update-bookmark-form
+  h4.mb-3 New bookmark
+  form#new-bookmark-form
     .form-group
       label(for="bookmark-name") Bookmark name
       input(
         id="bookmark-name"
         class="form-control"
-        readonly
         name="name"
-        value=bookmark.name
         type="text"
         placeholder="Enter bookmark name"
       )
@@ -23,16 +21,15 @@ block form
         id="bookmark-address"
         class="form-control"
         name="address"
-        value=bookmark.address
         type="text"
         placeholder="Enter bookmark address"
       )
     .d-flex
       button(
-        id="update-bookmark-button"
+        id="new-bookmark-button"
         class="btn btn-primary"
         type="submit"
-      ) Update
+      ) Create
       a(
         class="ml-2 btn btn-secondary"
         role="button"

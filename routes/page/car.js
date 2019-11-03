@@ -16,7 +16,6 @@ router.get('/', async (req, res) => {
     +page,
     CARS_PAGE_LIMIT
   );
-  const isDriver = await checkIsDriver(email);
 
   let nextPageUrl;
   let prevPageUrl;
@@ -28,7 +27,9 @@ router.get('/', async (req, res) => {
     prevPageUrl = `/p/cars?page=${+page - 1}`;
   }
 
-  res.render('cars', {
+  const isDriver = await checkIsDriver(email);
+
+  res.render('car/cars', {
     title: 'Cars',
     hasPrevPage: +page !== 1,
     hasNextPage,
@@ -41,14 +42,17 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/new', async (req, res) => {
-  res.render('newCar', { title: 'New car' });
+  const isDriver = await checkIsDriver(email);
+  res.render('car/newCar', { title: 'New car', isDriver });
 });
 
 router.get('/:license/update', async (req, res) => {
   const { license } = req.params;
   const car = await Car.findByLicense(license);
-  res.render('updateCar', {
+  const isDriver = await checkIsDriver(email);
+  res.render('car/updateCar', {
     title: 'Update car',
+    isDriver,
     car,
   });
 });
