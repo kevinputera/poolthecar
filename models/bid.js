@@ -103,7 +103,7 @@ class Bid {
     return Promise.all(bidsWithTrip);
   }
 
-  static async findByCustomerAndAddressWithTrip(email, address) {
+  static async findAllByCustomerAndAddressWithTrip(email, address) {
     let bids = await this.findAllByEmail(email);
     const bidsWithTripPromise = bids.map(async bid => {
       const trip = await Trip.findByTidAndStopAddress(bid.tid, address);

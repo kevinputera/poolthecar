@@ -20,3 +20,7 @@
 .table-button:hover {
   text-decoration: underline;
 }
+
+.logout-btn {
+  margin-top: 50px;
+}

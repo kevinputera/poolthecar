@@ -103,7 +103,7 @@ class Trip {
     return trip;
   }
 
-  static async findByDriverEmail(driverEmail) {
+  static async findAllByDriverEmail(driverEmail) {
     const res = await makeSingleQuery({
       text: /* sql */ `
       SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on
