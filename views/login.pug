@@ -1,8 +1,11 @@
 extends layouts/authForm.pug
 
+append scripts
+  script(src="/login.js")
+
 block form
   h4.mb-3 Log in
-  form(action="/api/auth/login" method="POST")
+  form#login-form
     .form-group
       label(for="login-email") Email address
       input(
@@ -22,7 +25,11 @@ block form
         placeholder="Enter password"
       )
     .d-flex
-      button(class="btn btn-primary" type="submit") Log in
+      button(
+        id="login-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Log in
       a(
         class="ml-2 btn btn-secondary"
         role="button"
