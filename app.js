@@ -10,6 +10,7 @@ const { browsePageRoutes } = require('./routes/page/browse');
 const { bidPageRoutes } = require('./routes/page/bids');
 const { tripPageRoutes } = require('./routes/page/trips');
 const { bookmarkPageRoutes } = require('./routes/page/bookmark');
+const { carPageRoutes } = require('./routes/page/car');
 
 const { authenticationRoutes } = require('./routes/api/authentication');
 const { userRoutes } = require('./routes/api/user');
@@ -54,6 +55,7 @@ app.use('/p/account', requireAuthentication, accountPageRoutes);
 app.use('/p/bids', requireAuthentication, bidPageRoutes);
 app.use('/p/trips', requireAuthentication, tripPageRoutes);
 app.use('/p/bookmarks', requireAuthentication, bookmarkPageRoutes);
+app.use('/p/cars', requireAuthentication, carPageRoutes);
 app.use('/api/trips', requireAuthentication, tripRoutes);
 app.use('/api/users', requireAuthentication, userRoutes);
 app.use('/api/bookmarks', requireAuthentication, bookmarkRoutes);

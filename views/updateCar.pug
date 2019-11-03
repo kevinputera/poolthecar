@@ -1,0 +1,60 @@
+extends layouts/appForm.pug
+
+append scripts
+  script(src="/updateCar.js")
+
+block form
+  h4.mb-3 Update car
+  form#update-car-form
+    .form-group
+      label(for="car-license") License
+      input(
+        id="car-license"
+        class="form-control"
+        readonly
+        name="license"
+        value=car.license
+        type="text"
+        placeholder="Enter license"
+      )
+    .form-group
+      label(for="car-model") Model
+      input(
+        id="car-model"
+        class="form-control"
+        name="model"
+        value=car.model
+        type="text"
+        placeholder="Enter model"
+      )
+    .form-group
+      label(for="car-seats") No. of seats
+      input(
+        id="car-seats"
+        class="form-control"
+        name="seats"
+        value=car.seats
+        type="number"
+        placeholder="Enter no. of seats"
+      )
+    .form-group
+      label(for="car-year") Year of manufacture
+      input(
+        id="car-year"
+        class="form-control"
+        name="manufacturedOn"
+        value=car.manufacturedOn
+        type="number"
+        placeholder="Enter year of manufacture"
+      )
+    .d-flex
+      button(
+        id="update-car-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Update
+      a(
+        class="ml-2 btn btn-secondary"
+        role="button"
+        href="/p/cars"
+      ) Back
