@@ -10,6 +10,7 @@ router.get('/', async (req, res) => {
   const isDriver = await checkIsDriver(email);
   res.render('account', {
     title: 'Account',
+    isLoggedIn: true,
     isDriver,
     currentUser,
   });

@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
   res.render('browse', {
     title: 'Browse',
     query: req.query,
+    isLoggedIn: true,
     isDriver,
     tripsWithStops,
   });
