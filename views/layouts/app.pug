@@ -12,8 +12,14 @@ block body
       div(class="app-sidebar col-md-2 py-2")
         div(class="d-flex flex-column justify-content-between h-100")
           nav(class="nav nav-pills flex-column")
-            a(class="nav-link" href="/p/trips") Browse
-            a(class="nav-link" href="/p/account") Manage account
+            a(
+              class="nav-link" + (title === "Browse" ? " active" : "")
+              href="/p/browse"
+            ) Browse
+            a(
+              class="nav-link" + (title === "Account" ? " active" : "")
+              href="/p/account"
+            ) Manage account
           button(id="logout-button" class="btn btn-danger") Log out
-      div(class="col-md-10 py-2")
+      div(class="col-md-10")
         block content

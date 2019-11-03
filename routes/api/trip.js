@@ -1,7 +1,6 @@
 const express = require('express');
 const { Review } = require('../../models/review');
 const { Trip } = require('../../models/trip');
-const { Stop } = require('../../models/stop');
 const {
   ok,
   badRequestMessage,
@@ -76,21 +75,6 @@ router.get('/:tid/reviews', async (req, res) => {
   try {
     const reviews = await Review.findByTrip(tid);
     ok(res, reviews);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.get('/', async (req, res) => {
-  const address = req.query.address;
-  try {
-    if (!address) {
-      const trips = await Trip.findAllCreatedWithStops();
-      ok(res, trips);
-    } else {
-      const trips = await Trip.findByAddressWithStops(address);
-      ok(res, trips);
-    }
   } catch (error) {
     internalError(res, error);
   }

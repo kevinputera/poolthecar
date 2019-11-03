@@ -25,7 +25,7 @@ class Trip {
   async save() {
     const trips = await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Trips (tid,license,status,origin,seats,departing_on)
+        INSERT INTO Trips (tid, license, status, origin, seats, departing_on)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING created_on, updated_on;
       `,
@@ -44,28 +44,26 @@ class Trip {
   }
 
   async update() {
-    this.updatedOn = new Date();
-    await makeSingleQuery({
+    const res = await makeSingleQuery({
       text: /*sql*/ `
         UPDATE  Trips 
-        SET     license = $2, 
-                status = $3, 
-                origin = $4, 
-                seats = $5, 
-                departing_on = $6, 
-                updated_on = $7
+        SET     status = $2,
+                origin = $3,
+                seats = $4,
+                departing_on = $5,
+                updated_on = NOW()
         WHERE   tid = $1
+        RETURNING updated_on
         `,
       values: [
         this.tid,
-        this.license,
         this.status,
         this.origin,
         this.seats,
         this.departingOn,
-        this.updatedOn,
       ],
     });
+    this.updatedOn = res.rows[0].updated_on;
     return this;
   }
 
@@ -107,10 +105,47 @@ class Trip {
 
   static async findAllCreatedWithStops() {
     const res = await makeSingleQuery(/* sql */ `
-      SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on, min_price, address
-      FROM Trips NATURAL JOIN Stops
-      WHERE Trips.status = 'created'
+      SELECT T.tid, T.license, T.status, T.origin, T.seats,
+        T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
+      FROM Trips T NATURAL JOIN Stops S
+      WHERE T.status = 'created'
     `);
+    const tripsMapping = {};
+    res.rows.forEach(row => {
+      if (tripsMapping[row.tid]) {
+        tripsMapping[row.tid].stops.push(
+          new Stop(row.min_price, row.address, row.tid)
+        );
+      } else {
+        const trip = new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        );
+        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
+        tripsMapping[row.tid] = trip;
+      }
+    });
+    return Object.values(tripsMapping);
+  }
+
+  static async findAllCreatedByAddressWithStops(address) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT  T.tid, T.license, T.status, T.origin, T.seats,
+          T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
+        FROM    Trips T NATURAL JOIN Stops S
+        WHERE   LOWER(S.address) LIKE $1
+        AND     T.status = 'created'
+      `,
+      values: ['%' + address.toLowerCase() + '%'],
+    });
+
     const tripsMapping = {};
     res.rows.forEach(row => {
       if (tripsMapping[row.tid]) {
@@ -146,40 +181,6 @@ class Trip {
       `,
       values: [driverEmail],
     });
-    const tripsMapping = {};
-    res.rows.forEach(row => {
-      if (tripsMapping[row.tid]) {
-        tripsMapping[row.tid].stops.push(
-          new Stop(row.min_price, row.address, row.tid)
-        );
-      } else {
-        const trip = new Trip(
-          row.tid,
-          row.license,
-          row.status,
-          row.origin,
-          row.seats,
-          row.departing_on,
-          row.created_on,
-          row.updated_on
-        );
-        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid] = trip;
-      }
-    });
-    return Object.values(tripsMapping);
-  }
-
-  static async findByAddressWithStops(address) {
-    const res = await makeSingleQuery({
-      text: /* sql */ `
-        SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on, min_price, address
-        FROM    Trips NATURAL JOIN Stops
-        WHERE   address LIKE $1
-      `,
-      values: ['%' + address + '%'],
-    });
-
     const tripsMapping = {};
     res.rows.forEach(row => {
       if (tripsMapping[row.tid]) {
