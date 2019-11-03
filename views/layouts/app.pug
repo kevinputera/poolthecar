@@ -24,6 +24,10 @@ block body
               class="nav-link" + (title === "Biddings" ? " active" : "")
               href="/p/bids"
             ) Manage biddings
+            a(
+              class="nav-link" + (title === "Trips" ? " active" : "")
+              href="/p/trips"
+            ) Manage Trips
           .app-sidebar-controls
             if !isDriver
               button(

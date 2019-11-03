@@ -103,6 +103,33 @@ class Trip {
     return trip;
   }
 
+  static async findByDriverEmail(driverEmail) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on
+      FROM DriverTrips
+      WHERE driver_email = $1
+      `,
+      values: [driverEmail],
+    });
+    if (res.rows.length < 1) {
+      return null;
+    }
+    return res.rows.map(
+      row =>
+        new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        )
+    );
+  }
+
   static async findAllCreatedWithStops() {
     const res = await makeSingleQuery(/* sql */ `
       SELECT T.tid, T.license, T.status, T.origin, T.seats,
@@ -140,10 +167,47 @@ class Trip {
         SELECT  T.tid, T.license, T.status, T.origin, T.seats,
           T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
         FROM    Trips T NATURAL JOIN Stops S
-        WHERE   LOWER(S.address) LIKE $1
+        WHERE   LOWER(S.address) LIKE $1 OR LOWER(T.origin) LIKE $1
         AND     T.status = 'created'
       `,
       values: ['%' + address.toLowerCase() + '%'],
+    });
+
+    const tripsMapping = {};
+    res.rows.forEach(row => {
+      if (tripsMapping[row.tid]) {
+        tripsMapping[row.tid].stops.push(
+          new Stop(row.min_price, row.address, row.tid)
+        );
+      } else {
+        const trip = new Trip(
+          row.tid,
+          row.license,
+          row.status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.created_on,
+          row.updated_on
+        );
+        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
+        tripsMapping[row.tid] = trip;
+      }
+    });
+    return Object.values(tripsMapping);
+  }
+
+  static async findByDriverEmailAndAddressWithStops(driverEmail, address) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT  T.tid, T.license, T.status, T.origin, T.seats,
+          T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
+        FROM    DriverTrips T
+        NATURAL JOIN Stops S
+        WHERE   T.driver_email = $1
+          AND (LOWER(S.address) LIKE $2 OR LOWER(T.origin) LIKE $2)
+      `,
+      values: [driverEmail, '%' + address.toLowerCase() + '%'],
     });
 
     const tripsMapping = {};
@@ -174,10 +238,9 @@ class Trip {
     const res = await makeSingleQuery({
       text: /*sql*/ `
       SELECT tid, T.license, status, origin, T.seats, departing_on, created_on, updated_on, min_price, address
-      FROM (Trips T JOIN Cars C ON T.license = C.license)
-      NATURAL JOIN Drivers D
+      FROM DriverTrips T
       NATURAL JOIN Stops S
-      WHERE D.email = $1
+      WHERE T.driver_email = $1
       `,
       values: [driverEmail],
     });
@@ -208,11 +271,11 @@ class Trip {
   static async findByTidAndStopAddress(tid, address) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-      SELECT T.tid, T.license, T.status, T.origin, T.seats,
-      T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
-      FROM Trips T
-      JOIN Stops S ON T.tid = S.tid
-      WHERE T.tid = $1 AND (LOWER(S.address) LIKE $2 OR LOWER(T.origin) LIKE $2)
+      SELECT  T.tid, T.license, T.status, T.origin, T.seats,
+        T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
+      FROM    Trips T
+      JOIN    Stops S ON T.tid = S.tid
+      WHERE   T.tid = $1 AND (LOWER(S.address) LIKE $2 OR LOWER(T.origin) LIKE $2)
       `,
       values: [tid, '%' + address.toLowerCase() + '%'],
     });

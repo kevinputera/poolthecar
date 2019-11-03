@@ -1,6 +1,5 @@
 const express = require('express');
 const { Bid } = require('../../models/bid');
-const { Trip } = require('../../models/trip');
 
 const router = express.Router();
 
