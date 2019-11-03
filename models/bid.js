@@ -2,9 +2,10 @@ const { makeSingleQuery } = require('../db');
 const { Trip } = require('./trip');
 
 class Bid {
-  constructor(email, tid, status, value, created_on, updated_on) {
+  constructor(email, tid, address, status, value, created_on, updated_on) {
     this.email = email;
     this.tid = tid;
+    this.address = address;
     this.status = status;
     this.value = value;
     this.created_on = created_on;
@@ -14,11 +15,11 @@ class Bid {
   async save() {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Bids (email, tid, status, value)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO Bids (email, tid, address, status, value)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING created_on, updated_on
       `,
-      values: [this.email, this.tid, this.status, this.value],
+      values: [this.email, this.tid, this.address, this.status, this.value],
     });
     this.created_on = bids.rows[0].created_on;
     this.updated_on = bids.rows[0].updated_on;
@@ -28,11 +29,11 @@ class Bid {
   async update() {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        UPDATE Bids SET status = $3, value = $4, updated_on = NOW()
-        WHERE email = $1 AND tid = $2
+        UPDATE Bids SET status = $4, value = $5, updated_on = NOW()
+        WHERE email = $1 AND tid = $2 AND address = $3
         RETURNING created_on, updated_on
       `,
-      values: [this.email, this.tid, this.status, this.value],
+      values: [this.email, this.tid, this.address, this.status, this.value],
     });
     this.updated_on = bids.rows[0].updated_on;
     return this;
@@ -42,33 +43,11 @@ class Bid {
     await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Bids
-        WHERE email = $1 AND tid = $2
+        WHERE email = $1 AND tid = $2 AND address = $3
       `,
-      values: [this.email, this.tid],
+      values: [this.email, this.tid, this.address],
     });
     return this;
-  }
-
-  static async findByDriver(email) {
-    const bids = await makeSingleQuery({
-      text: /* sql */ `
-      SELECT email, tid, status, value, created_on, updated_on
-      FROM Bids NATURAL JOIN Drivers
-      WHERE email = $1
-    `,
-      values: [email],
-    });
-    return bids.rows.map(
-      bid =>
-        new Bid(
-          bid.email,
-          bid.tid,
-          bid.status,
-          bid.value,
-          bid.created_on,
-          bid.updated_on
-        )
-    );
   }
 
   static async findAllByEmail(email) {
@@ -80,15 +59,19 @@ class Bid {
     `,
       values: [email],
     });
+    if (bids.rows.length < 1) {
+      return null;
+    }
     return bids.rows.map(
-      bid =>
+      row =>
         new Bid(
-          bid.email,
-          bid.tid,
-          bid.status,
-          bid.value,
-          bid.created_on,
-          bid.updated_on
+          row.email,
+          row.tid,
+          row.address,
+          row.status,
+          row.value,
+          row.created_on,
+          row.updated_on
         )
     );
   }

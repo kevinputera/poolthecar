@@ -28,9 +28,10 @@ block content
         th #Seats
         th Departing on
       tbody
-        each trip in trips 
-          tr
-            td= trip.origin
-            td= trip.status
-            td= trip.seats
-            td= trip.departingOn
+        if !!trips
+          each trip in trips 
+            tr
+              td= trip.origin
+              td= trip.status
+              td= trip.seats
+              td= trip.departingOn
