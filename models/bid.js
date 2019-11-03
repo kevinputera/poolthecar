@@ -49,11 +49,12 @@ class Bid {
     return this;
   }
 
-  static async findByUserAndStop(email, tid, address) {
+  static async findByEmailAndTidAndAddress(email, tid, address) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        SELECT Bids.email, tid, address, status, value, Bids.created_on, Bids.updated_on
-        WHERE Bids.email = $1 AND tid = $2 AND address = $3
+        SELECT email, tid, address, status, value, created_on, updated_on
+        FROM Bids
+        WHERE email = $1 AND tid = $2 AND address = $3
       `,
       values: [email, tid, address],
     });
@@ -69,32 +70,6 @@ class Bid {
       bid.value,
       bid.created_on,
       bid.updated_on
-    );
-  }
-
-  static async findBidByTripDriverStatus(tid, email, status) {
-    const bids = await makeSingleQuery({
-      text: /* sql */ `
-        SELECT Bids.email, Bids.tid, address, Bids.status, value, Bids.created_on, Bids.updated_on
-        FROM Bids
-        JOIN Trips ON Bids.tid = Trips.tid
-        JOIN Cars ON Trips.license = Cars.license
-        JOIN Drivers ON Cars.email = Drivers.email
-        WHERE Bids.tid = $1 AND Drivers.email = $2 AND Bids.status = $3
-      `,
-      values: [tid, email, status],
-    });
-    return bids.rows.map(
-      bid =>
-        new Bid(
-          bid.email,
-          bid.tid,
-          bid.address,
-          bid.status,
-          bid.value,
-          bid.created_on,
-          bid.updated_on
-        )
     );
   }
 }

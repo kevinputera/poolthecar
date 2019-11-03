@@ -18,7 +18,7 @@ router.post('/:tid/reviews', async (req, res) => {
   }
 });
 
-router.put('/:tid/reviews/', async (req, res) => {
+router.put('/:tid/reviews', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;
   const { score, content } = req.body;
@@ -38,7 +38,7 @@ router.put('/:tid/reviews/', async (req, res) => {
 });
 
 // TODO: Remove this
-router.get('/:tid/reviews/', async (req, res) => {
+router.get('/:tid/reviews', async (req, res) => {
   const { tid } = req.params;
   const { email } = req.session;
   try {
@@ -53,7 +53,7 @@ router.get('/:tid/reviews/', async (req, res) => {
   }
 });
 
-router.delete('/:tid/reviews/', async (req, res) => {
+router.delete('/:tid/reviews', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;
   try {
