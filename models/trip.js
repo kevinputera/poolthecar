@@ -108,9 +108,8 @@ class Trip {
     return Objects.values(tripsMapping);
   }
 
-  static async findByDriverWithCarAndStops(driver) {
+  static async findByDriverEmailWithCarAndStops(driverEmail) {
     const client = await getClient();
-    const driverEmail = driver.email;
     /*
      * For now, I am returning just the car license. For future if we want we
      * can actually include all the car details
