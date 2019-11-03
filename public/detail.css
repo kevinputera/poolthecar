@@ -1,0 +1,39 @@
+.detail-content {
+  margin-top: 30px;
+}
+
+.field-title {
+  font-weight: bold;
+  margin-bottom: 0px;
+}
+
+.field-value {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.field-inline-container {
+  display: block;
+  margin: auto;
+  padding-top: 15px;
+}
+
+.field-title-inline {
+  text-align: center;
+  display: inline;
+  font-weight: bold;
+}
+
+.field-value-inline {
+  display: inline;
+}
+
+.user-profile-photo {
+  width: 150px;
+  height: 150px;
+  margin: auto;
+  display: block;
+  border-radius: 120px;
+  object-position: 50% 50%;
+  object-fit: cover;
+}

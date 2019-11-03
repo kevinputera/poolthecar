@@ -1,0 +1,27 @@
+extends layouts/app.pug
+
+append styles
+  link(rel="stylesheet" href="/detail.css")
+
+block content
+  .detail-content
+  div.container
+    div.row
+      div.col-md
+        img(
+          class="user-profile-photo"
+          src='https://avatars2.githubusercontent.com/u/46835051?s=460&v=4'
+          alt="User profile photo"
+        )
+        div.field-inline-container
+          p.field-title-inline Driver Name: 
+          p.field-value-inline Bob
+      div.col-md
+        p.field-title Origin
+        p.field-value Somewhere
+        p.field-title Seats
+        p.field-value 3
+        p.field-title Departing On
+        p.field-value 11:00
+        p.field-title Trip Status
+        p.field-value Created
