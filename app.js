@@ -3,11 +3,22 @@ const session = require('express-session');
 const { join } = require('path');
 const { requireAuthentication } = require('./middlewares/authentication');
 
-const { authenticationRoutes } = require('./routes/authentication');
-const { userRoutes } = require('./routes/user');
-const { tripRoutes } = require('./routes/trip');
-const { carRoutes } = require('./routes/car');
-const { messageRoutes } = require('./routes/message');
+const { authenticationPageRoutes } = require('./routes/page/authentication');
+const { accountPageRoutes } = require('./routes/page/account');
+const { browsePageRoutes } = require('./routes/page/browse');
+const { bidPageRoutes } = require('./routes/page/bids');
+const { tripPageRoutes } = require('./routes/page/trips');
+const { bookmarkPageRoutes } = require('./routes/page/bookmark');
+
+const { authenticationRoutes } = require('./routes/api/authentication');
+const { userRoutes } = require('./routes/api/user');
+const { bookmarkRoutes } = require('./routes/api/bookmark');
+const { tripRoutes } = require('./routes/api/trip');
+const { carRoutes } = require('./routes/api/car');
+const { messageRoutes } = require('./routes/api/message');
+const { driverRoutes } = require('./routes/api/driver');
+
+const { permanentRedirect } = require('./utils/response');
 
 // Load env variables
 require('dotenv').config({ path: join(__dirname, '.env') });
@@ -24,16 +35,30 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 
-// Authentication
-app.use('/', authenticationRoutes);
-app.use(requireAuthentication);
+// Permanent redirection from / to /p/browse
+app.get('/', (req, res) => {
+  permanentRedirect(res, '/p/browse');
+});
 
-app.use('/users', userRoutes);
-app.use('/trips', tripRoutes);
-app.use('/cars', carRoutes);
-app.use('/messages', messageRoutes);
+// Authentication
+app.use('/p/auth', authenticationPageRoutes);
+app.use('/api/auth', authenticationRoutes);
+
+// Block of all the routes below from unauthenticated users
+app.use('/p/browse', requireAuthentication, browsePageRoutes);
+app.use('/p/account', requireAuthentication, accountPageRoutes);
+app.use('/p/bids', requireAuthentication, bidPageRoutes);
+app.use('/p/trips', requireAuthentication, tripPageRoutes);
+app.use('/p/bookmarks', requireAuthentication, bookmarkPageRoutes);
+app.use('/api/trips', requireAuthentication, tripRoutes);
+app.use('/api/users', requireAuthentication, userRoutes);
+app.use('/api/bookmarks', requireAuthentication, bookmarkRoutes);
+app.use('/api/cars', requireAuthentication, carRoutes);
+app.use('/api/messages', requireAuthentication, messageRoutes);
+app.use('/api/drivers', requireAuthentication, driverRoutes);
 
 app.listen(process.env.APP_PORT, () =>
   console.log(`App started on port ${process.env.APP_PORT}!`)

@@ -1,0 +1,82 @@
+extends layouts/app.pug
+
+append scripts
+  script(src="/account.js")
+
+append styles
+  link(rel="stylesheet" href="/account.css")
+
+block content
+  .user-details
+    img(
+      class="user-profile-photo"
+      src=currentUser.profilePhotoUrl
+      alt="User profile photo"
+    )
+    form(id="user-update-form" class="mt-4")
+      .form-group
+        label(for="user-email") Email address
+        input(
+          id="user-email"
+          class="form-control"
+          name="email"
+          type="email"
+          readonly
+          value=currentUser.email
+          placeholder="Enter email"
+        )
+      .form-group
+        label(for="user-name") Name
+        input(
+          id="user-name"
+          class="form-control"
+          name="name"
+          type="text"
+          value=currentUser.name
+          placeholder="Enter name"
+        )
+      .form-group
+        label(for="user-gender") Gender
+        select(
+          id="user-gender"
+          class="form-control"
+          name="gender"
+        )
+          option(
+            value="male"
+            selected=(currentUser.gender === "male")
+          ) Male
+          option(
+            value="female"
+            selected=(currentUser.gender === "female")
+          ) Female
+          option(
+            value="non binary"
+            selected=(currentUser.gender === "non binary")
+          ) Non binary
+      .form-group
+        label(for="user-phone") Phone number
+        input(
+          id="user-phone"
+          class="form-control"
+          name="phone"
+          type="tel"
+          value=currentUser.phone
+          placeholder="Enter phone number"
+        )
+      .form-group
+        label(for="user-profile-photo") Profile photo url
+        //- |  #[small(class="font-italic text-muted") Optional]
+        input(
+          id="user-profile-photo"
+          class="form-control"
+          name="profilePhotoUrl"
+          type="url"
+          value=currentUser.profilePhotoUrl
+          placeholder="Enter profile photo url"
+        )
+      button(
+        id="user-update-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Update

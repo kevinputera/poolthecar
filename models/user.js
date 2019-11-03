@@ -43,14 +43,17 @@ class User {
     return this;
   }
 
-  async delete() {
-    await makeSingleQuery({
+  async update() {
+    const res = await makeSingleQuery({
       text: /* sql */ `
-        DELETE FROM Users
-        WHERE email = $1
+        UPDATE Users
+        SET name = $1, gender = $2,
+          phone = $3, profile_photo_url = $4, updated_on = NOW()
+        RETURNING updated_on
       `,
-      values: [this.email],
+      values: [this.name, this.gender, this.phone, this.profilePhotoUrl],
     });
+    this.updatedOn = res.rows[0].updated_on;
     return this;
   }
 
@@ -75,26 +78,6 @@ class User {
       users.rows[0].profile_photo_url,
       users.rows[0].created_on,
       users.rows[0].updated_on
-    );
-  }
-
-  static async findAll() {
-    const users = await makeSingleQuery(/* sql */ `
-      SELECT email, secret, name, gender, phone, profile_photo_url, created_on, updated_on
-      FROM Users
-    `);
-    return users.rows.map(
-      user =>
-        new User(
-          user.email,
-          user.secret,
-          user.name,
-          user.gender,
-          user.phone,
-          user.profile_photo_url,
-          user.created_on,
-          user.updated_on
-        )
     );
   }
 }

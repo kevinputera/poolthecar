@@ -1,4 +1,5 @@
 const { makeSingleQuery } = require('../db');
+const { Trip } = require('./trip');
 
 class Bid {
   constructor(email, tid, address, status, value, created_on, updated_on) {
@@ -49,28 +50,55 @@ class Bid {
     return this;
   }
 
-  static async findByEmailAndTidAndAddress(email, tid, address) {
+  static async findAllByEmail(email) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        SELECT email, tid, address, status, value, created_on, updated_on
-        FROM Bids
-        WHERE email = $1 AND tid = $2 AND address = $3
-      `,
-      values: [email, tid, address],
+      SELECT email, tid, status, value, Bids.created_on, Bids.updated_on
+      FROM Bids
+      WHERE email = $1
+    `,
+      values: [email],
     });
     if (bids.rows.length < 1) {
       return null;
     }
-    const bid = bids.rows[0];
-    return new Bid(
-      bid.email,
-      bid.tid,
-      bid.address,
-      bid.status,
-      bid.value,
-      bid.created_on,
-      bid.updated_on
+    return bids.rows.map(
+      row =>
+        new Bid(
+          row.email,
+          row.tid,
+          row.address,
+          row.status,
+          row.value,
+          row.created_on,
+          row.updated_on
+        )
     );
+  }
+
+  static async findAllByCustomerWithTrip(email) {
+    let bids = await this.findAllByEmail(email);
+    const bidsWithTrip = bids.map(async bid => {
+      const trip = await Trip.findByTid(bid.tid);
+      bid.trip = trip;
+      return bid;
+    });
+    return Promise.all(bidsWithTrip);
+  }
+
+  static async findAllByCustomerAndAddressWithTrip(email, address) {
+    let bids = await this.findAllByEmail(email);
+    const bidsWithTripPromise = bids.map(async bid => {
+      const trip = await Trip.findByTidAndStopAddress(bid.tid, address);
+      if (trip != null) {
+        bid.trip = trip;
+        return bid;
+      } else {
+        return null;
+      }
+    });
+    const bidsWithTrip = await Promise.all(bidsWithTripPromise);
+    return bidsWithTrip.filter(x => !!x);
   }
 }
 

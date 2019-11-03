@@ -1,0 +1,11 @@
+.user-details {
+  margin: 48px 120px;
+}
+
+.user-profile-photo {
+  width: 240px;
+  height: 240px;
+  border-radius: 120px;
+  object-position: 50% 50%;
+  object-fit: cover;
+}

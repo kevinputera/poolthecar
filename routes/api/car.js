@@ -1,6 +1,10 @@
 const express = require('express');
-const { Car } = require('../models/car.js');
-const { ok, badRequestMessage, internalError } = require('../utils/response');
+const { Car } = require('../../models/car.js');
+const {
+  ok,
+  badRequestMessage,
+  internalError,
+} = require('../../utils/response');
 
 const router = express.Router();
 

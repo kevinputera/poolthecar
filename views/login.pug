@@ -1,0 +1,37 @@
+extends layouts/authForm.pug
+
+append scripts
+  script(src="/login.js")
+
+block form
+  h4.mb-3 Log in
+  form#login-form
+    .form-group
+      label(for="login-email") Email address
+      input(
+        id="login-email"
+        class="form-control"
+        name="email"
+        type="email"
+        placeholder="Enter email"
+      )
+    .form-group
+      label(for="login-secret") Password
+      input(
+        id="login-secret"
+        class="form-control"
+        name="secret"
+        type="password"
+        placeholder="Enter password"
+      )
+    .d-flex
+      button(
+        id="login-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Log in
+      a(
+        class="ml-2 btn btn-secondary"
+        role="button"
+        href="/p/auth/signup"
+      ) Sign up

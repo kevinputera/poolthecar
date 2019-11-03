@@ -46,6 +46,14 @@ const internalErrorMessage = (res, message) => {
   });
 };
 
+const permanentRedirect = (res, url) => {
+  res.status(301).redirect(url);
+};
+
+const redirect = (res, url) => {
+  res.status(302).redirect(url);
+};
+
 module.exports = {
   ok,
   okMessage,
@@ -53,4 +61,6 @@ module.exports = {
   badRequestMessage,
   internalError,
   internalErrorMessage,
+  permanentRedirect,
+  redirect,
 };
