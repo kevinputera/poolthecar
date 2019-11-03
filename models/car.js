@@ -26,6 +26,18 @@ class Car {
     return this;
   }
 
+  async update() {
+    await makeSingleQuery({
+      text: /* sql */ `
+        UPDATE Cars
+        SET model = $1, seats = $2, manufactured_on = $3
+        WHERE license = $4
+      `,
+      values: [this.model, this.seats, this.manufacturedOn, this.license],
+    });
+    return this;
+  }
+
   async delete() {
     await makeSingleQuery({
       text: /* sql */ `
@@ -37,27 +49,46 @@ class Car {
     return this;
   }
 
-  static async findByDriver(email, page, limit) {
+  static async findAllByEmailAndSearchQuery(email, search, page, limit) {
     const cars = await makeSingleQuery({
       text: /* sql */ `
-      SELECT license, email, model, seats, manufactured_on
-      FROM Cars
-      WHERE email = $1
-      LIMIT  $2
-      OFFSET $3
+        SELECT license, email, model, seats, manufactured_on
+        FROM Cars
+        WHERE email = $1
+        AND (LOWER(license) LIKE $2 OR LOWER(model) LIKE $2)
+        LIMIT  $3
+        OFFSET $4
       `,
-      values: [email, limit, (page - 1) * limit],
+      values: [
+        email,
+        '%' + search.toLowerCase() + '%',
+        limit + 1,
+        (page - 1) * limit,
+      ],
     });
-    return cars.rows.map(
-      car =>
-        new Car(
-          car.license,
-          car.email,
-          car.model,
-          car.seats,
-          car.manufactured_on
-        )
-    );
+
+    let hasNextPage;
+    if (cars.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      cars: cars.rows
+        .slice(0, limit)
+        .map(
+          car =>
+            new Car(
+              car.license,
+              car.email,
+              car.model,
+              car.seats,
+              car.manufactured_on
+            )
+        ),
+    };
   }
 
   static async findByLicense(license) {
