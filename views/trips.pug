@@ -1,0 +1,36 @@
+extends layouts/app.pug
+
+append styles 
+  link(rel="stylesheet" href="/browse.css")
+
+block content
+  .browser-container
+    form(id="browse-filter-form" class="my-1")
+      div(class="d-flex flex-row")
+        input(
+          class="form-control flex-grow-1"
+          type="text"
+          name="address"
+          value=(query.address || "")
+          placeholder="Search stop address"
+        )
+        button(
+          id="browse-filter-button"
+          class="ml-1 btn btn-primary flex-shrink-0" 
+          type="submit"
+        ) Search
+        //- button(class="ml-1 btn btn-secondary flex-shrink-0") More filters
+      
+    table(class="table table-hover table-bordered table-striped")
+      thead
+        th Origin
+        th Status
+        th #Seats
+        th Departing on
+      tbody
+        each trip in trips 
+          tr
+            td= trip.origin
+            td= trip.status
+            td= trip.seats
+            td= trip.departingOn

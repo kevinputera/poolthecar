@@ -1,4 +1,5 @@
 const { makeSingleQuery } = require('../db');
+const { Trip } = require('./trip');
 
 class Bid {
   constructor(email, tid, status, value, created_on, updated_on) {
@@ -70,11 +71,11 @@ class Bid {
     );
   }
 
-  static async findByCustomer(email) {
+  static async findAllByEmail(email) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, status, value, created_on, updated_on
-      FROM Bids NATURAL JOIN Customers
+      SELECT email, tid, status, value, Bids.created_on, Bids.updated_on
+      FROM Bids
       WHERE email = $1
     `,
       values: [email],
@@ -90,6 +91,31 @@ class Bid {
           bid.updated_on
         )
     );
+  }
+
+  static async findAllByCustomerWithTrip(email) {
+    let bids = await this.findAllByEmail(email);
+    const bidsWithTrip = bids.map(async bid => {
+      const trip = await Trip.findByTid(bid.tid);
+      bid.trip = trip;
+      return bid;
+    });
+    return Promise.all(bidsWithTrip);
+  }
+
+  static async findAllByCustomerAndAddressWithTrip(email, address) {
+    let bids = await this.findAllByEmail(email);
+    const bidsWithTripPromise = bids.map(async bid => {
+      const trip = await Trip.findByTidAndStopAddress(bid.tid, address);
+      if (trip != null) {
+        bid.trip = trip;
+        return bid;
+      } else {
+        return null;
+      }
+    });
+    const bidsWithTrip = await Promise.all(bidsWithTripPromise);
+    return bidsWithTrip.filter(x => !!x);
   }
 }
 
