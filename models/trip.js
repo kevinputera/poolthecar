@@ -204,6 +204,39 @@ class Trip {
     });
     return Object.values(tripsMapping);
   }
+
+  static async findByTidAndStopAddress(tid, address) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT T.tid, T.license, T.status, T.origin, T.seats,
+      T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
+      FROM Trips T
+      JOIN Stops S ON T.tid = S.tid
+      WHERE T.tid = $1 AND (LOWER(S.address) LIKE $2 OR LOWER(T.origin) LIKE $2)
+      `,
+      values: [tid, '%' + address.toLowerCase() + '%'],
+    });
+    if (res.rows.length >= 1) {
+      const row = res.rows[0];
+      const trip = new Trip(
+        row.tid,
+        row.license,
+        row.status,
+        row.origin,
+        row.seats,
+        row.departing_on,
+        row.created_on,
+        row.updated_on
+      );
+      trip.stops = [];
+      res.rows.forEach(row => {
+        trip.stops.push(new Stop(row.min_price, row.address, row.tid));
+      });
+      return trip;
+    } else {
+      return null;
+    }
+  }
 }
 
 module.exports = { Trip };

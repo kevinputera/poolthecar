@@ -7,6 +7,7 @@ const { requireAuthentication } = require('./middlewares/authentication');
 const { authenticationPageRoutes } = require('./routes/page/authentication');
 const { accountPageRoutes } = require('./routes/page/account');
 const { browsePageRoutes } = require('./routes/page/browse');
+const { bidPageRoutes } = require('./routes/page/bids');
 
 const { authenticationRoutes } = require('./routes/api/authentication');
 const { userRoutes } = require('./routes/api/user');
@@ -47,6 +48,7 @@ app.use('/api/auth', authenticationRoutes);
 // Block of all the routes below from unauthenticated users
 app.use('/p/browse', requireAuthentication, browsePageRoutes);
 app.use('/p/account', requireAuthentication, accountPageRoutes);
+app.use('/p/bids', requireAuthentication, bidPageRoutes);
 app.use('/api/trips', requireAuthentication, tripRoutes);
 app.use('/api/users', requireAuthentication, userRoutes);
 app.use('/api/cars', requireAuthentication, carRoutes);
