@@ -55,6 +55,33 @@ class Driver {
 
     return driver;
   }
+
+  static async findByTid(tid) {
+    const drivers = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT  T.driver_email, U.secret, U.name, U.gender, U.phone,
+              U.profile_photo_url, U.created_on, U.updated_on
+      FROM DriverTrips T
+      JOIN Users U ON T.driver_email = U.email
+      WHERE T.tid = $1
+      `,
+      values: [tid],
+    });
+    if (drivers.rows.length < 1) {
+      return null;
+    }
+    const row = drivers.rows[0];
+    return new User(
+      row.driver_email,
+      row.secret,
+      row.name,
+      row.gender,
+      row.phone,
+      row.profile_photo_url,
+      row.created_on,
+      row.updated_on
+    );
+  }
 }
 
 module.exports = { Driver };

@@ -1,5 +1,6 @@
 .app-sidebar {
   background-color: #f5f3f0;
+  height: 100%;
 }
 
 .app-sidebar-controls {
@@ -11,12 +12,11 @@
   margin-top: 5px;
 }
 
-.table-button {
-  display: inline-block;
-  color: #0000ff;
-  cursor: pointer;
+.app-content {
+  overflow: auto;
+  height: 100%;
 }
 
-.table-button:hover {
-  text-decoration: underline;
+.logout-btn {
+  margin-top: 50px;
 }

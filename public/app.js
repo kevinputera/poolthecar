@@ -5,7 +5,8 @@ window.addEventListener('load', () => {
     try {
       const res = await fetch('/api/auth/logout', { method: 'POST' });
       if (res.ok) {
-        window.location.href = res.url;
+        // Redirect to login screen after successful logout
+        window.location.href = '/p/auth/login';
       } else {
         console.log('Logout failed');
       }
@@ -22,7 +23,6 @@ window.addEventListener('load', () => {
         if (confirm('Would you wish to sign up as a driver?')) {
           const res = await fetch('/api/drivers', { method: 'POST' });
           if (res.ok) {
-            // Reload page to get most recent change
             window.location.reload();
           } else {
             console.log('Driver signup failed');

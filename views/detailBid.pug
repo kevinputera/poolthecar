@@ -6,6 +6,7 @@ append styles
 block content
   .detail-content
   div.container
+    h3.page-title Bidding
     div.row
       div.col-md
         img(
@@ -15,13 +16,33 @@ block content
         )
         div.field-inline-container
           p.field-title-inline Driver Name: 
-          p.field-value-inline Bob
+          p.field-value-inline= driver.name
+        div.field-inline-container
+          p.field-title-inline Rating: 
+          p.field-value-inline 5
       div.col-md
         p.field-title Origin
-        p.field-value Somewhere
+        p.field-value= tripWithStops.origin
         p.field-title Seats
-        p.field-value 3
+        p.field-value= tripWithStops.seats
         p.field-title Departing On
-        p.field-value 11:00
+        p.field-value= tripWithStops.departing_on
         p.field-title Trip Status
-        p.field-value Created
+        p.field-value= tripWithStops.status
+    div
+      h5.section-title Stops
+      table.table.table-hover.table-bordered.table-striped
+        thead.thead-light
+          th Destination
+          th Min. Price
+          th Action
+          th Status
+          th Your Price
+        tbody
+          each stop in tripWithStops.stops
+            tr
+              td= stop.address
+              td= stop.min_price
+              td= stopBiddingMap[stop.address] ? "Cancel" : "Bid"
+              td= stopBiddingMap[stop.address] ? bidWithTripAndStops.status : ""
+              td= stopBiddingMap[stop.address] ? bidWithTripAndStops.value : ""

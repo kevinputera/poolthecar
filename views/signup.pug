@@ -1,8 +1,11 @@
-extends layouts/form.pug
+extends layouts/authForm.pug
+
+append scripts
+  script(src="/signup.js")
 
 block form
   h4.mb-3 Sign up
-  form(id="signup-form" action="/api/auth/new" method="POST")
+  form#signup-form
     .form-group
       label(for="signup-email") Email address
       input(

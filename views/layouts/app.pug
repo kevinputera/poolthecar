@@ -10,7 +10,6 @@ block body
   div(class="container-fluid vh-100")
     div(class="row h-100")
       div(class="app-sidebar col-md-2 py-2")
-        if isLoggedIn
           div(class="d-flex flex-column justify-content-between h-100")
             nav(class="nav nav-pills flex-column")
               a(
@@ -33,12 +32,12 @@ block body
                 class="nav-link" + (title === "Trips" ? " active" : "")
                 href="/p/trips"
               ) Manage trips
-              .app-sidebar-controls
-                if !isDriver
-                  button(
-                    id="driver-signup-button"
-                    class="btn btn-secondary"
-                  ) Be a driver!
-                button(id="logout-button" class="btn btn-danger") Log out
-      div(class="col-md-10")
+            .app-sidebar-controls
+              if !isDriver
+                button(
+                  id="driver-signup-button"
+                  class="btn btn-secondary"
+                ) Be a driver!
+              button(id="logout-button" class="btn btn-danger") Log out
+      div(class="app-content col-md-10")
         block content

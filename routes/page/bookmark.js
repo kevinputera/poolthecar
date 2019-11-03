@@ -20,14 +20,13 @@ router.get('/', async (req, res) => {
   res.render('bookmarks', {
     title: 'Bookmarks',
     query: req.query,
-    isLoggedIn: true,
     isDriver,
     bookmarks,
   });
 });
 
 router.get('/new', async (req, res) => {
-  res.render('newBookmark', { title: 'New bookmark', isLoggedIn: true });
+  res.render('newBookmark', { title: 'New bookmark' });
 });
 
 router.get('/:name/update', async (req, res) => {
@@ -36,7 +35,6 @@ router.get('/:name/update', async (req, res) => {
   const bookmark = await Bookmark.findByEmailAndName(email, name);
   res.render('updateBookmark', {
     title: 'Update bookmark',
-    isLoggedIn: true,
     bookmark,
   });
 });

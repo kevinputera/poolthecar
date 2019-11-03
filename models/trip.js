@@ -103,7 +103,7 @@ class Trip {
     return trip;
   }
 
-  static async findByDriverEmail(driverEmail) {
+  static async findAllByDriverEmail(driverEmail) {
     const res = await makeSingleQuery({
       text: /* sql */ `
       SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on
@@ -197,7 +197,7 @@ class Trip {
     return Object.values(tripsMapping);
   }
 
-  static async findByDriverEmailAndAddressWithStops(driverEmail, address) {
+  static async findAllByDriverEmailAndAddressWithStops(driverEmail, address) {
     const res = await makeSingleQuery({
       text: /* sql */ `
         SELECT  T.tid, T.license, T.status, T.origin, T.seats,
@@ -234,7 +234,7 @@ class Trip {
     return Object.values(tripsMapping);
   }
 
-  static async findByDriverEmailWithCarAndStops(driverEmail) {
+  static async findAllByDriverEmailWithCarAndStops(driverEmail) {
     const res = await makeSingleQuery({
       text: /*sql*/ `
       SELECT tid, T.license, status, origin, T.seats, departing_on, created_on, updated_on, min_price, address
@@ -299,6 +299,36 @@ class Trip {
     } else {
       return null;
     }
+  }
+
+  static async findByTidWithStops(tid) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on
+              min_price, address
+      FROM    Trips
+      NATURAL JOIN Stops
+      WHERE   tid = $1
+      `,
+      values: [tid],
+    });
+    if (res.rows.length < 1) {
+      return null;
+    }
+    let trip = new Trip(
+      res.rows[0].tid,
+      res.rows[0].license,
+      res.rows[0].status,
+      res.rows[0].origin,
+      res.rows[0].seats,
+      res.rows[0].departing_on,
+      res.rows[0].createdOn,
+      res.rows[0].updatedOn
+    );
+    trip.stops = res.rows.map(
+      row => new Stop(row.min_price, row.address, trip.tid)
+    );
+    return trip;
   }
 }
 
