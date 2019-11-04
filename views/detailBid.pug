@@ -18,7 +18,7 @@ block content
           p.field-title-inline Driver Name: 
           p.field-value-inline= driver.name
         div.field-inline-container
-          p.field-title-inline Rating: 
+          p.field-title-inline Driver Rating: 
           p.field-value-inline 5
       div.col-md
         p.field-title Origin
@@ -46,3 +46,7 @@ block content
               td= bidMapWithStop[stop.address] ? "Cancel" : "Bid"
               td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status : ""
               td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].value : ""
+    div
+      h5.section-title Review
+      textarea(name="bid-review", rows="10",
+       placeholder="Please enter your review here").review-text-area

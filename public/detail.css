@@ -52,3 +52,7 @@
 .table {
   margin-top: 20px;
 }
+
+.review-text-area {
+  min-width: 100%;
+}
