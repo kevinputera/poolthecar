@@ -27,18 +27,19 @@ block content
     table(class="table table-hover table-bordered table-striped")
       thead
         th Origin
-        th Status
+        th Bid Status
         th #Seats
         th Departing on
       tbody
-        each bid in bidsWithTrip 
-          tr(
-            name= "bid-row",
-            id= bid.tid,
-            class= "table-link-row"
-          )
-            td= bid.trip.origin
-            td= bid.status
-            td= bid.trip.seats
-            td= bid.trip.departingOn
+        if !!bidsWithTrip
+          each bid in bidsWithTrip 
+            tr(
+              name= "bid-row",
+              id= bid.tid,
+              class= "table-link-row"
+            )
+              td= bid.trip.origin
+              td= bid.status
+              td= bid.trip.seats
+              td= bid.trip.departingOn
             

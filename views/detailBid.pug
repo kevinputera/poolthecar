@@ -26,7 +26,7 @@ block content
         p.field-title Seats
         p.field-value= tripWithStops.seats
         p.field-title Departing On
-        p.field-value= tripWithStops.departing_on
+        p.field-value= tripWithStops.departingOn
         p.field-title Trip Status
         p.field-value= tripWithStops.status
     div
@@ -36,7 +36,7 @@ block content
           th Destination
           th Min. Price
           th Action
-          th Status
+          th Bid Status
           th Your Price
         tbody
           each stop in tripWithStops.stops

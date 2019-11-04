@@ -1,0 +1,40 @@
+extends layouts/app.pug
+
+append styles
+  link(rel="stylesheet" href="/detail.css")
+
+block content
+  .detail-content
+  div.container
+    h3.page-title Bidding
+    div.row
+      div.col-md
+        p placeholder for some interesting query stuff
+      div.col-md
+        p.field-title Origin
+        p.field-value= trip.origin
+        p.field-title Seats
+        p.field-value= trip.seats
+        p.field-title Departing On
+        p.field-value= trip.departingOn
+        p.field-title Trip Status
+        p.field-value= trip.status
+    div
+      h5.section-title Stops
+      table.table.table-hover.table-bordered.table-striped
+        thead.thead-light
+          th Destination
+          th Min. Price
+          th Customer Price
+          th Bid Status
+          th Action
+          th Review
+        tbody
+          each bid in bidsWithStopsAndCustomer
+            tr
+              td= bid.stop.address
+              td= bid.stop.min_price
+              td= bid.value
+              td= bid.status
+              td Accept
+              td Review

@@ -3,6 +3,9 @@ extends layouts/app.pug
 append styles 
   link(rel="stylesheet" href="/browse.css")
 
+append scripts
+  script(src="/trips.js")
+
 block content
   .browser-container
     form(id="browse-filter-form" class="my-1")
@@ -24,13 +27,17 @@ block content
     table(class="table table-hover table-bordered table-striped")
       thead
         th Origin
-        th Status
+        th Trip Status
         th #Seats
         th Departing on
       tbody
         if !!trips
           each trip in trips 
-            tr
+            tr(
+              name= "trip-row",
+              id= trip.tid,
+              class= "table-link-row"
+            )
               td= trip.origin
               td= trip.status
               td= trip.seats

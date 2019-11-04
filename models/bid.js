@@ -1,6 +1,7 @@
 const { makeSingleQuery } = require('../db');
 const { Trip } = require('./trip');
 const { Stop } = require('./stop');
+const { User } = require('./user');
 
 class Bid {
   constructor(email, tid, address, status, value, created_on, updated_on) {
@@ -79,6 +80,7 @@ class Bid {
 
   static async findAllByCustomerWithTrip(email) {
     let bids = await this.findAllByEmail(email);
+    if (bids == null) return null;
     const bidsWithTrip = bids.map(async bid => {
       const trip = await Trip.findByTid(bid.tid);
       bid.trip = trip;
@@ -156,6 +158,49 @@ class Bid {
       bids.rows[0].created_on,
       bids.rows[0].updated_on
     );
+  }
+
+  static async findAllByTidWithStopsAndCustomer(tid) {
+    const bidsWithStops = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT  Bids.email, tid, address, status, value, Bids.created_on, Bids.updated_on,
+              min_price, name, phone, profile_photo_url
+      FROM Bids NATURAL JOIN Stops
+      JOIN Users 
+      ON      Users.email = Bids.email
+      WHERE   tid = $1
+      ORDER BY address ASC
+      `,
+      values: [tid],
+    });
+    if (bidsWithStops.rows.length < 1) {
+      return null;
+    }
+    return bidsWithStops.rows.map(row => {
+      let bid = new Bid(
+        row.email,
+        row.tid,
+        row.address,
+        row.status,
+        row.value,
+        row.created_on,
+        row.updated_on
+      );
+      const stop = new Stop(row.min_price, row.address, tid);
+      bid.stop = stop;
+      const user = new User(
+        row.email,
+        null,
+        row.name,
+        null,
+        row.phone,
+        row.profile_photo_url,
+        null,
+        null
+      );
+      bid.user = user;
+      return bid;
+    });
   }
 }
 

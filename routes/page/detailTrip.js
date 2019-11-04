@@ -11,22 +11,18 @@ router.get('/:tid', async (req, res) => {
   const { tid } = req.params;
   const isDriver = checkIsDriver(email);
 
-  const driver = await Driver.findByTid(tid);
-  const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStops(email, tid);
-  const tripWithStops = await Trip.findByTidWithStops(tid);
-  const wonBid = await Bid.findWonBidByTidAndCustomer(tid, email);
+  const trip = await Trip.findByTid(tid);
+  const bidsWithStopsAndCustomer = await Bid.findAllByTidWithStopsAndCustomer(
+    tid
+  );
 
-  console.log(tripWithStops);
-
-  res.render('detailBid', {
-    title: 'Detailed Bidding',
+  res.render('detailTrip', {
+    title: 'Detailed Trip',
     isLoggedIn: true,
     isDriver,
-    driver,
-    bidMapWithStop,
-    tripWithStops,
-    wonBid,
+    trip,
+    bidsWithStopsAndCustomer,
   });
 });
 
-module.exports = { detailBidRoutes: router };
+module.exports = { detailTripRoutes: router };
