@@ -3,6 +3,9 @@ extends layouts/app.pug
 append styles
   link(rel="stylesheet" href="/detail.css")
 
+append scripts
+  script(src="/detailTrip.js")
+
 block content
   .detail-content
   div.container
@@ -36,5 +39,17 @@ block content
               td= bid.stop.min_price
               td= bid.value
               td= bid.status
-              td Accept
+              td.bid-acceptance-form
+                p(
+                  class="form-control",
+                  name="email",
+                  value=bid.email
+                )
+                p(
+                    name= "accept-bid-action",
+                    class= "form-control table-cell-action",
+                    tid= bid.tid,
+                    address= bid.address,
+                    email= bid.email
+                )= bid.status === 'pending' ? "Accept" : ""
               td Review

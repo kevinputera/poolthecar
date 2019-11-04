@@ -56,3 +56,11 @@
 .review-text-area {
   min-width: 100%;
 }
+
+.table-cell-action {
+  cursor: pointer;
+}
+
+.hidden-bid-email {
+  display: none;
+}

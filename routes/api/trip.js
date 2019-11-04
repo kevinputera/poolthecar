@@ -126,6 +126,29 @@ router.put('/:tid/bidding/stop/:address', async (req, res) => {
   }
 });
 
+//Accept bid
+router.put('/:tid/stop/:address/accept', async (req, res) => {
+  const { tid, address } = req.params;
+  const { email } = req.body;
+  console.log(tid, address, email, req.body);
+  try {
+    let bid = await Bid.findByUserAndStop(email, tid, address);
+    if (!bid) {
+      badRequestMessage(res, 'Bid does not exist');
+      return;
+    }
+    if (bid.status !== 'pending') {
+      badRequestMessage(res, 'Bid not in pending stage');
+      return;
+    }
+    bid.status = 'won';
+    const updatedBid = await bid.update();
+    ok(res, updatedBid);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 //Delete bid
 router.delete('/:tid/bidding/stop/:address', async (req, res) => {
   const { tid, address } = req.params;
