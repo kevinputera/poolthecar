@@ -85,12 +85,14 @@ CREATE TYPE bid_status AS ENUM (
 
 CREATE TABLE Bids (
   email varchar(255) REFERENCES Users(email),
-  tid integer REFERENCES Trips(tid),
+  tid integer,
+  address varchar(255),
   status bid_status NOT NULL DEFAULT 'pending',
   value numeric NOT NULL CHECK (value >= 0),
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (email, tid)
+  PRIMARY KEY (email, tid, address),
+  FOREIGN KEY (tid, address) REFERENCES Stops(tid, address)
 );
 
 CREATE TABLE Reviews (
@@ -102,3 +104,10 @@ CREATE TABLE Reviews (
   updated_on timestamptz NOT NULL DEFAULT NOW(),
   PRIMARY KEY (email, tid)
 );
+
+CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, departing_on, created_on, updated_on) AS
+  SELECT D.email, T.tid, T.license, T.status, T.origin, T.seats, T.departing_on, T.created_on, T.updated_on
+  FROM Trips T
+  JOIN Cars C ON T.license = C.license
+  JOIN Drivers D ON C.email = D.email;
+

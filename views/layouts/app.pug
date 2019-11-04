@@ -1,25 +1,48 @@
 extends base.pug
 
 append scripts
-  script(src="/app.js")
+  script(src="/scripts/app.js")
 
 append styles
-  link(rel="stylesheet" href="/app.css")
+  link(rel="stylesheet" href="/styles/app.css")
 
 block body
   div(class="container-fluid vh-100")
     div(class="row h-100")
       div(class="app-sidebar col-md-2 py-2")
-        div(class="d-flex flex-column justify-content-between h-100")
-          nav(class="nav nav-pills flex-column")
-            a(
-              class="nav-link" + (title === "Browse" ? " active" : "")
-              href="/p/browse"
-            ) Browse
-            a(
-              class="nav-link" + (title === "Account" ? " active" : "")
-              href="/p/account"
-            ) Manage account
-          button(id="logout-button" class="btn btn-danger") Log out
-      div(class="col-md-10")
+          div(class="d-flex flex-column justify-content-between h-100")
+            nav(class="nav nav-pills flex-column")
+              a(
+                class="nav-link" + (title === "Browse" ? " active" : "")
+                href="/p/browse"
+              ) Browse
+              a(
+                class="nav-link" + (title === "Bookmarks" ? " active" : "")
+                href="/p/bookmarks"
+              ) Manage bookmarks
+              if isDriver
+                a(
+                  class="nav-link" + (title === "Cars" ? " active" : "")
+                  href="/p/cars"
+                ) Manage cars
+              a(
+                class="nav-link" + (title === "Account" ? " active" : "")
+                href="/p/account"
+              ) Manage account
+              a(
+                class="nav-link" + (title === "Biddings" ? " active" : "")
+                href="/p/bids"
+              ) Manage biddings
+              a(
+                class="nav-link" + (title === "Trips" ? " active" : "")
+                href="/p/trips"
+              ) Manage trips
+            .app-sidebar-controls
+              if !isDriver
+                button(
+                  id="driver-signup-button"
+                  class="btn btn-secondary"
+                ) Be a driver!
+              button(id="logout-button" class="btn btn-danger") Log out
+      div(class="app-content col-md-10")
         block content

@@ -1,0 +1,22 @@
+.app-sidebar {
+  background-color: #f5f3f0;
+  height: 100%;
+}
+
+.app-sidebar-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-sidebar-controls > * {
+  margin-top: 5px;
+}
+
+.app-content {
+  overflow: auto;
+  height: 100%;
+}
+
+.logout-btn {
+  margin-top: 50px;
+}

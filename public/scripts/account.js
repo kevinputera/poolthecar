@@ -1,24 +1,14 @@
-// Account details update logic
 window.addEventListener('load', () => {
+  // Account details update logic
   const userUpdateForm = document.getElementById('user-update-form');
   const userUpdateButton = document.getElementById('user-update-button');
   userUpdateButton.addEventListener('click', async event => {
     event.preventDefault();
-
-    const formData = new FormData(userUpdateForm);
-    const urlEncodedPairs = [];
-    formData.forEach((value, key) => {
-      urlEncodedPairs.push(
-        encodeURIComponent(key) + '=' + encodeURIComponent(value)
-      );
-    });
-    const urlEncodedBody = urlEncodedPairs.join('&').replace(/%20/g, '+');
-
     try {
       const res = await fetch('/api/users', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: urlEncodedBody,
+        body: getURLEncodedStringFromHTMLForm(userUpdateForm),
       });
       if (res.ok) {
         // Reload page
