@@ -54,7 +54,7 @@ class Bid {
   static async findAllByEmail(email) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, status, value, Bids.created_on, Bids.updated_on
+      SELECT email, tid, address, status, value, created_on, updated_on
       FROM Bids
       WHERE email = $1
     `,
@@ -133,6 +133,29 @@ class Bid {
       bidMapWithStop[row.address] = bid;
     });
     return bidMapWithStop;
+  }
+
+  static async findWonBidByTidAndCustomer(tid, email) {
+    const bids = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT email, tid, address, status, value, created_on, updated_on
+      FROM Bids
+      WHERE tid = $1 AND email = $2 AND status = 'won'
+      `,
+      values: [tid, email],
+    });
+    if (bids.rows.length < 1) {
+      return null;
+    }
+    return new Bid(
+      bids.rows[0].email,
+      bids.rows[0].tid,
+      bids.rows[0].address,
+      bids.rows[0].status,
+      bids.rows[0].value,
+      bids.rows[0].created_on,
+      bids.rows[0].updated_on
+    );
   }
 }
 

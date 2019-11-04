@@ -1,3 +1,7 @@
 .browser-container {
   margin: 0 -10px;
 }
+
+.table-link-row {
+  cursor: pointer;
+}

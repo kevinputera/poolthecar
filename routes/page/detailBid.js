@@ -14,6 +14,7 @@ router.get('/:tid', async (req, res) => {
   const driver = await Driver.findByTid(tid);
   const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStops(email, tid);
   const tripWithStops = await Trip.findByTidWithStops(tid);
+  const wonBid = await Bid.findWonBidByTidAndCustomer(tid, email);
 
   res.render('detailBid', {
     title: 'Detailed Bidding',
@@ -22,6 +23,7 @@ router.get('/:tid', async (req, res) => {
     driver,
     bidMapWithStop,
     tripWithStops,
+    wonBid,
   });
 });
 

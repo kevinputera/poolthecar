@@ -3,6 +3,9 @@ extends layouts/app.pug
 append styles 
   link(rel="stylesheet" href="/browse.css")
 
+append scripts
+  script(src="/bids.js")
+
 block content
   .browser-container
     form(id="browse-filter-form" class="my-1")
@@ -29,8 +32,13 @@ block content
         th Departing on
       tbody
         each bid in bidsWithTrip 
-          tr
+          tr(
+            name= "bid-row",
+            id= bid.tid,
+            class= "table-link-row"
+          )
             td= bid.trip.origin
             td= bid.status
             td= bid.trip.seats
             td= bid.trip.departingOn
+            
