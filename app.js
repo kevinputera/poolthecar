@@ -24,8 +24,6 @@ const { permanentRedirect } = require('./utils/response');
 // Load env variables
 require('dotenv').config({ path: join(__dirname, '.env') });
 
-const { driverRoutes } = require('./routes/driver.js');
-
 const app = express();
 
 app.set('view engine', 'pug');
