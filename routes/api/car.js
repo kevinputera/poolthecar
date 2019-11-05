@@ -8,30 +8,9 @@ const {
 
 const router = express.Router();
 
-// TODO: Remove this
-router.get('/driver', async (req, res) => {
-  const { email, page, limit } = req.query;
-  try {
-    const cars = await Car.findByDriver(email, page, limit);
-    ok(res, cars);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-// TODO: Remove this
-router.get('/license', async (req, res) => {
-  const license = req.query.license;
-  try {
-    const cars = await Car.findByLicense(license);
-    ok(res, cars);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
 router.post('/', async (req, res) => {
-  const { license, email, model, seats, manufacturedOn } = req.body;
+  const { email } = req.session;
+  const { license, model, seats, manufacturedOn } = req.body;
   const car = new Car(license, email, model, seats, manufacturedOn);
   try {
     const savedCar = await car.save();
@@ -41,8 +20,25 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.put('/:license', async (req, res) => {
+  const { license } = req.params;
+  const { model, seats, manufacturedOn } = req.body;
+  try {
+    const car = await Car.findByLicense(license);
+
+    car.model = model;
+    car.seats = seats;
+    car.manufacturedOn = manufacturedOn;
+    const updatedCar = await car.update();
+
+    ok(res, updatedCar);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
 router.delete('/:license', async (req, res) => {
-  const license = req.params.license;
+  const { license } = req.params;
   try {
     const car = await Car.findByLicense(license);
     if (!car) {

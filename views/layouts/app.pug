@@ -1,10 +1,10 @@
 extends base.pug
 
 append scripts
-  script(src="/app.js")
+  script(src="/scripts/app.js")
 
 append styles
-  link(rel="stylesheet" href="/app.css")
+  link(rel="stylesheet" href="/styles/app.css")
 
 block body
   div(class="container-fluid vh-100")
@@ -20,6 +20,11 @@ block body
                 class="nav-link" + (title === "Bookmarks" ? " active" : "")
                 href="/p/bookmarks"
               ) Manage bookmarks
+              if isDriver
+                a(
+                  class="nav-link" + (title === "Cars" ? " active" : "")
+                  href="/p/cars"
+                ) Manage cars
               a(
                 class="nav-link" + (title === "Account" ? " active" : "")
                 href="/p/account"

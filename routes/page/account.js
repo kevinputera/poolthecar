@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
   const { email } = req.session;
   const currentUser = await User.findByEmail(email);
   const isDriver = await checkIsDriver(email);
-  res.render('account', {
+  res.render('account/account', {
     title: 'Account',
     isDriver,
     currentUser,
