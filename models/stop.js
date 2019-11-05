@@ -39,6 +39,25 @@ class Stop {
     });
     return this;
   }
+
+  static async findByTidAndAddress(tid, address) {
+    const stops = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT min_price, address, tid
+      FROM Stops
+      WHERE tid = $1 AND address = $2
+      `,
+      values: [tid, address],
+    });
+    if (stops.rows.length < 1) {
+      return null;
+    }
+    return new Stop(
+      stops.rows[0].min_price,
+      stops.rows[0].address,
+      stops.rows[0].tid
+    );
+  }
 }
 
 module.exports = { Stop };

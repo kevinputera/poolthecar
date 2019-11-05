@@ -3,6 +3,9 @@ extends layouts/app.pug
 append styles
   link(rel="stylesheet" href="/detail.css")
 
+append scripts
+  script(src="/detailBid.js")
+
 block content
   .detail-content
   div.container
@@ -43,9 +46,21 @@ block content
             tr
               td= stop.address
               td= stop.min_price
-              td= bidMapWithStop[stop.address] ? "Cancel" : "Bid"
+              td(
+                name= "bid-action",
+                class= "table-cell-action",
+                tid= tripWithStops.tid,
+                address= stop.address
+                action= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : "Bid"
+              )= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : "Bid"
               td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status : ""
-              td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].value : ""
+              td
+                input(
+                  id= stop.address
+                  hidden= !bidMapWithStop[stop.address]
+                  disabled= !bidMapWithStop[stop.address] || bidMapWithStop[stop.address].status !== "pending"
+                  value= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].value : ""
+                )
     if(wonBid)
       div
         h5.section-title Review

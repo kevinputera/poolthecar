@@ -59,6 +59,11 @@
 
 .table-cell-action {
   cursor: pointer;
+  color: #007bff;
+}
+
+.table-cell-action:hover {
+  text-decoration: underline;
 }
 
 .hidden-bid-email {

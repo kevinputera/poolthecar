@@ -11,7 +11,7 @@ router.get('/:tid', async (req, res) => {
   const { tid } = req.params;
   const isDriver = checkIsDriver(email);
 
-  const trip = await Trip.findByTid(tid);
+  const tripWithStops = await Trip.findByTidWithStops(tid);
   const bidsWithStopsAndCustomer = await Bid.findAllByTidWithStopsAndCustomer(
     tid
   );
@@ -20,7 +20,7 @@ router.get('/:tid', async (req, res) => {
     title: 'Detailed Trip',
     isLoggedIn: true,
     isDriver,
-    trip,
+    tripWithStops,
     bidsWithStopsAndCustomer,
   });
 });

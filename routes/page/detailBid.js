@@ -16,8 +16,6 @@ router.get('/:tid', async (req, res) => {
   const tripWithStops = await Trip.findByTidWithStops(tid);
   const wonBid = await Bid.findWonBidByTidAndCustomer(tid, email);
 
-  console.log(tripWithStops);
-
   res.render('detailBid', {
     title: 'Detailed Bidding',
     isLoggedIn: true,

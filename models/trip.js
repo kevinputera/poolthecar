@@ -304,7 +304,7 @@ class Trip {
   static async findByTidWithStops(tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-      SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on
+      SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on,
               min_price, address
       FROM    Trips
       NATURAL JOIN Stops

@@ -31,4 +31,39 @@ window.addEventListener('load', () => {
       }
     });
   }
+
+  const updateStopButtons = document.getElementsByName('update-stop-action');
+  for (let updateStopButton of updateStopButtons) {
+    updateStopButton.addEventListener('click', async () => {
+      const tid = updateStopButton.getAttribute('tid');
+      const address = updateStopButton.getAttribute('address');
+      const stopValueInput = document.getElementById(
+        'stop-update-input-' + address
+      );
+      const min_price = stopValueInput.value;
+      console.log(tid, address, min_price);
+      try {
+        const res = await fetch(
+          `/api/trips/${encodeURIComponent(tid)}/stop/${encodeURIComponent(
+            address
+          )}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ min_price: min_price }),
+          }
+        );
+        if (res.ok) {
+          console.log('Stop update successful: ', res);
+          window.location.reload();
+        } else {
+          console.log('Stop update failed: ', res);
+        }
+      } catch (error) {
+        console.log('Stop update error: ', error);
+      }
+    });
+  }
 });

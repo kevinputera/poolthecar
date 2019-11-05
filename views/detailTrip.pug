@@ -15,16 +15,38 @@ block content
         p placeholder for some interesting query stuff
       div.col-md
         p.field-title Origin
-        p.field-value= trip.origin
+        p.field-value= tripWithStops.origin
         p.field-title Seats
-        p.field-value= trip.seats
+        p.field-value= tripWithStops.seats
         p.field-title Departing On
-        p.field-value= trip.departingOn
+        p.field-value= tripWithStops.departingOn
         p.field-title Trip Status
-        p.field-value= trip.status
+        p.field-value= tripWithStops.status
     div
-      h5.section-title Stops
-      table.table.table-hover.table-bordered.table-striped
+      h5.section-tile Stops
+      table.table.table-hover.table-bordered.table-striped#stop-table
+        thead.thead-light
+          th Destination
+          th Min. Price
+          th Action
+        each stop in tripWithStops.stops
+          tr
+            td= stop.address
+            td
+              input(
+                id= "stop-update-input-" + stop.address,
+                disabled= tripWithStops.status !== 'created',
+                value= stop.min_price
+              )
+            td(
+              name= "update-stop-action",
+              class= "table-cell-action",
+              address= stop.address,
+              tid = tripWithStops.tid
+            )= tripWithStops.status === 'created' ? "Update" : ""
+    div
+      h5.section-title Bids
+      table.table.table-hover.table-bordered.table-striped#bid-table
         thead.thead-light
           th Destination
           th Min. Price
@@ -33,17 +55,18 @@ block content
           th Action
           th Review
         tbody
-          each bid in bidsWithStopsAndCustomer
-            tr
-              td= bid.stop.address
-              td= bid.stop.min_price
-              td= bid.value
-              td= bid.status
-              td(
+          if !!bidsWithStopsAndCustomer
+            each bid in bidsWithStopsAndCustomer
+              tr
+                td= bid.stop.address
+                td= bid.stop.min_price
+                td= bid.value
+                td= bid.status
+                td(
                     name= "accept-bid-action",
                     class= "table-cell-action",
                     tid= bid.tid,
                     address= bid.address,
                     email= bid.email
-                )= bid.status === 'pending' ? "Accept" : ""
-              td Review
+                  )= bid.status === 'pending' ? "Accept" : ""
+                td Review

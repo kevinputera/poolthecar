@@ -2,6 +2,7 @@ const express = require('express');
 const { Review } = require('../../models/review');
 const { Trip } = require('../../models/trip');
 const { Bid } = require('../../models/bid');
+const { Stop } = require('../../models/stop');
 const {
   ok,
   badRequestMessage,
@@ -79,7 +80,7 @@ router.get('/:tid/bidding/stop/:address', async (req, res) => {
   const { tid, address } = req.params;
   const { email } = req.session;
   try {
-    const bid = await Bid.findByUserAndStop(email, tid, address);
+    const bid = await Bid.findByCustomerAndStop(email, tid, address);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;
@@ -110,7 +111,7 @@ router.put('/:tid/bidding/stop/:address', async (req, res) => {
   const { value } = req.body;
   const { email } = req.session;
   try {
-    let bid = await Bid.findByUserAndStop(email, tid, address);
+    let bid = await Bid.findByCustomerAndStop(email, tid, address);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;
@@ -123,6 +124,7 @@ router.put('/:tid/bidding/stop/:address', async (req, res) => {
     const updatedBid = await bid.update();
     ok(res, updatedBid);
   } catch (error) {
+    console.error(error);
     internalError(res, error);
   }
 });
@@ -251,6 +253,24 @@ router.put('/:tid', async (req, res) => {
     const updatedTrip = await trip.update();
     ok(res, updatedTrip);
   } catch (error) {
+    internalError(res, error);
+  }
+});
+
+// Update stop
+router.put('/:tid/stop/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { min_price } = req.body;
+  try {
+    let stop = await Stop.findByTidAndAddress(tid, address);
+    if (!stop) {
+      badRequestMessage(res, 'Stop does not exist');
+    }
+    stop.min_price = min_price;
+    const updatedStop = await stop.update();
+    ok(res, updatedStop);
+  } catch (error) {
+    console.log(error);
     internalError(res, error);
   }
 });
