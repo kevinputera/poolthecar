@@ -61,8 +61,34 @@ block content
                   disabled= !bidMapWithStop[stop.address] || bidMapWithStop[stop.address].status !== "pending"
                   value= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].value : ""
                 )
-    if(wonBid)
+    if(wonBidWithReview)
       div
         h5.section-title Review
-        textarea(name="bid-review", rows="10",
-        placeholder="Please enter your review here").review-text-area
+        div.input-group.mb-3
+          div.input-group-prepend
+            label(
+              class= "input-group-text",
+              for= "score-select"
+            ) Score
+          select(
+            class= "custom-select"
+            id= "score-select",
+            score= wonBidWithReview.review.score
+          )
+            option(
+              selected= 5
+            )
+            option( value= 1 ) 1
+            option( value= 2 ) 2
+            option( value= 3 ) 3
+            option( value= 4 ) 4
+            option( value= 5 ) 5
+        textarea(
+          id= 'review-textarea'
+          rows="5",
+          placeholder="Please enter your review here",
+          content= wonBidWithReview.review.content,
+          tid= wonBidWithReview.tid
+          action= wonBidWithReview.review.content ? 'Update' : 'Create'
+        ).review-text-area
+        button.btn.btn-light.update-review-btn=wonBidWithReview.review.content ? 'Update' : 'Create'

@@ -138,19 +138,28 @@ class Bid {
     return bidMapWithStop;
   }
 
-  static async findWonBidByTidAndCustomer(tid, email) {
+  static async findWonBidByTidAndCustomerWithReview(tid, email) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, address, status, value, created_on, updated_on
-      FROM Bids
-      WHERE tid = $1 AND email = $2 AND status = 'won'
+      SELECT  Bids.email, Bids.tid, address, status, value, 
+              Bids.created_on, Bids.updated_on, Reviews.score, Reviews.content
+      FROM    Bids
+      LEFT JOIN Reviews
+      ON      Bids.tid = Reviews.tid AND Bids.email = Reviews.email
+      WHERE   Bids.tid = $1 AND Bids.email = $2 AND status = 'won'
       `,
       values: [tid, email],
     });
     if (bids.rows.length < 1) {
       return null;
     }
-    return new Bid(
+    const review = new Review(
+      bids.rows[0].email,
+      bids.rows[0].tid,
+      bids.rows[0].score,
+      bids.rows[0].content
+    );
+    let bid = new Bid(
       bids.rows[0].email,
       bids.rows[0].tid,
       bids.rows[0].address,
@@ -159,6 +168,8 @@ class Bid {
       bids.rows[0].created_on,
       bids.rows[0].updated_on
     );
+    bid.review = review;
+    return bid;
   }
 
   static async findAllByTidWithStopsAndCustomerAndReview(tid) {

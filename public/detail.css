@@ -54,7 +54,8 @@
 }
 
 .review-text-area {
-  min-width: 100%;
+  min-width: 60%;
+  margin-top: 15px;
 }
 
 .table-cell-action {
@@ -68,4 +69,14 @@
 
 .hidden-bid-email {
   display: none;
+}
+
+.update-review-btn {
+  display: block;
+  min-width: 60%;
+  margin-bottom: 100px;
+}
+
+#score-select {
+  max-width: 30%;
 }

@@ -53,6 +53,7 @@ block content
           th Customer Price
           th Bid Status
           th Action
+          th Score
           th Review
         tbody
           if !!bidsWithStopsAndCustomerAndReview
@@ -69,4 +70,5 @@ block content
                     address= bid.address,
                     email= bid.email
                   )= bid.status === 'pending' ? "Accept" : ""
-                td= bid.review.content : ""
+                td= bid.review.score
+                td= bid.review.content
