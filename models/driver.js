@@ -55,6 +55,84 @@ class Driver {
 
     return driver;
   }
+
+  static async findDriverTotalIncome(email) {
+    const totalIncome = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT SUM(B.value) AS total_income
+        FROM DriverTrips D JOIN Bids B ON B.tid = D.tid
+        WHERE B.status = 'won' AND D.status = 'finished' AND D.email = $1
+        `,
+      values: [email],
+    });
+    if (totalIncome.rows.length === 0) {
+      return null;
+    }
+    return totalIncome.rows[0].total_income;
+  }
+
+  static async findDriverMonthlyIncome(email, month, year) {
+    const monthlyIncome = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT monthly_income 
+        FROM (SELECT SUM(B.value) AS monthly_income,
+                EXTRACT(MONTH FROM D.departing_on) AS month,
+                EXTRACT(YEAR FROM D.departing_on) AS year
+              FROM DriverTrips D JOIN Bids B on B.tid = D.tid
+              WHERE B.status = 'won' AND D.status = 'finished' AND D.email = $1
+              GROUP BY(month,year)
+              ORDER BY year DESC,month DESC) AS monthly_incomes
+        WHERE monthly_incomes.month = $2 AND monthly_incomes.year = $3
+        `,
+      values: [email, month, year],
+    });
+
+    if (monthlyIncome.rows.length === 0) {
+      return null;
+    }
+    return monthlyIncome.rows[0].monthly_income;
+  }
+
+  static async findConsecutiveTrips(email, page, limit) {
+    const consecutiveTrips = await makeSingleQuery({
+      text: /* sql */ `
+        WITH DistinctDates(date) AS (
+          SELECT DISTINCT CAST(departing_on AS DATE)
+          FROM DriverTrips D
+          WHERE D.email = $1 AND D.status = 'finished'
+        ),
+          ConsecutiveDates AS (
+            SELECT ROW_NUMBER() OVER (ORDER by date) AS row_number,
+              date - ROW_NUMBER() OVER (ORDER by date) * INTERVAL '1 day' AS single_group,date
+            FROM DistinctDates
+          )
+        SELECT MIN(date) AS start_date, MAX(date) AS end_date, COUNT(*) AS num_dates
+        FROM ConsecutiveDates
+        GROUP BY single_group
+        ORDER BY 1 DESC, 3 DESC
+        LIMIT $2
+        OFFSET $3
+        `,
+      values: [email, limit + 1, (page - 1) * limit],
+    });
+    let hasNextPage;
+    if (consecutiveTrips.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      consecutiveTrips: consecutiveTrips.rows
+        .slice(limit)
+        .map(consecutiveTrip => {
+          consecutiveTrip.start_date,
+            consecutiveTrip.end_date,
+            consecutiveTrip.num_dates;
+        }),
+    };
+  }
 }
 
 module.exports = { Driver };
