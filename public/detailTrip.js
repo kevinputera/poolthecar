@@ -1,15 +1,7 @@
 window.addEventListener('load', () => {
-  // const acceptBidButtons = document.getElementsByName("accept-bid-action");
-  const acceptBidForms = document.getElementsByClassName('bid-acceptance-form');
+  const acceptBidButtons = document.getElementsByName('accept-bid-action');
   // console.log(acceptBidButtons);
-  for (let acceptBidForm of acceptBidForms) {
-    // acceptBidButton = acceptBidForm.children.getElementsByName("accept-bid-action");
-    let acceptBidButton;
-    for (let child of acceptBidForm.children) {
-      if (child.className.includes('table-cell-action')) {
-        acceptBidButton = child;
-      }
-    }
+  for (let acceptBidButton of acceptBidButtons) {
     acceptBidButton.addEventListener('click', async event => {
       event.preventDefault();
       let tid = acceptBidButton.getAttribute('tid');
@@ -23,9 +15,9 @@ window.addEventListener('load', () => {
           {
             method: 'PUT',
             headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Type': 'application/json',
             },
-            body: getURLEncodedStringFromHTMLForm(acceptBidForm),
+            body: JSON.stringify({ email: email }),
           }
         );
         if (res.ok) {

@@ -39,15 +39,9 @@ block content
               td= bid.stop.min_price
               td= bid.value
               td= bid.status
-              td.bid-acceptance-form
-                p(
-                  class="form-control",
-                  name="email",
-                  value=bid.email
-                )
-                p(
+              td(
                     name= "accept-bid-action",
-                    class= "form-control table-cell-action",
+                    class= "table-cell-action",
                     tid= bid.tid,
                     address= bid.address,
                     email= bid.email

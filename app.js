@@ -37,6 +37,7 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 

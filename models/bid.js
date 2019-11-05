@@ -202,6 +202,29 @@ class Bid {
       return bid;
     });
   }
+
+  static async findByCustomerAndStop(email, tid, address) {
+    const bids = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT email, tid, address, status, value, created_on, updated_on
+      FROM Bids
+      WHERE email = $1 AND tid = $2 AND address = $3
+      `,
+      values: [email, tid, address],
+    });
+    if (bids.rows.length < 1) {
+      return null;
+    }
+    return new Bid(
+      bids.rows[0].email,
+      bids.rows[0].tid,
+      bids.rows[0].address,
+      bids.rows[0].status,
+      bids.rows[0].value,
+      bids.rows[0].created_on,
+      bids.rows[0].updated_on
+    );
+  }
 }
 
 module.exports = { Bid };

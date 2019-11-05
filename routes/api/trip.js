@@ -1,6 +1,7 @@
 const express = require('express');
 const { Review } = require('../../models/review');
 const { Trip } = require('../../models/trip');
+const { Bid } = require('../../models/bid');
 const {
   ok,
   badRequestMessage,
@@ -130,9 +131,8 @@ router.put('/:tid/bidding/stop/:address', async (req, res) => {
 router.put('/:tid/stop/:address/accept', async (req, res) => {
   const { tid, address } = req.params;
   const { email } = req.body;
-  console.log(tid, address, email, req.body);
   try {
-    let bid = await Bid.findByUserAndStop(email, tid, address);
+    let bid = await Bid.findByCustomerAndStop(email, tid, address);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;
