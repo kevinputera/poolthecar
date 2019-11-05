@@ -2,6 +2,7 @@ const { makeSingleQuery } = require('../db');
 const { Trip } = require('./trip');
 const { Stop } = require('./stop');
 const { User } = require('./user');
+const { Review } = require('./review');
 
 class Bid {
   constructor(email, tid, address, status, value, created_on, updated_on) {
@@ -160,15 +161,18 @@ class Bid {
     );
   }
 
-  static async findAllByTidWithStopsAndCustomer(tid) {
+  static async findAllByTidWithStopsAndCustomerAndReview(tid) {
     const bidsWithStops = await makeSingleQuery({
       text: /* sql */ `
-      SELECT  Bids.email, tid, address, status, value, Bids.created_on, Bids.updated_on,
-              min_price, name, phone, profile_photo_url
+      SELECT  Bids.email, Bids.tid, address, status, value, Bids.created_on, Bids.updated_on,
+              min_price, name, phone, profile_photo_url, Reviews.score, Reviews.content
       FROM Bids NATURAL JOIN Stops
       JOIN Users 
       ON      Users.email = Bids.email
-      WHERE   tid = $1
+      LEFT JOIN Reviews
+      ON      Bids.email = Reviews.email AND Bids.tid = Reviews.tid
+              AND Bids.status = 'won'
+      WHERE   Bids.tid = $1
       ORDER BY address ASC
       `,
       values: [tid],
@@ -199,6 +203,8 @@ class Bid {
         null
       );
       bid.user = user;
+      const review = new Review(row.email, row.tid, row.score, row.content);
+      bid.review = review;
       return bid;
     });
   }

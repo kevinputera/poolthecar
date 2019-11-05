@@ -55,8 +55,8 @@ block content
           th Action
           th Review
         tbody
-          if !!bidsWithStopsAndCustomer
-            each bid in bidsWithStopsAndCustomer
+          if !!bidsWithStopsAndCustomerAndReview
+            each bid in bidsWithStopsAndCustomerAndReview
               tr
                 td= bid.stop.address
                 td= bid.stop.min_price
@@ -69,4 +69,4 @@ block content
                     address= bid.address,
                     email= bid.email
                   )= bid.status === 'pending' ? "Accept" : ""
-                td Review
+                td= bid.review.content : ""
