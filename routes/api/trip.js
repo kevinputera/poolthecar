@@ -169,8 +169,6 @@ router.delete('/:tid', async (req, res) => {
 router.post('/:tid/stops', async (req, res) => {
   const { tid } = req.params;
   const { address, minPrice } = req.body;
-  console.log({ address });
-  console.log({ minPrice });
   try {
     const stop = new Stop(minPrice, address, tid);
     const savedStop = await stop.save();
