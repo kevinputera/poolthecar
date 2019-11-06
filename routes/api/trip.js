@@ -167,16 +167,16 @@ router.get('/:tid', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { tid, license, status, origin, seats, departingOn } = req.body;
+  const { license, origin, seats, departingOn } = req.body;
   const trip = new Trip(
-    tid,
+    undefined,
     license,
-    status,
+    undefined,
     origin,
     seats,
     departingOn,
-    null,
-    null
+    undefined,
+    undefined
   );
   try {
     const savedTrip = await trip.save();
@@ -203,29 +203,21 @@ router.delete('/:tid', async (req, res) => {
 
 router.put('/:tid', async (req, res) => {
   const tid = req.params.tid;
-  const { license, status, origin, seats, departingOn } = req.body;
+  const { status, origin, seats, departingOn } = req.body;
   try {
     const trip = await Trip.findByTid(tid);
+
     if (!trip) {
       badRequestMessage(res, 'Trip does not exist');
       return;
     }
-    if (license) {
-      trip.license = license;
-    }
-    if (status) {
-      trip.status = status;
-    }
-    if (origin) {
-      trip.origin = origin;
-    }
-    if (seats) {
-      trip.seats = seats;
-    }
-    if (departingOn) {
-      trip.departingOn = departingOn;
-    }
+
+    trip.status = status;
+    trip.origin = origin;
+    trip.seats = seats;
+    trip.departingOn = departingOn;
     const updatedTrip = await trip.update();
+
     ok(res, updatedTrip);
   } catch (error) {
     internalError(res, error);
