@@ -63,7 +63,7 @@ CREATE TABLE Trips (
   license varchar(255) NOT NULL REFERENCES Cars(license),
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
-  seats integer NOT NULL CHECK (seats > 0),
+  seats integer NOT NULL CHECK (seats >= 0),
   departing_on timestamptz NOT NULL,
   created_on timestamptz NOT NULL DEFAULT NOW(),
   updated_on timestamptz NOT NULL DEFAULT NOW()
@@ -111,3 +111,23 @@ CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, depar
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;
 
+
+CREATE OR REPLACE FUNCTION trip_seats_less_than_car_seats()
+RETURNS TRIGGER AS $$ DECLARE car_seats INTEGER;
+BEGIN 
+  SELECT C.seats
+  INTO car_seats
+  FROM Cars C
+  WHERE C.license = NEW.license;
+  IF NEW.seats <= car_seats 
+    THEN RETURN NEW;
+  ELSE  
+    RAISE NOTICE 'trip seats more than car seats';
+    RETURN NULL;
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trip_seats_less_than_car_seats_trigger
+BEFORE INSERT OR UPDATE ON Trips
+FOR EACH ROW
+EXECUTE PROCEDURE trip_seats_less_than_car_seats();
