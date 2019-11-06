@@ -1,6 +1,7 @@
 const express = require('express');
-const { Review } = require('../../models/review');
 const { Trip } = require('../../models/trip');
+const { Review } = require('../../models/review');
+const { Stop } = require('../../models/stop');
 const {
   ok,
   badRequestMessage,
@@ -41,22 +42,6 @@ router.put('/:tid/reviews', async (req, res) => {
   }
 });
 
-// TODO: Remove this
-router.get('/:tid/reviews', async (req, res) => {
-  const { tid } = req.params;
-  const { email } = req.session;
-  try {
-    const review = await Review.findByEmailAndTid(email, tid);
-    if (!review) {
-      badRequestMessage(res, 'Review does not exist');
-      return;
-    }
-    ok(res, review);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
 router.delete('/:tid/reviews', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;
@@ -68,22 +53,6 @@ router.delete('/:tid/reviews', async (req, res) => {
     }
     const deletedReview = await review.delete();
     ok(res, deletedReview);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-//Get bid
-router.get('/:tid/bidding/stop/:address', async (req, res) => {
-  const { tid, address } = req.params;
-  const { email } = req.session;
-  try {
-    const bid = await Bid.findByUserAndStop(email, tid, address);
-    if (!bid) {
-      badRequestMessage(res, 'Bid does not exist');
-      return;
-    }
-    ok(res, bid);
   } catch (error) {
     internalError(res, error);
   }
@@ -139,46 +108,19 @@ router.delete('/:tid/bidding/stop/:address', async (req, res) => {
   }
 });
 
-//Get bid by trip and status of driver
-router.get('/:tid/bidding', async (req, res) => {
-  const { tid } = req.params;
-  const { status } = req.query;
-  const { email } = req.session; //driver email
-  try {
-    const bids = await Bid.findBidByTripDriverStatus(tid, email, status);
-    ok(res, bids);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.get('/:tid', async (req, res) => {
-  const tid = req.params.tid;
-  try {
-    const trip = await Trip.findByTid(tid);
-    if (!trip) {
-      badRequestMessage(res, 'Trip does not exist');
-      return;
-    }
-    ok(res, trip);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
 router.post('/', async (req, res) => {
   const { license, origin, seats, departingOn } = req.body;
-  const trip = new Trip(
-    undefined,
-    license,
-    undefined,
-    origin,
-    seats,
-    departingOn,
-    undefined,
-    undefined
-  );
   try {
+    const trip = new Trip(
+      undefined,
+      license,
+      undefined,
+      origin,
+      seats,
+      departingOn,
+      undefined,
+      undefined
+    );
     const savedTrip = await trip.save();
     ok(res, savedTrip);
   } catch (error) {
@@ -186,23 +128,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/:tid', async (req, res) => {
-  const tid = req.params.tid;
-  try {
-    const trip = await Trip.findByTid(tid);
-    if (!trip) {
-      badRequestMessage(res, 'Trip does not exist');
-      return;
-    }
-    const deletedTrip = await trip.delete();
-    ok(res, deletedTrip);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
 router.put('/:tid', async (req, res) => {
-  const tid = req.params.tid;
+  const { tid } = req.params;
   const { status, origin, seats, departingOn } = req.body;
   try {
     const trip = await Trip.findByTid(tid);
@@ -219,6 +146,35 @@ router.put('/:tid', async (req, res) => {
     const updatedTrip = await trip.update();
 
     ok(res, updatedTrip);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.delete('/:tid', async (req, res) => {
+  const { tid } = req.params;
+  try {
+    const trip = await Trip.findByTid(tid);
+    if (!trip) {
+      badRequestMessage(res, 'Trip does not exist');
+      return;
+    }
+    const deletedTrip = await trip.delete();
+    ok(res, deletedTrip);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
+
+router.post('/:tid/stops', async (req, res) => {
+  const { tid } = req.params;
+  const { address, minPrice } = req.body;
+  console.log({ address });
+  console.log({ minPrice });
+  try {
+    const stop = new Stop(minPrice, address, tid);
+    const savedStop = await stop.save();
+    ok(res, savedStop);
   } catch (error) {
     internalError(res, error);
   }
