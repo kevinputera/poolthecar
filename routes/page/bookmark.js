@@ -4,28 +4,48 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
 
+const BOOKMARKS_PAGE_LIMIT = 15;
+
 router.get('/', async (req, res) => {
-  const { name } = req.query;
+  const { search = '', page = 1 } = req.query;
   const { email } = req.session;
 
-  let bookmarks;
-  if (name) {
-    bookmarks = await Bookmark.findAllByEmailAndLikeName(email, name);
+  const {
+    hasNextPage,
+    bookmarks,
+  } = await Bookmark.findAllByEmailAndSearchQuery(
+    email,
+    search,
+    +page,
+    BOOKMARKS_PAGE_LIMIT
+  );
+
+  let nextPageUrl;
+  let prevPageUrl;
+  if (search) {
+    nextPageUrl = `/p/bookmarks?search=${search}&page=${+page + 1}`;
+    prevPageUrl = `/p/bookmarks?search=${search}&page=${+page - 1}`;
   } else {
-    bookmarks = await Bookmark.findAllByEmail(email);
+    nextPageUrl = `/p/bookmarks?page=${+page + 1}`;
+    prevPageUrl = `/p/bookmarks?page=${+page - 1}`;
   }
 
   const isDriver = await checkIsDriver(email);
 
   res.render('bookmark/bookmarks', {
     title: 'Bookmarks',
-    query: req.query,
     isDriver,
+    hasPrevPage: +page !== 1,
+    hasNextPage,
+    nextPageUrl,
+    prevPageUrl,
+    search,
     bookmarks,
   });
 });
 
 router.get('/new', async (req, res) => {
+  const { email } = req.session;
   const isDriver = await checkIsDriver(email);
   res.render('bookmark/newBookmark', { title: 'New bookmark', isDriver });
 });

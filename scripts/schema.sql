@@ -129,3 +129,17 @@ CREATE TRIGGER no_self_bid_trigger
 BEFORE INSERT OR UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_bid();
+
+CREATE OR REPLACE FUNCTION no_self_message()
+RETURNS TRIGGER AS $$ BEGIN 
+  IF NEW.sender <> NEW.receiver
+    THEN RETURN NEW;
+  ELSE  
+    RAISE EXCEPTION 'Messaged self';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_self_message_trigger
+BEFORE INSERT OR UPDATE ON Messages
+FOR EACH ROW
+EXECUTE PROCEDURE no_self_message();
