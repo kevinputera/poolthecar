@@ -42,12 +42,14 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/new', async (req, res) => {
+  const { email } = req.session;
   const isDriver = await checkIsDriver(email);
   res.render('car/newCar', { title: 'New car', isDriver });
 });
 
 router.get('/:license/update', async (req, res) => {
   const { license } = req.params;
+  const { email } = req.session;
   const car = await Car.findByLicense(license);
   const isDriver = await checkIsDriver(email);
   res.render('car/updateCar', {

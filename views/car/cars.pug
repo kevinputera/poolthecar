@@ -4,7 +4,7 @@ append scripts
   script(src="/scripts/cars.js")
 
 block header
-  div(class="d-flex my-1")
+  .d-flex
     form(id="cars-filter-form" class="flex-grow-1")
       div(class="d-flex flex-row")
         input(
@@ -16,12 +16,12 @@ block header
         )
         button(
           id="cars-filter-button"
-          class="ml-1 btn btn-primary flex-shrink-0" 
+          class="ml-2 btn btn-primary flex-shrink-0" 
           type="submit"
         ) Search
     a(
       id="cars-add-button"
-      class="ml-1 btn btn-primary flex-shrink-0"
+      class="ml-2 btn btn-primary flex-shrink-0"
       href="/p/cars/new"
     ) New car
 
@@ -42,12 +42,11 @@ block table
           td= car.manufacturedOn
           td
             a(
-              href="/p/cars/" + encodeURIComponent(car.license) + "/delete"
-              class="cars-delete-button"
-              for-license=car.license
-            ) Delete
-            a(
-              class="ml-2"
               href="/p/cars/" + encodeURIComponent(car.license) + "/update"
             ) Update
+            a(
+              href="/p/cars/" + encodeURIComponent(car.license) + "/delete"
+              class="cars-delete-button ml-2"
+              for-license=car.license
+            ) Delete
     
