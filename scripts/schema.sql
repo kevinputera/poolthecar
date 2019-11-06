@@ -121,7 +121,7 @@ BEGIN
   IF driver_email <> NEW.email  
     THEN RETURN NEW;
   ELSE  
-    RAISE NOTICE 'driver bidding own trip';
+    RAISE EXCEPTION 'Driver bidding own trip';
     RETURN NULL;
   END IF;
 END; $$ LANGUAGE plpgsql;
