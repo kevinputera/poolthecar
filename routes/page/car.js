@@ -4,7 +4,7 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
 
-const CARS_PAGE_LIMIT = 1;
+const CARS_PAGE_LIMIT = 15;
 
 router.get('/', async (req, res) => {
   const { search = '', page = 1 } = req.query;
@@ -31,12 +31,12 @@ router.get('/', async (req, res) => {
 
   res.render('car/cars', {
     title: 'Cars',
+    isDriver,
     hasPrevPage: +page !== 1,
     hasNextPage,
     nextPageUrl,
     prevPageUrl,
     search,
-    isDriver,
     cars,
   });
 });

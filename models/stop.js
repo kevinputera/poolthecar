@@ -39,6 +39,20 @@ class Stop {
     });
     return this;
   }
+
+  static async findAllByTid(tid) {
+    const stops = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT min_price, address, tid
+        FROM Stops
+        WHERE tid = $1
+      `,
+      values: [tid],
+    });
+    return stops.rows.map(
+      stop => new Stop(stop.min_price, stop.address, stop.tid)
+    );
+  }
 }
 
 module.exports = { Stop };
