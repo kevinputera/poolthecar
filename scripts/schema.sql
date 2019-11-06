@@ -111,3 +111,22 @@ CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, depar
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;
 
+CREATE OR REPLACE FUNCTION bidding_own_trip()
+RETURNS TRIGGER AS $$ DECLARE driver_email varchar(255);
+BEGIN 
+  SELECT C.email
+  INTO driver_email
+  FROM Cars C JOIN Trips T ON C.license = T.license
+  WHERE T.tid = NEW.tid;
+  IF driver_email <> NEW.email  
+    THEN RETURN NEW;
+  ELSE  
+    RAISE NOTICE 'driver bidding own trip';
+    RETURN NULL;
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER bidding_own_trip_trigger
+BEFORE INSERT OR UPDATE ON Bids
+FOR EACH ROW
+EXECUTE PROCEDURE bidding_own_trip();
