@@ -122,7 +122,7 @@ BEGIN
   IF NEW.seats <= car_seats 
     THEN RETURN NEW;
   ELSE  
-    RAISE NOTICE 'trip seats more than car seats';
+    RAISE EXCEPTION 'trip seats more than car seats';
     RETURN NULL;
   END IF;
 END; $$ LANGUAGE plpgsql;
