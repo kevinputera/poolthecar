@@ -125,16 +125,16 @@ BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
 
-CREATE OR REPLACE FUNCTION no_trip_status_change()
+CREATE OR REPLACE FUNCTION no_bid_status_change()
 RETURNS TRIGGER AS $$ BEGIN
-  IF (OLD.status <> 'finished')
+  IF (OLD.status = 'pending')
     THEN RETURN NEW;
   ELSE
-    RAISE EXCEPTION 'Trip is in finished status, cannot change status.';
+    RAISE EXCEPTION 'Bid is not in pending status, cannot change status.';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER no_trip_status_change_trigger
-BEFORE UPDATE ON Trips
+CREATE TRIGGER no_bid_status_change_trigger
+BEFORE UPDATE ON Bids
 FOR EACH ROW
-EXECUTE PROCEDURE no_trip_status_change();
+EXECUTE PROCEDURE no_bid_status_change();
