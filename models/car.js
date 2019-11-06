@@ -49,6 +49,28 @@ class Car {
     return this;
   }
 
+  static async findAllByEmail(email) {
+    const cars = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT license, email, model, seats, manufactured_on 
+        FROM Cars
+        WHERE email = $1
+      `,
+      values: [email],
+    });
+
+    return cars.rows.map(
+      car =>
+        new Car(
+          car.license,
+          car.email,
+          car.model,
+          car.seats,
+          car.manufactured_on
+        )
+    );
+  }
+
   static async findAllByEmailAndSearchQuery(email, search, page, limit) {
     const cars = await makeSingleQuery({
       text: /* sql */ `
