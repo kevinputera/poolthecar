@@ -124,3 +124,36 @@ CREATE TRIGGER no_self_message_trigger
 BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
+
+CREATE OR REPLACE FUNCTION successful_bids_equal_seat_count()
+RETURNS TRIGGER AS $$ 
+DECLARE successful_bids_count INTEGER;
+DECLARE seats_count INTEGER;
+BEGIN 
+  SELECT COUNT(B.status)
+  INTO successful_bids_count
+  FROM Bids B
+  WHERE B.tid = NEW.tid
+  AND   B.status = 'won';
+  
+  SELECT T.seats
+  INTO seats_count
+  FROM Trips T
+  WHERE T.tid = NEW.tid;
+
+  IF successful_bids_count = seats_count
+    THEN BEGIN
+      UPDATE Bids 
+      SET status = 'failed'
+      WHERE tid = NEW.tid
+      AND status <> 'won';
+    END;
+  END IF;
+
+  RETURN NEW;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER successful_bids_equal_seat_count_trigger
+BEFORE INSERT OR UPDATE ON Bids
+FOR EACH ROW WHEN (NEW.status = 'won')
+EXECUTE PROCEDURE successful_bids_equal_seat_count();
