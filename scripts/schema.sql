@@ -112,7 +112,7 @@ CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, depar
   JOIN Drivers D ON C.email = D.email;
 
 
-CREATE OR REPLACE FUNCTION trip_seats_less_than_car_seats()
+CREATE OR REPLACE FUNCTION no_trip_seats_less_than_car_seats()
 RETURNS TRIGGER AS $$ DECLARE car_seats INTEGER;
 BEGIN 
   SELECT C.seats
@@ -123,11 +123,10 @@ BEGIN
     THEN RETURN NEW;
   ELSE  
     RAISE EXCEPTION 'trip seats more than car seats';
-    RETURN NULL;
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trip_seats_less_than_car_seats_trigger
+CREATE TRIGGER no_trip_seats_less_than_car_seats_trigger
 BEFORE INSERT OR UPDATE ON Trips
 FOR EACH ROW
-EXECUTE PROCEDURE trip_seats_less_than_car_seats();
+EXECUTE PROCEDURE no_trip_seats_less_than_car_seats();
