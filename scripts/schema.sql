@@ -111,3 +111,17 @@ CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, depar
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;
 
+CREATE OR REPLACE FUNCTION message_self()
+RETURNS TRIGGER AS $$ BEGIN 
+  IF NEW.sender <> NEW.receiver
+    THEN RETURN NEW;
+  ELSE  
+    RAISE EXCEPTION 'messaging self';
+    RETURN NULL;
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER message_self_trigger
+BEFORE INSERT OR UPDATE ON Messages
+FOR EACH ROW
+EXECUTE PROCEDURE message_self();
