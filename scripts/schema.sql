@@ -124,3 +124,17 @@ CREATE TRIGGER no_self_message_trigger
 BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
+
+CREATE OR REPLACE FUNCTION no_bid_status_change()
+RETURNS TRIGGER AS $$ BEGIN
+  IF (OLD.status = 'pending')
+    THEN RETURN NEW;
+  ELSE
+    RAISE EXCEPTION 'Bid is not in pending status, cannot change status.';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_bid_status_change_trigger
+BEFORE UPDATE ON Bids
+FOR EACH ROW
+EXECUTE PROCEDURE no_bid_status_change();
