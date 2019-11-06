@@ -66,12 +66,12 @@ class Driver {
       values: [email],
     });
     if (totalIncome.rows.length === 0) {
-      return null;
+      return 0;
     }
     return totalIncome.rows[0].total_income;
   }
 
-  static async findDriverMonthlyIncome(email, month, year) {
+  static async getDriverMonthlyIncome(email, month, year) {
     const monthlyIncome = await makeSingleQuery({
       text: /* sql */ `
         SELECT monthly_income 
@@ -80,20 +80,19 @@ class Driver {
                 EXTRACT(YEAR FROM D.departing_on) AS year
               FROM DriverTrips D JOIN Bids B on B.tid = D.tid
               WHERE B.status = 'won' AND D.status = 'finished' AND D.email = $1
-              GROUP BY(month,year)
-              ORDER BY year DESC,month DESC) AS monthly_incomes
+              GROUP BY(month,year)) AS monthly_incomes
         WHERE monthly_incomes.month = $2 AND monthly_incomes.year = $3
         `,
       values: [email, month, year],
     });
 
     if (monthlyIncome.rows.length === 0) {
-      return null;
+      return 0;
     }
     return monthlyIncome.rows[0].monthly_income;
   }
 
-  static async findConsecutiveTrips(email, page, limit) {
+  static async getConsecutiveTrips(email, page, limit) {
     const consecutiveTrips = await makeSingleQuery({
       text: /* sql */ `
         WITH DistinctDates(date) AS (
@@ -109,7 +108,7 @@ class Driver {
         SELECT MIN(date) AS start_date, MAX(date) AS end_date, COUNT(*) AS num_dates
         FROM ConsecutiveDates
         GROUP BY single_group
-        ORDER BY 1 DESC, 3 DESC
+        ORDER BY start_date DESC, num_dates DESC
         LIMIT $2
         OFFSET $3
         `,
@@ -132,6 +131,23 @@ class Driver {
             consecutiveTrip.num_dates;
         }),
     };
+  }
+
+  static async getOverallRating(email) {
+    const averageRating = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT ROUND(AVG(R.score),1) AS rating 
+        FROM DriverTrips D JOIN Reviews R ON D.tid = R.tid
+        WHERE D.status = 'finished' AND D.email = $1
+        `,
+      values: [email],
+    });
+
+    if (averageRating.rows.length === 0) {
+      return 0;
+    }
+
+    return averageRating.rows[0].rating;
   }
 }
 
