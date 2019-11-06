@@ -27,6 +27,6 @@ block table
       each tripWithStops in tripsWithStops 
         tr
           td= tripWithStops.origin
-          td= tripWithStops.stops.map(stop => stop.address).join(", ")
+          td= tripWithStops.stops.map(stop => stop.address).join(", ") || "-"
           td= tripWithStops.seats
           td= tripWithStops.departingOn
