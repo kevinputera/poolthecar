@@ -41,33 +41,40 @@ class Bookmark {
     return this;
   }
 
-  static async findAllByEmail(email) {
-    const bookmarks = await makeSingleQuery({
-      text: /* sql */ `
-        SELECT email, name, address 
-        FROM Bookmarks
-        WHERE email = $1
-      `,
-      values: [email],
-    });
-    return bookmarks.rows.map(
-      bookmark => new Bookmark(bookmark.email, bookmark.name, bookmark.address)
-    );
-  }
-
-  static async findAllByEmailAndLikeName(email, name) {
+  static async findAllByEmailAndSearchQuery(email, search, page, limit) {
     const bookmarks = await makeSingleQuery({
       text: /* sql */ `
         SELECT email, name, address
         FROM Bookmarks
         WHERE email = $1
-        AND LOWER(name) LIKE $2
+        AND (LOWER(name) LIKE $2 OR LOWER(address) LIKE $2)
+        LIMIT $3
+        OFFSET $4
       `,
-      values: [email, '%' + name.toLowerCase() + '%'],
+      values: [
+        email,
+        '%' + search.toLowerCase() + '%',
+        limit + 1,
+        (page - 1) * limit,
+      ],
     });
-    return bookmarks.rows.map(
-      bookmark => new Bookmark(bookmark.email, bookmark.name, bookmark.address)
-    );
+
+    let hasNextPage;
+    if (bookmarks.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      bookmarks: bookmarks.rows
+        .slice(0, limit)
+        .map(
+          bookmark =>
+            new Bookmark(bookmark.email, bookmark.name, bookmark.address)
+        ),
+    };
   }
 
   static async findByEmailAndName(email, name) {

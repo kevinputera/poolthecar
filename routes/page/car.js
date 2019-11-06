@@ -4,7 +4,7 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
 
-const CARS_PAGE_LIMIT = 1;
+const CARS_PAGE_LIMIT = 15;
 
 router.get('/', async (req, res) => {
   const { search = '', page = 1 } = req.query;
@@ -31,23 +31,25 @@ router.get('/', async (req, res) => {
 
   res.render('car/cars', {
     title: 'Cars',
+    isDriver,
     hasPrevPage: +page !== 1,
     hasNextPage,
     nextPageUrl,
     prevPageUrl,
     search,
-    isDriver,
     cars,
   });
 });
 
 router.get('/new', async (req, res) => {
+  const { email } = req.session;
   const isDriver = await checkIsDriver(email);
   res.render('car/newCar', { title: 'New car', isDriver });
 });
 
 router.get('/:license/update', async (req, res) => {
   const { license } = req.params;
+  const { email } = req.session;
   const car = await Car.findByLicense(license);
   const isDriver = await checkIsDriver(email);
   res.render('car/updateCar', {
