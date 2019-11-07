@@ -145,7 +145,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
 
 
-CREATE OR REPLACE FUNCTION no_trip_status_change()
+CREATE OR REPLACE FUNCTION no_invalid_trip_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status <> 'finished')
     THEN RETURN NEW;
@@ -154,10 +154,10 @@ RETURNS TRIGGER AS $$ BEGIN
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER no_trip_status_change_trigger
+CREATE TRIGGER no_invalid_trip_update_trigger
 BEFORE UPDATE ON Trips
 FOR EACH ROW
-EXECUTE PROCEDURE no_trip_status_change();
+EXECUTE PROCEDURE no_invalid_trip_update();
 
 CREATE OR REPLACE FUNCTION no_invalid_bid_update()
 RETURNS TRIGGER AS $$ BEGIN
