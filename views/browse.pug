@@ -20,13 +20,16 @@ block table
   table(class="table table-hover table-bordered table-striped")
     thead
       th Origin
-      th Stops(minimum price)
+      th Stops (minimum price)
       th #Seats
       th Departing on 
     tbody
       each tripWithStops in tripsWithStops 
-        tr
+        tr(
+          class="link-table-row"
+          data-href=`/p/trips/${tripWithStops.tid}/bids/new`
+        )
           td= tripWithStops.origin
-          td= tripWithStops.stops.map(stop => `${stop.address}($${stop.minPrice})`).join(", ") || "-"
+          td= tripWithStops.stops.map(stop => `${stop.address} ($${stop.minPrice})`).join(", ") || "-"
           td= tripWithStops.seats
-          td= tripWithStops.departingOn
+          td= new Date(tripWithStops.departingOn).toLocaleString()

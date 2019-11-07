@@ -1,26 +1,14 @@
 const express = require('express');
 const { Driver } = require('../../models/driver');
-const { Trip } = require('../../models/trip');
-const { ok, internalError } = require('../../utils/response');
+const { okMessage, internalError } = require('../../utils/response');
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-  const email = req.session.email;
+router.post('/register', async (req, res) => {
+  const { email } = req.session;
   try {
-    const driver = new Driver(email);
-    const savedDriver = await driver.save();
-    ok(res, savedDriver);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
-router.get('/:email/trips', async (req, res) => {
-  const email = req.params.email;
-  try {
-    const trips = await Trip.findByDriverEmailWithCarAndStops(email);
-    ok(res, trips);
+    await Driver.register(email);
+    okMessage(res, 'Registered as driver');
   } catch (error) {
     internalError(res, error);
   }

@@ -5,7 +5,7 @@ window.addEventListener('load', () => {
   for (let i = 0; i < carsDeleteButtons.length; i++) {
     carsDeleteButtons[i].addEventListener('click', async event => {
       event.preventDefault();
-      const carLicense = carsDeleteButtons[i].getAttribute('for-license');
+      const carLicense = carsDeleteButtons[i].getAttribute('data-license');
       if (confirm(`Would you like to delete car ${carLicense}?`)) {
         try {
           const { error } = await sendJSON(
