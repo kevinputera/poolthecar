@@ -5,64 +5,57 @@ window.addEventListener('load', () => {
   newTripButton.addEventListener('click', async event => {
     event.preventDefault();
 
-    const formData = new FormData(newTripForm);
+    const json = getJSONFromHTMLForm(newTripForm);
 
     // Get list of stops inside form
     const stopsData = [];
     const stopKeys = [];
-    for (const key of formData.keys()) {
+    Object.keys(json).forEach(key => {
       const matches = key.match(/^stopAddress(\d+)$/);
       if (matches && matches.length > 0) {
         const index = matches[1];
-        const addressKey = `stopAddress${index}`;
         const minPriceKey = `stopMinPrice${index}`;
         stopsData.push({
-          address: formData.get(addressKey),
-          minPrice: formData.get(minPriceKey),
+          address: json[key],
+          minPrice: json[minPriceKey],
         });
-        stopKeys.push(addressKey, minPriceKey);
+        stopKeys.push(key, minPriceKey);
       }
-    }
-    // Remove stop-related data from formData
-    stopKeys.forEach(key => formData.delete(key));
+    });
+    // Remove stop-related data from json
+    stopKeys.forEach(key => delete json[key]);
 
     // Replace local time with ISO format date
-    const departingOnISOFormat = new Date(
-      formData.get('departingOn')
-    ).toISOString();
-    formData.set('departingOn', departingOnISOFormat);
+    const departingOnISOFormat = new Date(json.departingOn).toISOString();
+    json.departingOn = departingOnISOFormat;
 
     try {
-      const createTripRes = await fetch('/api/trips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getURLEncodedStringFromFormData(formData),
-      });
-      if (!createTripRes.ok) {
-        console.log('New trip creation failed');
+      const { data: createdTrip, error: createTripError } = await sendJSON(
+        '/api/trips',
+        'POST',
+        json
+      );
+      if (createTripError) {
+        alert(`New trip creation error\n${prettyFormatJSON(createTripError)}`);
         return;
       }
-      const createdTrip = (await createTripRes.json()).data;
 
       const createStopsRes = await Promise.all(
         stopsData.map(data =>
-          fetch(`/api/trips/${createdTrip.tid}/stops`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          })
+          sendJSON(`/api/trips/${createdTrip.tid}/stops`, 'POST', data)
         )
       );
-      createStopsRes.forEach(res => {
-        if (!res.ok) {
-          console.log('New stop creation failed');
+      createStopsRes.forEach(({ error }) => {
+        if (error) {
+          alert(`New stop creation error\n${prettyFormatJSON(error)}`);
         }
       });
 
       // Reload page
       window.location.reload();
     } catch (error) {
-      console.log('New trip/stops creation error', error);
+      console.log(error);
+      alert(`New trip/stops creation error\n${prettyFormatJSON(error)}`);
     }
   });
 

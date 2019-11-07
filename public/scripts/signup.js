@@ -5,19 +5,16 @@ window.addEventListener('load', () => {
   signupButton.addEventListener('click', async event => {
     event.preventDefault();
     try {
-      const res = await fetch('/api/auth/new', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getURLEncodedStringFromHTMLForm(signupForm),
-      });
-      if (res.ok) {
+      const json = getJSONFromHTMLForm(signupForm);
+      const { error } = await sendJSON('/api/auth/new', 'POST', json);
+      if (error) {
+        alert(`Signup error\n${prettyFormatJSON(error)}`);
+      } else {
         // Redirect to browse page after successful login
         window.location.href = '/p/browse';
-      } else {
-        console.log('Signup failed');
       }
     } catch (error) {
-      console.log('Signup error', error);
+      alert(`Signup error\n${prettyFormatJSON(error)}`);
     }
   });
 });

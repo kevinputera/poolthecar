@@ -3,15 +3,15 @@ window.addEventListener('load', () => {
   const logoutButton = document.getElementById('logout-button');
   logoutButton.addEventListener('click', async event => {
     try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' });
-      if (res.ok) {
+      const { error } = await sendJSON('/api/auth/logout', 'POST');
+      if (error) {
+        alert(`Logout error\n${prettyFormatJSON(error)}`);
+      } else {
         // Redirect to login screen after successful logout
         window.location.href = '/p/auth/login';
-      } else {
-        console.log('Logout failed');
       }
     } catch (error) {
-      console.log('Logout error', error);
+      alert(`Logout error\n${prettyFormatJSON(error)}`);
     }
   });
 
@@ -21,17 +21,15 @@ window.addEventListener('load', () => {
     driverSignupButton.addEventListener('click', async event => {
       try {
         if (confirm('Would you wish to sign up as a driver?')) {
-          const res = await fetch('/api/drivers', { method: 'POST' });
-          if (res.ok) {
-            window.location.reload();
+          const { error } = await sendJSON('/api/drivers', 'POST');
+          if (error) {
+            alert(`Driver signup error\n${prettyFormatJSON(error)}`);
           } else {
-            console.log('Driver signup failed');
+            window.location.reload();
           }
-        } else {
-          console.log('Driver signup cancelled');
         }
       } catch (error) {
-        console.log('Driver signup error', error);
+        alert(`Driver signup error\n${prettyFormatJSON(error)}`);
       }
     });
   }

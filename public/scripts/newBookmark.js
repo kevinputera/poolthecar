@@ -5,19 +5,15 @@ window.addEventListener('load', () => {
   newBookmarkButton.addEventListener('click', async event => {
     event.preventDefault();
     try {
-      const res = await fetch('/api/bookmarks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getURLEncodedStringFromHTMLForm(newBookmarkForm),
-      });
-      if (res.ok) {
-        // Reload page
-        window.location.reload();
+      const json = getJSONFromHTMLForm(newBookmarkForm);
+      const { error } = await sendJSON('/api/bookmarks', 'POST', json);
+      if (error) {
+        alert(`New bookmark creation error\n${prettyFormatJSON(error)}`);
       } else {
-        console.log('New bookmark creation failed');
+        window.location.reload();
       }
     } catch (error) {
-      console.log('New bookmark creation error', error);
+      alert(`New bookmark creation error\n${prettyFormatJSON(error)}`);
     }
   });
 });

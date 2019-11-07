@@ -6,20 +6,20 @@ window.addEventListener('load', () => {
     bookmarksDeleteButtons[i].addEventListener('click', async event => {
       event.preventDefault();
       const bookmarkName = bookmarksDeleteButtons[i].getAttribute('for-name');
-      try {
-        const res = await fetch(
-          `/api/bookmarks/${encodeURIComponent(bookmarkName)}`,
-          {
-            method: 'DELETE',
+      if (confirm(`Would you like to delete bookmark ${bookmarkName}?`)) {
+        try {
+          const { error } = await sendJSON(
+            `/api/bookmarks/${encodeURIComponent(bookmarkName)}`,
+            'DELETE'
+          );
+          if (error) {
+            alert(`Bookmark deletion error\n${prettyFormatJSON(error)}`);
+          } else {
+            window.location.reload();
           }
-        );
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          console.log('Bookmark deletion failed');
+        } catch (error) {
+          alert(`Bookmark deletion error\n${prettyFormatJSON(error)}`);
         }
-      } catch (error) {
-        console.log('Bookmark deletion error', error);
       }
     });
   }
