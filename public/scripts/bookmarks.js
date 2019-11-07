@@ -5,7 +5,7 @@ window.addEventListener('load', () => {
   for (let i = 0; i < bookmarksDeleteButtons.length; i++) {
     bookmarksDeleteButtons[i].addEventListener('click', async event => {
       event.preventDefault();
-      const bookmarkName = bookmarksDeleteButtons[i].getAttribute('for-name');
+      const bookmarkName = bookmarksDeleteButtons[i].getAttribute('data-name');
       if (confirm(`Would you like to delete bookmark ${bookmarkName}?`)) {
         try {
           const { error } = await sendJSON(
