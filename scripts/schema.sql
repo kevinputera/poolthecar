@@ -111,6 +111,25 @@ CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, depar
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;
 
+CREATE OR REPLACE FUNCTION no_trip_seats_more_than_car_seats()
+RETURNS TRIGGER AS $$ DECLARE car_seats INTEGER;
+BEGIN 
+  SELECT C.seats
+  INTO car_seats
+  FROM Cars C
+  WHERE C.license = NEW.license;
+  IF NEW.seats <= car_seats 
+    THEN RETURN NEW;
+  ELSE  
+    RAISE EXCEPTION 'trip seats more than car seats';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_trip_seats_more_than_car_seats_trigger
+BEFORE INSERT OR UPDATE ON Trips
+FOR EACH ROW
+EXECUTE PROCEDURE no_trip_seats_more_than_car_seats();
+
 CREATE OR REPLACE FUNCTION no_self_bid()
 RETURNS TRIGGER AS $$ DECLARE driver_email varchar(255);
 BEGIN 
@@ -144,7 +163,6 @@ BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
 
-
 CREATE OR REPLACE FUNCTION no_invalid_trip_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status <> 'finished')
@@ -172,4 +190,3 @@ CREATE TRIGGER no_invalid_bid_update_trigger
 BEFORE UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_invalid_bid_update();
-
