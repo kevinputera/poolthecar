@@ -144,22 +144,19 @@ class Driver extends User {
   static async getOverallRating(email) {
     const averageRating = await makeSingleQuery({
       text: /* sql */ `
-        SELECT rating_scores AS rating
-        FROM (SELECT R.score AS rating 
-              FROM DriverTrips DT JOIN Reviews R ON DT.tid = R.tid
-              WHERE DT.status = 'finished'
-              AND DT.driver_email = $1) AS rating_scores
+        SELECT ROUND(AVG(R.score), 1) AS rating
+        FROM DriverTrips DT JOIN Reviews R ON DT.tid = R.tid
+        WHERE DT.status = 'finished'
+        AND DT.driver_email = $1
       `,
       values: [email],
     });
-
-    console.log(averageRating.rows);
 
     if (averageRating.rows.length === 0) {
       return 0;
     }
 
-    return averageRating.rows[0].rating;
+    return averageRating.rows[0].rating || 0;
   }
 }
 

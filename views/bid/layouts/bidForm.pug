@@ -8,18 +8,19 @@ block form
 
   block bidFormDriverInfo
     section.mb-3
-      h5.mb-3 Drivers' Info
-      div(class="driver-info-container container")
-        .row
-          .col-md-4
-            img(
-              class="driver-info-profile-photo"
-              src=tripWithDriver.driver.profilePhotoUrl
-              alt="Driver profile photo"
-            )
-          .col-md-8
-            .row
-              h6= `${tripWithDriver.driver.name} - ${driverOverallRating}/5.0`
-
+      h5.mb-3 Driver info
+      div(class="d-flex align-items-center")
+        img(
+          class="driver-info-profile-photo"
+          src=tripWithDriver.driver.profilePhotoUrl
+          alt="Driver profile photo"
+        )
+        .driver-info-details-container
+          div(class="d-flex flex-column")
+            div(
+              class="driver-info-text text-secondary"
+            ) &#11088; #{`${driverOverallRating}/5`}
+            .driver-info-text &#128100; #{tripWithDriver.driver.name}
+            .driver-info-text &#128222; #{tripWithDriver.driver.phone}
   
   block bidFormContent

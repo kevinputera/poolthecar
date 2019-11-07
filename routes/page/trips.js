@@ -44,8 +44,6 @@ router.get('/:tid/bids/new', async (req, res) => {
     tripWithDriver.driver.email
   );
 
-  console.log(driverOverallRating);
-
   res.render('bid/newBid', {
     title: 'New bid',
     isDriver,
