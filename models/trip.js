@@ -217,12 +217,12 @@ class Trip {
   static async findAllByDriverEmailAndAddressWithStops(driverEmail, address) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-        SELECT  T.tid, T.license, T.status, T.origin, T.seats,
-          T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
-        FROM    DriverTrips T
+        SELECT  DT.tid, DT.license, DT.status, DT.origin, DT.seats,
+          DT.departing_on, DT.created_on, DT.updated_on, S.min_price, S.address
+        FROM    DriverTrips DT
         NATURAL JOIN Stops S
-        WHERE   T.driver_email = $1
-          AND (LOWER(S.address) LIKE $2 OR LOWER(T.origin) LIKE $2)
+        WHERE   DT.driver_email = $1
+          AND (LOWER(S.address) LIKE $2 OR LOWER(DT.origin) LIKE $2)
       `,
       values: [driverEmail, '%' + address.toLowerCase() + '%'],
     });
@@ -254,10 +254,11 @@ class Trip {
   static async findAllByDriverEmailWithCarAndStops(driverEmail) {
     const res = await makeSingleQuery({
       text: /*sql*/ `
-      SELECT tid, T.license, status, origin, T.seats, departing_on, created_on, updated_on, min_price, address
-      FROM DriverTrips T
+      SELECT DT.tid, DT.license, DT.status, DT.origin, DT.seats, DT.departing_on,
+        DT.created_on, DT.updated_on, S.min_price, S.address
+      FROM DriverTrips DT
       NATURAL JOIN Stops S
-      WHERE T.driver_email = $1
+      WHERE DT.driver_email = $1
       `,
       values: [driverEmail],
     });

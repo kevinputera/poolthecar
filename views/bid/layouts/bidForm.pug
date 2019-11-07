@@ -1,0 +1,25 @@
+extends ../../layouts/appForm.pug
+
+append styles
+  link(rel="stylesheet" href="/styles/bidForm.css")
+
+block form
+  block bidFormTitle
+
+  block bidFormDriverInfo
+    section.mb-3
+      h5.mb-3 Drivers' Info
+      div(class="driver-info-container container")
+        .row
+          .col-md-4
+            img(
+              class="driver-info-profile-photo"
+              src=tripWithDriver.driver.profilePhotoUrl
+              alt="Driver profile photo"
+            )
+          .col-md-8
+            .row
+              h6= `${tripWithDriver.driver.name} - ${driverOverallRating}/5.0`
+
+  
+  block bidFormContent

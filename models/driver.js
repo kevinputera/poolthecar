@@ -63,8 +63,10 @@ class Driver extends User {
     const totalIncome = await makeSingleQuery({
       text: /* sql */ `
         SELECT SUM(B.value) AS total_income
-        FROM DriverTrips D JOIN Bids B ON B.tid = D.tid
-        WHERE B.status = 'won' AND D.status = 'finished' AND D.email = $1
+        FROM DriverTrips DT JOIN Bids B ON B.tid = DT.tid
+        WHERE B.status = 'won'
+        AND DT.status = 'finished'
+        AND DT.driver_email = $1
         `,
       values: [email],
     });
@@ -79,10 +81,12 @@ class Driver extends User {
       text: /* sql */ `
         SELECT monthly_income 
         FROM (SELECT SUM(B.value) AS monthly_income,
-                EXTRACT(MONTH FROM D.departing_on) AS month,
-                EXTRACT(YEAR FROM D.departing_on) AS year
-              FROM DriverTrips D JOIN Bids B on B.tid = D.tid
-              WHERE B.status = 'won' AND D.status = 'finished' AND D.email = $1
+                EXTRACT(MONTH FROM DT.departing_on) AS month,
+                EXTRACT(YEAR FROM DT.departing_on) AS year
+              FROM DriverTrips DT JOIN Bids B on B.tid = D.tid
+              WHERE B.status = 'won'
+              AND DT.status = 'finished'
+              AND DT.driver_email = $1
               GROUP BY(month,year)) AS monthly_incomes
         WHERE monthly_incomes.month = $2 AND monthly_incomes.year = $3
         `,
@@ -100,14 +104,15 @@ class Driver extends User {
       text: /* sql */ `
         WITH DistinctDates(date) AS (
           SELECT DISTINCT CAST(departing_on AS DATE)
-          FROM DriverTrips D
-          WHERE D.email = $1 AND D.status = 'finished'
+          FROM DriverTrips DT
+          WHERE DT.driver_email = $1
+          AND DT.status = 'finished'
         ),
-          ConsecutiveDates AS (
-            SELECT ROW_NUMBER() OVER (ORDER by date) AS row_number,
-              date - ROW_NUMBER() OVER (ORDER by date) * INTERVAL '1 day' AS single_group,date
-            FROM DistinctDates
-          )
+        ConsecutiveDates AS (
+          SELECT ROW_NUMBER() OVER (ORDER by date) AS row_number,
+            date - ROW_NUMBER() OVER (ORDER by date) * INTERVAL '1 day' AS single_group,date
+          FROM DistinctDates
+        )
         SELECT MIN(date) AS start_date, MAX(date) AS end_date, COUNT(*) AS num_dates
         FROM ConsecutiveDates
         GROUP BY single_group
@@ -139,12 +144,16 @@ class Driver extends User {
   static async getOverallRating(email) {
     const averageRating = await makeSingleQuery({
       text: /* sql */ `
-        SELECT ROUND(AVG(R.score),1) AS rating 
-        FROM DriverTrips D JOIN Reviews R ON D.tid = R.tid
-        WHERE D.status = 'finished' AND D.email = $1
-        `,
+        SELECT rating_scores AS rating
+        FROM (SELECT R.score AS rating 
+              FROM DriverTrips DT JOIN Reviews R ON DT.tid = R.tid
+              WHERE DT.status = 'finished'
+              AND DT.driver_email = $1) AS rating_scores
+      `,
       values: [email],
     });
+
+    console.log(averageRating.rows);
 
     if (averageRating.rows.length === 0) {
       return 0;
