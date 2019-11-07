@@ -43,6 +43,12 @@ block body
                   id="driver-signup-button"
                   class="btn btn-secondary"
                 ) Be a driver!
+              else
+                a(
+                  class="btn btn-primary"
+                  href="/p/trips/new"
+                  role="button"
+                ) New trip
               button(id="logout-button" class="btn btn-danger") Log out
       div(class="app-content col-md-10")
         block content

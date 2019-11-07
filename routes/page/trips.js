@@ -1,5 +1,6 @@
 const express = require('express');
 const { Trip } = require('../../models/trip');
+const { Car } = require('../../models/car');
 const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
@@ -23,6 +24,13 @@ router.get('/', async (req, res) => {
     trips,
     query: req.query,
   });
+});
+
+router.get('/new', async (req, res) => {
+  const { email } = req.session;
+  const isDriver = await checkIsDriver(email);
+  const cars = await Car.findAllByEmail(email);
+  res.render('trip/newTrip', { title: 'New trip', isDriver, cars });
 });
 
 module.exports = { tripPageRoutes: router };

@@ -25,19 +25,14 @@ class Trip {
   async save() {
     const trips = await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Trips (tid, license, status, origin, seats, departing_on)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING created_on, updated_on;
+        INSERT INTO Trips (license, origin, seats, departing_on)
+        VALUES ($1, $2, $3, $4)
+        RETURNING tid, status, created_on, updated_on;
       `,
-      values: [
-        this.tid,
-        this.license,
-        this.status,
-        this.origin,
-        this.seats,
-        this.departingOn,
-      ],
+      values: [this.license, this.origin, this.seats, this.departingOn],
     });
+    this.tid = trips.rows[0].tid;
+    this.status = trips.rows[0].status;
     this.createdOn = trips.rows[0].created_on;
     this.updatedOn = trips.rows[0].updated_on;
     return this;
