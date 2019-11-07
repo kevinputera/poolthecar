@@ -144,6 +144,21 @@ BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
 
+
+CREATE OR REPLACE FUNCTION no_invalid_trip_update()
+RETURNS TRIGGER AS $$ BEGIN
+  IF (OLD.status <> 'finished')
+    THEN RETURN NEW;
+  ELSE
+    RAISE EXCEPTION 'Trip is in finished status, cannot change status.';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_invalid_trip_update_trigger
+BEFORE UPDATE ON Trips
+FOR EACH ROW
+EXECUTE PROCEDURE no_invalid_trip_update();
+
 CREATE OR REPLACE FUNCTION no_invalid_bid_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status = 'pending')
@@ -157,3 +172,4 @@ CREATE TRIGGER no_invalid_bid_update_trigger
 BEFORE UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_invalid_bid_update();
+
