@@ -17,26 +17,26 @@ block body
                 href="/p/browse"
               ) Browse
               a(
-                class="nav-link" + (title === "Bookmarks" ? " active" : "")
-                href="/p/bookmarks"
-              ) Manage bookmarks
+                class="nav-link" + (title === "Bids" ? " active" : "")
+                href="/p/bids"
+              ) Manage bids
               if isDriver
+                a(
+                  class="nav-link" + (title === "Trips" ? " active" : "")
+                  href="/p/trips"
+                ) Manage trips
                 a(
                   class="nav-link" + (title === "Cars" ? " active" : "")
                   href="/p/cars"
                 ) Manage cars
               a(
+                class="nav-link" + (title === "Bookmarks" ? " active" : "")
+                href="/p/bookmarks"
+              ) Manage bookmarks
+              a(
                 class="nav-link" + (title === "Account" ? " active" : "")
                 href="/p/account"
-              ) Manage account
-              a(
-                class="nav-link" + (title === "Biddings" ? " active" : "")
-                href="/p/bids"
-              ) Manage biddings
-              a(
-                class="nav-link" + (title === "Trips" ? " active" : "")
-                href="/p/trips"
-              ) Manage trips
+              ) Account settings
             .app-sidebar-controls
               if !isDriver
                 button(

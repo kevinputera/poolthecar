@@ -19,8 +19,8 @@ router.get('/', async (req, res) => {
     bidsWithTrip = await Bid.findAllByCustomerWithTrip(email);
   }
 
-  res.render('bids', {
-    title: 'Biddings',
+  res.render('bid/bids', {
+    title: 'Bids',
     isLoggedIn: true,
     isDriver,
     bidsWithTrip,

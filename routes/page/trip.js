@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     trips = await Trip.findAllByDriverEmail(email);
   }
 
-  res.render('trips', {
+  res.render('trip/trips', {
     title: 'Trips',
     isLoggedIn: true,
     isDriver,
