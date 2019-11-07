@@ -143,3 +143,17 @@ CREATE TRIGGER no_self_message_trigger
 BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
+
+CREATE OR REPLACE FUNCTION no_invalid_bid_update()
+RETURNS TRIGGER AS $$ BEGIN
+  IF (OLD.status = 'pending')
+    THEN RETURN NEW;
+  ELSE
+    RAISE EXCEPTION 'Bid is not in pending status, cannot change status.';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_invalid_bid_update_trigger
+BEFORE UPDATE ON Bids
+FOR EACH ROW
+EXECUTE PROCEDURE no_invalid_bid_update();
