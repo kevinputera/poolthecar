@@ -49,6 +49,34 @@ class Car {
     return this;
   }
 
+  /**
+   * NOTE: This query should be paginated.
+   * Yet, that will introduce additional UI complexity since this query is
+   * currently only used to populate options for a <select> during new trip creation.
+   * For now, this will be left not paginated.
+   */
+  static async findAllByEmail(email) {
+    const cars = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT license, email, model, seats, manufactured_on 
+        FROM Cars
+        WHERE email = $1
+      `,
+      values: [email],
+    });
+
+    return cars.rows.map(
+      car =>
+        new Car(
+          car.license,
+          car.email,
+          car.model,
+          car.seats,
+          car.manufactured_on
+        )
+    );
+  }
+
   static async findAllByEmailAndSearchQuery(email, search, page, limit) {
     const cars = await makeSingleQuery({
       text: /* sql */ `

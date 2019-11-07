@@ -20,13 +20,13 @@ block table
   table(class="table table-hover table-bordered table-striped")
     thead
       th Origin
-      th Stops
+      th Stops(minimum price)
       th #Seats
       th Departing on 
     tbody
       each tripWithStops in tripsWithStops 
         tr
           td= tripWithStops.origin
-          td= tripWithStops.stops.map(stop => stop.address).join(", ")
+          td= tripWithStops.stops.map(stop => `${stop.address}($${stop.minPrice})`).join(", ") || "-"
           td= tripWithStops.seats
           td= tripWithStops.departingOn
