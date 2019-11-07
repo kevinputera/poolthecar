@@ -1,5 +1,6 @@
 const { makeSingleQuery } = require('../db');
 const { Stop } = require('./stop');
+const { Car } = require('./car');
 const { Driver } = require('./driver');
 
 class Trip {
@@ -106,7 +107,9 @@ class Trip {
           DT.created_on AS trip_created_on, DT.updated_on AS trip_updated_on,
           U.email, U.secret, U.name, U.gender, U.phone, U.profile_photo_url,
           U.created_on AS driver_created_on, U.updated_on AS driver_updated_on
-        FROM DriverTrips DT JOIN Users U ON DT.driver_email = U.email
+
+        FROM DriverTrips DT
+          JOIN Users U ON DT.driver_email = U.email
         WHERE tid = $1
       `,
       values: [tid],

@@ -32,4 +32,4 @@ block table
           td= tripWithStops.origin
           td= tripWithStops.stops.map(stop => `${stop.address}($${stop.minPrice})`).join(", ") || "-"
           td= tripWithStops.seats
-          td= tripWithStops.departingOn
+          td= new Date(tripWithStops.departingOn).toLocaleString()
