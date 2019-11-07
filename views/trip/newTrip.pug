@@ -6,42 +6,44 @@ append scripts
 block form
   h4.mb-3 New trip
   form#new-trip-form
-    .form-group
-      label(for="trip-license") Car
-      select(
-        id="trip-license"
-        class="form-control"
-        name="license"
-      )
-        each car in cars
-          option(value=car.license)= `${car.license} - ${car.model}`
-    .form-group
-      label(for="trip-origin") Origin
-      input(
-        id="trip-origin"
-        class="form-control"
-        name="origin"
-        type="text"
-        placeholder="Enter origin"
-      )
-    .form-group
-      label(for="trip-seats") No. of seats
-      input(
-        id="trip-seats"
-        class="form-control"
-        name="seats"
-        type="number"
-        placeholder="Enter no. of seats"
-      )
-    .form-group
-      label(for="trip-departing-on") Departure time
-      input(
-        id="trip-departing-on"
-        class="form-control"
-        name="departingOn"
-        type="datetime-local"
-        placeholder="Enter departure time"
-      )
+    section.mb-3
+      h5 Trip info
+      .form-group
+        label(for="trip-license") Car
+        select(
+          id="trip-license"
+          class="form-control"
+          name="license"
+        )
+          each car in cars
+            option(value=car.license)= `${car.license} - ${car.model}`
+      .form-group
+        label(for="trip-origin") Origin
+        input(
+          id="trip-origin"
+          class="form-control"
+          name="origin"
+          type="text"
+          placeholder="Enter origin"
+        )
+      .form-group
+        label(for="trip-seats") No. of seats
+        input(
+          id="trip-seats"
+          class="form-control"
+          name="seats"
+          type="number"
+          placeholder="Enter no. of seats"
+        )
+      .form-group
+        label(for="trip-departing-on") Departure time
+        input(
+          id="trip-departing-on"
+          class="form-control"
+          name="departingOn"
+          type="datetime-local"
+          placeholder="Enter departure time"
+        )
 
     section.mb-3
       h5 Stops

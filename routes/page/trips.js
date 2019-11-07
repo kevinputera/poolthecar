@@ -39,15 +39,15 @@ router.get('/:tid/bids/new', async (req, res) => {
   const { tid } = req.params;
   const isDriver = await checkIsDriver(email);
 
-  const tripWithDriver = await Trip.findByTidWithDriver(tid);
+  const tripWithDriverAndStops = await Trip.findByTidWithDriverAndStops(tid);
   const driverOverallRating = await Driver.getOverallRating(
-    tripWithDriver.driver.email
+    tripWithDriverAndStops.driver.email
   );
 
   res.render('bid/newBid', {
     title: 'New bid',
     isDriver,
-    tripWithDriver,
+    tripWithDriverAndStops,
     driverOverallRating,
   });
 });

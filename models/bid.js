@@ -15,12 +15,13 @@ class Bid {
   async save() {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Bids (email, tid, address, status, value)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO Bids (email, tid, address, value)
+        VALUES ($1, $2, $3, $4)
         RETURNING created_on, updated_on
       `,
-      values: [this.email, this.tid, this.address, this.status, this.value],
+      values: [this.email, this.tid, this.address, this.value],
     });
+    this.status = bids.rows[0].status;
     this.created_on = bids.rows[0].created_on;
     this.updated_on = bids.rows[0].updated_on;
     return this;

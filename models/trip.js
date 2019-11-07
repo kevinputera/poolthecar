@@ -100,16 +100,14 @@ class Trip {
     return trip;
   }
 
-  static async findByTidWithDriver(tid) {
+  static async findByTidWithDriverAndStops(tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
         SELECT DT.tid, DT.license, DT.status, DT.origin, DT.seats, DT.departing_on,
           DT.created_on AS trip_created_on, DT.updated_on AS trip_updated_on,
           U.email, U.secret, U.name, U.gender, U.phone, U.profile_photo_url,
           U.created_on AS driver_created_on, U.updated_on AS driver_updated_on
-
-        FROM DriverTrips DT
-          JOIN Users U ON DT.driver_email = U.email
+        FROM DriverTrips DT JOIN Users U ON DT.driver_email = U.email
         WHERE tid = $1
       `,
       values: [tid],
@@ -117,7 +115,7 @@ class Trip {
     if (res.rows.length === 0) {
       return null;
     }
-    const tripWithDriver = new Trip(
+    const tripWithDriverAndStops = new Trip(
       res.rows[0].tid,
       res.rows[0].license,
       res.rows[0].status,
@@ -127,7 +125,7 @@ class Trip {
       res.rows[0].trip_created_on,
       res.rows[0].trip_updated_on
     );
-    tripWithDriver.driver = new Driver(
+    tripWithDriverAndStops.driver = new Driver(
       res.rows[0].email,
       res.rows[0].secret,
       res.rows[0].name,
@@ -137,7 +135,8 @@ class Trip {
       res.rows[0].driver_created_on,
       res.rows[0].driver_updated_on
     );
-    return tripWithDriver;
+    tripWithDriverAndStops.stops = await Stop.findAllByTid(tid);
+    return tripWithDriverAndStops;
   }
 
   static async findAllByDriverEmail(driverEmail) {
