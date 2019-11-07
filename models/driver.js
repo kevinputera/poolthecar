@@ -56,7 +56,7 @@ class Driver {
     return driver;
   }
 
-  static async findDriverTotalIncome(email) {
+  static async getTotalIncome(email) {
     const totalIncome = await makeSingleQuery({
       text: /* sql */ `
         SELECT SUM(B.value) AS total_income
@@ -71,7 +71,7 @@ class Driver {
     return totalIncome.rows[0].total_income;
   }
 
-  static async getDriverIncome(email, month, year) {
+  static async getMonthlyIncome(email, month, year) {
     const monthlyIncome = await makeSingleQuery({
       text: /* sql */ `
         SELECT monthly_income 
