@@ -25,19 +25,14 @@ class Trip {
   async save() {
     const trips = await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Trips (tid, license, status, origin, seats, departing_on)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING created_on, updated_on;
+        INSERT INTO Trips (license, origin, seats, departing_on)
+        VALUES ($1, $2, $3, $4)
+        RETURNING tid, status, created_on, updated_on;
       `,
-      values: [
-        this.tid,
-        this.license,
-        this.status,
-        this.origin,
-        this.seats,
-        this.departingOn,
-      ],
+      values: [this.license, this.origin, this.seats, this.departingOn],
     });
+    this.tid = trips.rows[0].tid;
+    this.status = trips.rows[0].status;
     this.createdOn = trips.rows[0].created_on;
     this.updatedOn = trips.rows[0].updated_on;
     return this;
@@ -130,71 +125,54 @@ class Trip {
     );
   }
 
-  static async findAllCreatedWithStops() {
-    const res = await makeSingleQuery(/* sql */ `
-      SELECT T.tid, T.license, T.status, T.origin, T.seats,
-        T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
-      FROM Trips T NATURAL JOIN Stops S
-      WHERE T.status = 'created'
-    `);
-    const tripsMapping = {};
-    res.rows.forEach(row => {
-      if (tripsMapping[row.tid]) {
-        tripsMapping[row.tid].stops.push(
-          new Stop(row.min_price, row.address, row.tid)
-        );
-      } else {
-        const trip = new Trip(
-          row.tid,
-          row.license,
-          row.status,
-          row.origin,
-          row.seats,
-          row.departing_on,
-          row.created_on,
-          row.updated_on
-        );
-        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid] = trip;
-      }
-    });
-    return Object.values(tripsMapping);
-  }
-
-  static async findAllCreatedByAddressWithStops(address) {
+  static async findAllCreatedBySearchQueryWithStops(search, page, limit) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-        SELECT  T.tid, T.license, T.status, T.origin, T.seats,
-          T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
-        FROM    Trips T NATURAL JOIN Stops S
-        WHERE   LOWER(S.address) LIKE $1 OR LOWER(T.origin) LIKE $1
-        AND     T.status = 'created'
+        SELECT T.tid, T.license, T.status, T.origin, T.seats, T.departing_on, 
+          T.created_on, T.updated_on
+        FROM Trips T
+        WHERE T.status = 'created'
+        AND (LOWER(T.origin) LIKE $1
+          OR EXISTS (
+            SELECT 1
+            FROM Stops S
+            WHERE S.tid = T.tid
+            AND LOWER(S.address) LIKE $1
+          )
+        )
+        LIMIT $2
+        OFFSET $3
       `,
-      values: ['%' + address.toLowerCase() + '%'],
+      values: ['%' + search.toLowerCase() + '%', limit + 1, (page - 1) * limit],
     });
 
-    const tripsMapping = {};
-    res.rows.forEach(row => {
-      if (tripsMapping[row.tid]) {
-        tripsMapping[row.tid].stops.push(
-          new Stop(row.min_price, row.address, row.tid)
-        );
-      } else {
-        const trip = new Trip(
-          row.tid,
-          row.license,
-          row.status,
-          row.origin,
-          row.seats,
-          row.departing_on,
-          row.created_on,
-          row.updated_on
-        );
-        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid] = trip;
-      }
-    });
-    return Object.values(tripsMapping);
+    let hasNextPage;
+    if (res.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      tripsWithStops: await Promise.all(
+        res.rows.slice(0, limit).map(async row => {
+          const trip = new Trip(
+            row.tid,
+            row.license,
+            row.status,
+            row.origin,
+            row.seats,
+            row.departing_on,
+            row.created_on,
+            row.updated_on
+          );
+          const stops = await Stop.findAllByTid(row.tid);
+          trip.stops = stops;
+          return trip;
+        })
+      ),
+    };
   }
 
   static async findAllByDriverEmailAndAddressWithStops(driverEmail, address) {

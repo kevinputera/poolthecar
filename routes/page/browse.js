@@ -4,23 +4,41 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
 
+const BROWSE_PAGE_LIMIT = 15;
+
 router.get('/', async (req, res) => {
-  const { address } = req.query;
+  const { search = '', page = 1 } = req.query;
   const { email } = req.session;
 
-  let tripsWithStops;
-  if (address) {
-    tripsWithStops = await Trip.findAllCreatedByAddressWithStops(address);
+  const {
+    hasNextPage,
+    tripsWithStops,
+  } = await Trip.findAllCreatedBySearchQueryWithStops(
+    search,
+    +page,
+    BROWSE_PAGE_LIMIT
+  );
+
+  let nextPageUrl;
+  let prevPageUrl;
+  if (search) {
+    nextPageUrl = `/p/browse?search=${search}&page=${+page + 1}`;
+    prevPageUrl = `/p/browse?search=${search}&page=${+page - 1}`;
   } else {
-    tripsWithStops = await Trip.findAllCreatedWithStops();
+    nextPageUrl = `/p/browse?page=${+page + 1}`;
+    prevPageUrl = `/p/browse?page=${+page - 1}`;
   }
 
   const isDriver = await checkIsDriver(email);
 
   res.render('browse', {
     title: 'Browse',
-    query: req.query,
     isDriver,
+    hasPrevPage: +page !== 1,
+    hasNextPage,
+    nextPageUrl,
+    prevPageUrl,
+    search,
     tripsWithStops,
   });
 });

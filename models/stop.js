@@ -1,8 +1,8 @@
 const { makeSingleQuery } = require('../db');
 
 class Stop {
-  constructor(min_price, address, tid) {
-    this.min_price = min_price;
+  constructor(minPrice, address, tid) {
+    this.minPrice = minPrice;
     this.address = address;
     this.tid = tid;
   }
@@ -13,7 +13,7 @@ class Stop {
         INSERT INTO Stops (min_price, address, tid)
         VALUES ($1, $2, $3)
       `,
-      values: [this.min_price, this.address, this.tid],
+      values: [this.minPrice, this.address, this.tid],
     });
     return this;
   }
@@ -24,7 +24,7 @@ class Stop {
         UPDATE Stops SET min_price = $1
         WHERE tid = $3 AND address = $2
       `,
-      values: [this.min_price, this.address, this.tid],
+      values: [this.minPrice, this.address, this.tid],
     });
     return this;
   }
@@ -38,6 +38,20 @@ class Stop {
       values: [this.address, this.tid],
     });
     return this;
+  }
+
+  static async findAllByTid(tid) {
+    const stops = await makeSingleQuery({
+      text: /* sql */ `
+        SELECT min_price, address, tid
+        FROM Stops
+        WHERE tid = $1
+      `,
+      values: [tid],
+    });
+    return stops.rows.map(
+      stop => new Stop(stop.min_price, stop.address, stop.tid)
+    );
   }
 }
 
