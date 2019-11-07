@@ -5,18 +5,15 @@ window.addEventListener('load', () => {
   newCarButton.addEventListener('click', async event => {
     event.preventDefault();
     try {
-      const res = await fetch('/api/cars', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getURLEncodedStringFromHTMLForm(newCarForm),
-      });
-      if (res.ok) {
-        window.location.reload();
+      const json = getJSONFromHTMLForm(newCarForm);
+      const { error } = await sendJSON('/api/cars', 'POST', json);
+      if (error) {
+        alert(`New car creation error\n${prettyFormatJSON(error)}`);
       } else {
-        console.log('New car creation failed');
+        window.location.reload();
       }
     } catch (error) {
-      console.log('New car creation error', error);
+      alert(`New car creation error\n${prettyFormatJSON(error)}`);
     }
   });
 });

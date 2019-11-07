@@ -5,19 +5,16 @@ window.addEventListener('load', () => {
   loginButton.addEventListener('click', async event => {
     event.preventDefault();
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getURLEncodedStringFromHTMLForm(loginForm),
-      });
-      if (res.ok) {
+      const json = getJSONFromHTMLForm(loginForm);
+      const { error } = await sendJSON('/api/auth/login', 'POST', json);
+      if (error) {
+        alert(`Login error\n${prettyFormatJSON(error)}`);
+      } else {
         // Redirect to browse page after successful login
         window.location.href = '/p/browse';
-      } else {
-        console.log('Login failed');
       }
     } catch (error) {
-      console.log('Login error', error);
+      alert(`Login error\n${prettyFormatJSON(error)}`);
     }
   });
 });

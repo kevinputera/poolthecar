@@ -1,0 +1,26 @@
+extends ../../layouts/appForm.pug
+
+append styles
+  link(rel="stylesheet" href="/styles/bidForm.css")
+
+block form
+  block bidFormTitle
+
+  block bidFormDriverInfo
+    section.mb-4
+      h5.mb-3 Driver info
+      div(class="d-flex align-items-center")
+        img(
+          class="driver-info-profile-photo"
+          src=tripWithDriverAndStops.driver.profilePhotoUrl
+          alt="Driver profile photo"
+        )
+        .driver-info-details-container
+          div(class="d-flex flex-column")
+            div(
+              class="driver-info-text text-secondary"
+            ) &#11088; #{`${driverOverallRating}/5`}
+            .driver-info-text &#128100; #{tripWithDriverAndStops.driver.name}
+            .driver-info-text &#128222; #{tripWithDriverAndStops.driver.phone}
+  
+  block bidFormContent

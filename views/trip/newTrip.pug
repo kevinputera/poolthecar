@@ -1,0 +1,79 @@
+extends ../layouts/appForm.pug
+
+append scripts
+  script(src="/scripts/newTrip.js")
+
+block form
+  h4.mb-3 New trip
+  form#new-trip-form
+    section.mb-3
+      h5 Trip info
+      .form-group
+        label(for="trip-license") Car
+        select(
+          id="trip-license"
+          class="form-control"
+          name="license"
+        )
+          each car in cars
+            option(value=car.license)= `${car.license} - ${car.model}`
+      .form-group
+        label(for="trip-origin") Origin
+        input(
+          id="trip-origin"
+          class="form-control"
+          name="origin"
+          type="text"
+          placeholder="Enter origin"
+        )
+      .form-group
+        label(for="trip-seats") No. of seats
+        input(
+          id="trip-seats"
+          class="form-control"
+          name="seats"
+          type="number"
+          placeholder="Enter no. of seats"
+        )
+      .form-group
+        label(for="trip-departing-on") Departure time
+        input(
+          id="trip-departing-on"
+          class="form-control"
+          name="departingOn"
+          type="datetime-local"
+          placeholder="Enter departure time"
+        )
+
+    section.mb-3
+      h5 Stops
+      #stop-form-list
+        .form-row
+          div(class="form-group col-md-6")
+            label(for="stop-address-1") Address 1
+            input(
+              id="stop-address-1"
+              class="form-control"
+              name="stopAddress1"
+              type="text"
+              placeholder="Enter address"
+            ) 
+          div(class="form-group col-md-6")
+            label(for="stop-min-price-1") Minimum bid price 1
+            input(
+              id="stop-min-price-1"
+              class="form-control"
+              name="stopMinPrice1"
+              type="number"
+              placeholder="Enter minimum bid price"
+            ) 
+      button(
+        id="new-stop-form-button"
+        class="btn btn-secondary"
+      ) Add new stop
+
+    button(
+      id="new-trip-button"
+      class="btn btn-primary"
+      type="submit"
+    ) Create

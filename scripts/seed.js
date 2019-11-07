@@ -10,7 +10,7 @@ const { Review } = require('../models/review');
 
 const EMAILS = ['admin@poolthecar.com', 'member@poolthecar.com'];
 const LICENSES = ['A12345', 'B54321', 'C10000'];
-const TID = [1, 2, 3];
+const TID = Array(3).fill(0);
 
 const seedUsers = async () => {
   const users = [
@@ -45,16 +45,15 @@ const seedBookmarks = async () => {
 
 const seedMessages = async () => {
   const messages = [
-    new Message(null, EMAILS[0], EMAILS[1], 'Hello there!'),
-    new Message(null, EMAILS[0], EMAILS[1], 'How are you doing?'),
-    new Message(null, EMAILS[1], EMAILS[0], 'Hello back!'),
+    new Message(undefined, EMAILS[0], EMAILS[1], 'Hello there!'),
+    new Message(undefined, EMAILS[0], EMAILS[1], 'How are you doing?'),
+    new Message(undefined, EMAILS[1], EMAILS[0], 'Hello back!'),
   ];
   await Promise.all(messages.map(message => message.save()));
 };
 
 const seedDrivers = async () => {
-  const drivers = [new Driver(EMAILS[0])];
-  await Promise.all(drivers.map(driver => driver.save()));
+  await Driver.register(EMAILS[0]);
 };
 
 const seedCars = async () => {
@@ -68,11 +67,23 @@ const seedCars = async () => {
 
 const seedTrips = async () => {
   const trips = [
-    new Trip(TID[0], LICENSES[0], 'created', 'College Ave', 2, new Date()),
-    new Trip(TID[1], LICENSES[0], 'finished', 'Bugis', 3, new Date()),
-    new Trip(TID[2], LICENSES[1], 'finished', 'Clementi East', 2, new Date()),
+    new Trip(undefined, LICENSES[0], undefined, 'College Ave', 2, new Date()),
+    new Trip(undefined, LICENSES[0], undefined, 'Bugis', 3, new Date()),
+    new Trip(undefined, LICENSES[1], undefined, 'Clementi East', 2, new Date()),
   ];
-  await Promise.all(trips.map(trip => trip.save()));
+
+  const savedTrips = await Promise.all(trips.map(trip => trip.save()));
+  savedTrips.forEach((trip, index) => {
+    TID[index] = trip.tid;
+  });
+
+  const trip2 = savedTrips[1];
+  trip2.status = 'finished';
+  await trip2.update();
+
+  const trip3 = savedTrips[2];
+  trip3.status = 'finished';
+  await trip3.update();
 };
 
 const seedStops = async () => {

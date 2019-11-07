@@ -1,11 +1,15 @@
 extends ../layouts/app.pug
 
+append scripts
+  script(src="/scripts/appTable.js")
+
 append styles
   link(rel="stylesheet" href="/styles/appTable.css")
 
 block content
   .app-table-container
-    block header
+    .my-2
+      block header
 
     block table
     

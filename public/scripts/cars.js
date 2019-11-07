@@ -5,22 +5,20 @@ window.addEventListener('load', () => {
   for (let i = 0; i < carsDeleteButtons.length; i++) {
     carsDeleteButtons[i].addEventListener('click', async event => {
       event.preventDefault();
-      const carLicense = carsDeleteButtons[i].getAttribute('for-license');
+      const carLicense = carsDeleteButtons[i].getAttribute('data-license');
       if (confirm(`Would you like to delete car ${carLicense}?`)) {
         try {
-          const res = await fetch(
+          const { error } = await sendJSON(
             `/api/cars/${encodeURIComponent(carLicense)}`,
-            {
-              method: 'DELETE',
-            }
+            'DELETE'
           );
-          if (res.ok) {
-            window.location.reload();
+          if (error) {
+            alert(`Car deletion error\n${prettyFormatJSON(error)}`);
           } else {
-            console.log('Car deletion failed');
+            window.location.reload();
           }
         } catch (error) {
-          console.log('Car deletion error', error);
+          alert(`Car deletion error\n${prettyFormatJSON(error)}`);
         }
       }
     });

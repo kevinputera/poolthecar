@@ -5,19 +5,15 @@ window.addEventListener('load', () => {
   userUpdateButton.addEventListener('click', async event => {
     event.preventDefault();
     try {
-      const res = await fetch('/api/users', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getURLEncodedStringFromHTMLForm(userUpdateForm),
-      });
-      if (res.ok) {
-        // Reload page
-        window.location.reload();
+      const json = getJSONFromHTMLForm(userUpdateForm);
+      const { error } = await sendJSON('/api/users', 'PUT', json);
+      if (error) {
+        alert(`User update error\n${prettyFormatJSON(error)}`);
       } else {
-        console.log('User update failed');
+        window.location.reload();
       }
     } catch (error) {
-      console.log('User update error', error);
+      alert(`User update error\n${prettyFormatJSON(error)}`);
     }
   });
 });

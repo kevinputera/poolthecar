@@ -1,0 +1,19 @@
+.driver-info-profile-photo {
+  width: 160px;
+  height: 160px;
+  border-radius: 80px;
+  object-position: 50% 50%;
+  object-fit: cover;
+}
+
+.driver-info-details-container {
+  display: flex;
+  margin-left: 15px;
+  align-items: center;
+  height: 100%;
+}
+
+.driver-info-text {
+  margin-top: 5px;
+  font-size: 20px;
+}

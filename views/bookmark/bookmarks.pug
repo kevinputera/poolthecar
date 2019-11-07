@@ -4,24 +4,24 @@ append scripts
   script(src="/scripts/bookmarks.js")
 
 block header
-  div(class="d-flex my-1")
+  .d-flex
     form(id="bookmarks-filter-form" class="flex-grow-1")
       div(class="d-flex flex-row")
         input(
           class="form-control flex-grow-1"
           type="text"
-          name="name"
-          value=(query.name || "")
-          placeholder="Search bookmark name"
+          name="search"
+          value=search
+          placeholder="Search for name or address"
         )
         button(
           id="bookmarks-filter-button"
-          class="ml-1 btn btn-primary flex-shrink-0" 
+          class="ml-2 btn btn-primary flex-shrink-0" 
           type="submit"
         ) Search
     a(
       id="bookmarks-add-button"
-      class="ml-1 btn btn-primary flex-shrink-0"
+      class="ml-2 btn btn-primary flex-shrink-0"
       href="/p/bookmarks/new"
     ) New bookmark
 
@@ -38,11 +38,10 @@ block table
           td= bookmark.address
           td
             a(
-              href="/p/bookmarks/" + encodeURIComponent(bookmark.name) + "/delete"
-              class="bookmarks-delete-button"
-              for-name=bookmark.name
-            ) Delete
-            a(
-              class="ml-2"
               href="/p/bookmarks/" + encodeURIComponent(bookmark.name) + "/update"
             ) Update
+            a(
+              href="/p/bookmarks/" + encodeURIComponent(bookmark.name) + "/delete"
+              class="bookmarks-delete-button ml-2"
+              data-name=bookmark.name
+            ) Delete

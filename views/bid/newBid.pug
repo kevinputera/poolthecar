@@ -1,0 +1,64 @@
+extends layouts/bidForm.pug
+
+append scripts
+  script.
+    const newBidTid = !{tripWithDriverAndStops.tid}
+  script(src="/scripts/newBid.js")
+
+block bidFormTitle
+  h4.mb-3 New bid
+
+block bidFormContent
+  form#new-bid-form
+    section.mb-3
+      h5 Trip info
+      .form-group
+        label(for="trip-origin") Origin
+        input(
+          id="trip-origin"
+          class="form-control"
+          disabled
+          value=tripWithDriverAndStops.origin
+        )
+      .form-group
+        label(for="trip-departing-on") Departure time
+        input(
+          id="trip-departing-on"
+          class="form-control"
+          disabled
+          value=new Date(tripWithDriverAndStops.departingOn).toLocaleString()
+        )
+    
+    section.mb-3
+      h5 Bid
+      .form-group
+        label(for="bid-address") Stop
+        select(
+          id="bid-address"
+          class="form-control"
+          name="address"
+        )
+          each stop in tripWithDriverAndStops.stops
+            option(value=stop.address)= `${stop.address} (minimum price: $${stop.minPrice})`
+      .form-group
+        label(for="bid-value") Value
+        input(
+          id="bid-value"
+          class="form-control"
+          name="value"
+          type="number"
+          placeholder="Enter your bid value"
+        )
+
+    .d-flex
+      button(
+        id="new-bid-button"
+        class="btn btn-primary"
+        type="submit"
+      ) Place bid
+      a(
+        href="/p/browse"
+        class="ml-1 btn btn-secondary"
+        role="button"
+      ) Back
+
