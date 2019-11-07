@@ -53,8 +53,7 @@ const seedMessages = async () => {
 };
 
 const seedDrivers = async () => {
-  const drivers = [new Driver(EMAILS[0])];
-  await Promise.all(drivers.map(driver => driver.save()));
+  await Driver.register(EMAILS[0]);
 };
 
 const seedCars = async () => {

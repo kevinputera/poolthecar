@@ -1,7 +1,7 @@
 const { Driver } = require('../models/driver');
 
 const checkIsDriver = async email => {
-  const driver = await Driver.findByEmailWithUser(email);
+  const driver = await Driver.findByEmail(email);
   if (driver) {
     return true;
   }

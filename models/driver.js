@@ -1,34 +1,40 @@
 const { makeSingleQuery } = require('../db');
 const { User } = require('./user');
 
-class Driver {
-  constructor(email) {
-    this.email = email;
+class Driver extends User {
+  constructor(
+    email,
+    secret,
+    name,
+    gender,
+    phone,
+    profilePhotoUrl,
+    createdOn,
+    updatedOn
+  ) {
+    super(
+      email,
+      secret,
+      name,
+      gender,
+      phone,
+      profilePhotoUrl,
+      createdOn,
+      updatedOn
+    );
   }
 
-  async save() {
+  static async register(email) {
     await makeSingleQuery({
       text: /* sql */ `
-        INSERT INTO Drivers (email)
+        INSERT INTO Drivers (email) 
         VALUES ($1)
       `,
-      values: [this.email],
+      values: [email],
     });
-    return this;
   }
 
-  async delete() {
-    await makeSingleQuery({
-      text: /* sql */ `
-        DELETE FROM Drivers
-        WHERE email = $1
-      `,
-      values: [this.email],
-    });
-    return this;
-  }
-
-  static async findByEmailWithUser(email) {
+  static async findByEmail(email) {
     const drivers = await makeSingleQuery({
       text: /* sql */ `
         SELECT D.email, U.secret, U.name, U.gender, U.phone, U.profile_photo_url, U.created_on, U.updated_on
@@ -40,9 +46,7 @@ class Driver {
     if (drivers.rows.length === 0) {
       return null;
     }
-
-    const driver = new Driver(drivers.rows[0].email);
-    driver.user = new User(
+    const driver = new Driver(
       drivers.rows[0].email,
       drivers.rows[0].secret,
       drivers.rows[0].name,
@@ -52,7 +56,6 @@ class Driver {
       drivers.rows[0].created_on,
       drivers.rows[0].updated_on
     );
-
     return driver;
   }
 

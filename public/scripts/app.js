@@ -21,7 +21,7 @@ window.addEventListener('load', () => {
     driverSignupButton.addEventListener('click', async event => {
       try {
         if (confirm('Would you wish to sign up as a driver?')) {
-          const { error } = await sendJSON('/api/drivers', 'POST');
+          const { error } = await sendJSON('/api/drivers/register', 'POST');
           if (error) {
             alert(`Driver signup error\n${prettyFormatJSON(error)}`);
           } else {
