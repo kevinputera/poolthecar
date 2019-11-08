@@ -34,7 +34,9 @@ class Bid {
     const bids = await makeSingleQuery({
       text: /* sql */ `
         UPDATE Bids SET status = $4, value = $5, updated_on = NOW()
-        WHERE email = $1 AND tid = $2 AND address = $3
+        WHERE email = $1
+        AND tid = $2
+        AND address = $3
         RETURNING created_on, updated_on
       `,
       values: [this.email, this.tid, this.address, this.status, this.value],
@@ -47,7 +49,9 @@ class Bid {
     await makeSingleQuery({
       text: /* sql */ `
         DELETE FROM Bids
-        WHERE email = $1 AND tid = $2 AND address = $3
+        WHERE email = $1
+        AND tid = $2
+        AND address = $3
       `,
       values: [this.email, this.tid, this.address],
     });
@@ -229,12 +233,12 @@ class Bid {
     });
   }
 
-  static async findByCustomerAndStop(email, tid, address) {
+  static async findByEmailAndTidAndAddress(email, tid, address) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, address, status, value, created_on, updated_on
-      FROM Bids
-      WHERE email = $1 AND tid = $2 AND address = $3
+        SELECT email, tid, address, status, value, created_on, updated_on
+        FROM Bids
+        WHERE email = $1 AND tid = $2 AND address = $3
       `,
       values: [email, tid, address],
     });

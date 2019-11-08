@@ -132,18 +132,14 @@ router.post('/:tid/bids', async (req, res) => {
 /**
  * Route to update a bid
  */
-router.put('/:tid/bids', async (req, res) => {
-  const { tid } = req.params;
-  const { address, value } = req.body;
+router.put('/:tid/bids/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { value } = req.body;
   const { email } = req.session;
   try {
-    let bid = await Bid.findByCustomerAndStop(email, tid, address);
+    const bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
-      return;
-    }
-    if (bid.status !== 'pending') {
-      badRequestMessage(res, 'Bid not in pending stage');
       return;
     }
     bid.value = value;
@@ -155,17 +151,24 @@ router.put('/:tid/bids', async (req, res) => {
   }
 });
 
-// router.delete('/:tid/bids', async (req, res) => {
-//   const { tid, address } = req.params;
-//   const { email } = req.session;
-//   const bid = new Bid(email, tid, address);
-//   try {
-//     const deletedBid = await bid.delete();
-//     ok(res, deletedBid);
-//   } catch (error) {
-//     internalError(res, error);
-//   }
-// });
+/**
+ * Route to delete a bid
+ */
+router.delete('/:tid/bids/:address', async (req, res) => {
+  const { tid, address } = req.params;
+  const { email } = req.session;
+  try {
+    const bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
+    if (!bid) {
+      badRequestMessage(res, 'Bid does not exist');
+      return;
+    }
+    const deletedBid = await bid.delete();
+    ok(res, deletedBid);
+  } catch (error) {
+    internalError(res, error);
+  }
+});
 
 /**
  * Route to create a new review

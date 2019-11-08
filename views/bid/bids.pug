@@ -1,8 +1,5 @@
 extends ../layouts/appTable.pug
 
-append scripts
-  script(src="/bids.js")
-
 block header
   form(id="bids-filter-form" class="my-1")
     div(class="d-flex flex-row")
@@ -38,5 +35,5 @@ block table
           td= new Date(bidWithTrip.trip.departingOn).toLocaleString()
           td
             a(
-              href=`/p/trips/${bidWithTrip.trip.tid}/bids/${bidWithTrip.address}`
+              href=`/p/trips/${bidWithTrip.trip.tid}/bids/detail`
             ) View

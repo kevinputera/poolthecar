@@ -1,6 +1,7 @@
 const express = require('express');
 const { Trip } = require('../../models/trip');
 const { Car } = require('../../models/car');
+const { Bid } = require('../../models/bid');
 const { Driver } = require('../../models/driver');
 const { checkIsDriver } = require('../../utils/checkIsDriver');
 
@@ -49,6 +50,29 @@ router.get('/:tid/bids/new', async (req, res) => {
     isDriver,
     tripWithDriverAndStops,
     driverOverallRating,
+  });
+});
+
+router.get('/:tid/bids/detail', async (req, res) => {
+  const { email } = req.session;
+  const { tid } = req.params;
+  const isDriver = checkIsDriver(email);
+
+  const driver = await Driver.findByTid(tid);
+  const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStops(email, tid);
+  const tripWithStops = await Trip.findByTidWithStops(tid);
+  const wonBidWithReview = await Bid.findWonBidByTidAndCustomerWithReview(
+    tid,
+    email
+  );
+
+  res.render('bid/bidDetail', {
+    title: 'Bid detail',
+    isDriver,
+    driver,
+    bidMapWithStop,
+    tripWithStops,
+    wonBidWithReview,
   });
 });
 
