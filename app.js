@@ -9,7 +9,6 @@ const { browsePageRoutes } = require('./routes/page/browse');
 const { bidPageRoutes } = require('./routes/page/bid');
 const { tripPageRoutes } = require('./routes/page/trip');
 const { bookmarkPageRoutes } = require('./routes/page/bookmark');
-const { detailTripRoutes } = require('./routes/page/detailTrip');
 const { carPageRoutes } = require('./routes/page/car');
 
 const { authenticationRoutes } = require('./routes/api/authentication');
@@ -51,13 +50,15 @@ app.use('/p/auth', authenticationPageRoutes);
 app.use('/api/auth', authenticationRoutes);
 
 // Block of all the routes below from unauthenticated users
+// Page routes
 app.use('/p/browse', requireAuthentication, browsePageRoutes);
 app.use('/p/account', requireAuthentication, accountPageRoutes);
 app.use('/p/bids', requireAuthentication, bidPageRoutes);
 app.use('/p/trips', requireAuthentication, tripPageRoutes);
 app.use('/p/bookmarks', requireAuthentication, bookmarkPageRoutes);
-app.use('/p/detailTrip', requireAuthentication, detailTripRoutes);
 app.use('/p/cars', requireAuthentication, carPageRoutes);
+
+// API routes
 app.use('/api/trips', requireAuthentication, tripRoutes);
 app.use('/api/users', requireAuthentication, userRoutes);
 app.use('/api/bookmarks', requireAuthentication, bookmarkRoutes);

@@ -51,6 +51,27 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * Route to render trip detail page
+ */
+router.get('/:tid/detail', async (req, res) => {
+  const { tid } = req.params;
+  const { email } = req.session;
+  const isDriver = checkIsDriver(email);
+
+  const tripWithStops = await Trip.findByTidWithStops(tid);
+  const bidsWithStopsAndCustomerAndReview = await Bid.findAllByTidWithStopsAndCustomerAndReview(
+    tid
+  );
+
+  res.render('trip/tripDetail', {
+    title: 'Trip detail',
+    isDriver,
+    tripWithStops,
+    bidsWithStopsAndCustomerAndReview,
+  });
+});
+
+/**
  * Route to render trip creation form
  */
 router.get('/new', async (req, res) => {
