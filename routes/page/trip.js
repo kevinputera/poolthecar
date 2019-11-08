@@ -7,27 +7,52 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const email = req.session.email;
-  const address = req.query.address;
-  const isDriver = await checkIsDriver(email);
+const TRIPS_PAGE_LIMIT = 15;
 
-  let trips;
-  if (address) {
-    trips = await Trip.findAllByDriverEmailAndAddressWithStops(email, address);
+/**
+ * Route to render trip browse page
+ */
+router.get('/', async (req, res) => {
+  const { search = '', page = 1 } = req.query;
+  const { email } = req.session;
+
+  const {
+    hasNextPage,
+    tripsWithStops,
+  } = await Trip.findAllByDriverEmailAndSearchQueryWithStops(
+    email,
+    search,
+    +page,
+    TRIPS_PAGE_LIMIT
+  );
+
+  let nextPageUrl;
+  let prevPageUrl;
+  if (search) {
+    nextPageUrl = `/p/trips?search=${search}&page=${+page + 1}`;
+    prevPageUrl = `/p/trips?search=${search}&page=${+page - 1}`;
   } else {
-    trips = await Trip.findAllByDriverEmail(email);
+    nextPageUrl = `/p/trips?page=${+page + 1}`;
+    prevPageUrl = `/p/trips?page=${+page - 1}`;
   }
+
+  const isDriver = await checkIsDriver(email);
 
   res.render('trip/trips', {
     title: 'Trips',
-    isLoggedIn: true,
     isDriver,
-    trips,
-    query: req.query,
+    hasPrevPage: +page !== 1,
+    hasNextPage,
+    nextPageUrl,
+    prevPageUrl,
+    search,
+    tripsWithStops,
   });
 });
 
+/**
+ * Route to render trip creation form
+ */
 router.get('/new', async (req, res) => {
   const { email } = req.session;
   const isDriver = await checkIsDriver(email);
@@ -35,6 +60,9 @@ router.get('/new', async (req, res) => {
   res.render('trip/newTrip', { title: 'New trip', isDriver, cars });
 });
 
+/**
+ * Route to render bid creation form
+ */
 router.get('/:tid/bids/new', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;
@@ -53,6 +81,9 @@ router.get('/:tid/bids/new', async (req, res) => {
   });
 });
 
+/**
+ * Route to render bid detail page
+ */
 router.get('/:tid/bids/detail', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;

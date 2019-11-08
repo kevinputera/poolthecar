@@ -1,7 +1,7 @@
 extends ../layouts/appTable.pug
 
 block header
-  form(id="trip-filter-form" class="my-1")
+  form(id="trips-filter-form" class="my-1")
     div(class="d-flex flex-row")
       input(
         class="form-control flex-grow-1"
@@ -11,7 +11,7 @@ block header
         placeholder="Search for origin or stops"
       )
       button(
-        id="trip-filter-button"
+        id="trips-filter-button"
         class="ml-2 btn btn-primary flex-shrink-0" 
         type="submit"
       ) Search
@@ -20,16 +20,20 @@ block table
   table(class="table table-hover table-bordered table-striped")
     thead
       th Origin
-      th Trip Status
+      th Stops (minimum price)
       th #Seats
+      th Trip Status
       th Departing on
+      th.app-table-control-column-header
     tbody
-      each trip in trips 
-        tr(
-          class="link-table-row"
-          data-href=`/p/trips/${trip.tid}`
-        )
-          td= trip.origin
-          td= trip.status
-          td= trip.seats
-          td= trip.departingOn
+      each tripWithStops in tripsWithStops 
+        tr
+          td= tripWithStops.origin
+          td= tripWithStops.stops.map(stop => `${stop.address} ($${stop.minPrice})`).join(", ") || "-"
+          td= tripWithStops.seats
+          td= tripWithStops.status
+          td= new Date(tripWithStops.departingOn).toLocaleString()
+          td
+            a(
+              href=`/p/trips/${tripWithStops.tid}/detail`
+            ) View
