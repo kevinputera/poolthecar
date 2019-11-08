@@ -4,27 +4,43 @@ const { checkIsDriver } = require('../../utils/checkIsDriver');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const email = req.session.email;
-  const address = req.query.address;
-  const isDriver = await checkIsDriver(email);
+const BIDS_PAGE_LIMIT = 15;
 
-  let bidsWithTrip;
-  if (address) {
-    bidsWithTrip = await Bid.findAllByCustomerAndAddressWithTrip(
-      email,
-      address
-    );
+router.get('/', async (req, res) => {
+  const { search = '', page = 1 } = req.query;
+  const { email } = req.session;
+
+  const {
+    hasNextPage,
+    bidsWithTrip,
+  } = await Bid.findAllByEmailAndSearchQueryWithTrip(
+    email,
+    search,
+    +page,
+    BIDS_PAGE_LIMIT
+  );
+
+  let nextPageUrl;
+  let prevPageUrl;
+  if (search) {
+    nextPageUrl = `/p/bids?search=${search}&page=${+page + 1}`;
+    prevPageUrl = `/p/bids?search=${search}&page=${+page - 1}`;
   } else {
-    bidsWithTrip = await Bid.findAllByCustomerWithTrip(email);
+    nextPageUrl = `/p/bids?page=${+page + 1}`;
+    prevPageUrl = `/p/bids?page=${+page - 1}`;
   }
+
+  const isDriver = await checkIsDriver(email);
 
   res.render('bid/bids', {
     title: 'Bids',
-    isLoggedIn: true,
     isDriver,
+    hasPrevPage: +page !== 1,
+    hasNextPage,
+    nextPageUrl,
+    prevPageUrl,
+    search,
     bidsWithTrip,
-    query: req.query,
   });
 });
 

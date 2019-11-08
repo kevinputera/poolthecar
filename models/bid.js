@@ -54,56 +54,64 @@ class Bid {
     return this;
   }
 
-  static async findAllByEmail(email) {
-    const bids = await makeSingleQuery({
+  static async findAllByEmailAndSearchQueryWithTrip(
+    email,
+    search,
+    page,
+    limit
+  ) {
+    const res = await makeSingleQuery({
       text: /* sql */ `
-      SELECT email, tid, address, status, value, created_on, updated_on
-      FROM Bids
-      WHERE email = $1
-    `,
-      values: [email],
+        SELECT B.email, B.tid, B.address, B.status AS bid_status, B.value,
+          B.created_on AS bid_created_on, B.updated_on AS bid_updated_on,
+          T.license, T.status AS trip_status, T.origin, T.seats, T.departing_on,
+          T.created_on AS trip_created_on, T.updated_on AS trip_updated_on
+        FROM Bids B JOIN Trips T ON B.tid = T.tid
+        WHERE email = $1
+        AND (LOWER(origin) LIKE $2 OR LOWER(address) LIKE $2)
+        LIMIT $3
+        OFFSET $4
+      `,
+      values: [
+        email,
+        '%' + search.toLowerCase() + '%',
+        limit + 1,
+        (page - 1) * limit,
+      ],
     });
-    if (bids.rows.length < 1) {
-      return null;
+
+    let hasNextPage;
+    if (res.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
     }
-    return bids.rows.map(
-      row =>
-        new Bid(
+
+    return {
+      hasNextPage,
+      bidsWithTrip: res.rows.slice(0, limit).map(row => {
+        const bidWithTrip = new Bid(
           row.email,
           row.tid,
           row.address,
-          row.status,
+          row.bid_status,
           row.value,
-          row.created_on,
-          row.updated_on
-        )
-    );
-  }
-
-  static async findAllByCustomerWithTrip(email) {
-    let bids = await this.findAllByEmail(email);
-    if (bids == null) return null;
-    const bidsWithTrip = bids.map(async bid => {
-      const trip = await Trip.findByTid(bid.tid);
-      bid.trip = trip;
-      return bid;
-    });
-    return Promise.all(bidsWithTrip);
-  }
-
-  static async findAllByCustomerAndAddressWithTrip(email, address) {
-    let bids = await this.findAllByEmail(email);
-    const bidsWithTripPromise = bids.map(async bid => {
-      const trip = await Trip.findByTidAndStopAddress(bid.tid, address);
-      if (trip != null) {
-        bid.trip = trip;
-        return bid;
-      } else {
-        return null;
-      }
-    });
-    const bidsWithTrip = await Promise.all(bidsWithTripPromise);
-    return bidsWithTrip.filter(x => !!x);
+          row.bid_created_on,
+          row.bid_updated_on
+        );
+        bidWithTrip.trip = new Trip(
+          row.tid,
+          row.license,
+          row.trip_status,
+          row.origin,
+          row.seats,
+          row.departing_on,
+          row.trip_created_on,
+          row.trip_updated_on
+        );
+        return bidWithTrip;
+      }),
+    };
   }
 
   static async findAllByTidAndCustomerWithStops(email, tid) {

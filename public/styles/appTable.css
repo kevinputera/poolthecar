@@ -1,3 +1,7 @@
 .app-table-container {
   margin: 0 -5px;
 }
+
+.app-table-control-column-header {
+  width: 200px;
+}

@@ -23,13 +23,15 @@ block table
       th Stops (minimum price)
       th #Seats
       th Departing on 
+      th.app-table-control-column-header
     tbody
       each tripWithStops in tripsWithStops 
-        tr(
-          class="link-table-row"
-          data-href=`/p/trips/${tripWithStops.tid}/bids/new`
-        )
+        tr
           td= tripWithStops.origin
           td= tripWithStops.stops.map(stop => `${stop.address} ($${stop.minPrice})`).join(", ") || "-"
           td= tripWithStops.seats
           td= new Date(tripWithStops.departingOn).toLocaleString()
+          td
+            a(
+              href=`/p/trips/${tripWithStops.tid}/bids/new`
+            ) Bid
