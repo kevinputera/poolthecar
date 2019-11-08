@@ -216,109 +216,94 @@ class Trip {
     };
   }
 
-  static async findAllByDriverEmailAndAddressWithStops(driverEmail, address) {
+  static async findAllByDriverEmailAndSearchQueryWithStops(
+    driverEmail,
+    search,
+    page,
+    limit
+  ) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-        SELECT  DT.tid, DT.license, DT.status, DT.origin, DT.seats,
-          DT.departing_on, DT.created_on, DT.updated_on, S.min_price, S.address
-        FROM    DriverTrips DT
-        NATURAL JOIN Stops S
-        WHERE   DT.driver_email = $1
-          AND (LOWER(S.address) LIKE $2 OR LOWER(DT.origin) LIKE $2)
+        SELECT DT.tid, DT.license, DT.status, DT.origin, DT.seats,
+          DT.departing_on, DT.created_on, DT.updated_on
+        FROM DriverTrips DT
+        WHERE DT.driver_email = $1
+        AND (LOWER(DT.origin) LIKE $2
+          OR EXISTS (
+            SELECT 1
+            FROM Stops S
+            WHERE S.tid = DT.tid
+            AND LOWER(S.address) LIKE $2
+          )
+        )
+        LIMIT $3
+        OFFSET $4
       `,
-      values: [driverEmail, '%' + address.toLowerCase() + '%'],
+      values: [
+        driverEmail,
+        '%' + search.toLowerCase() + '%',
+        limit + 1,
+        (page - 1) * limit,
+      ],
     });
 
-    const tripsMapping = {};
-    res.rows.forEach(row => {
-      if (tripsMapping[row.tid]) {
-        tripsMapping[row.tid].stops.push(
-          new Stop(row.min_price, row.address, row.tid)
-        );
-      } else {
-        const trip = new Trip(
-          row.tid,
-          row.license,
-          row.status,
-          row.origin,
-          row.seats,
-          row.departing_on,
-          row.created_on,
-          row.updated_on
-        );
-        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid] = trip;
-      }
-    });
-    return Object.values(tripsMapping);
-  }
-
-  static async findAllByDriverEmailWithCarAndStops(driverEmail) {
-    const res = await makeSingleQuery({
-      text: /*sql*/ `
-      SELECT DT.tid, DT.license, DT.status, DT.origin, DT.seats, DT.departing_on,
-        DT.created_on, DT.updated_on, S.min_price, S.address
-      FROM DriverTrips DT
-      NATURAL JOIN Stops S
-      WHERE DT.driver_email = $1
-      `,
-      values: [driverEmail],
-    });
-    const tripsMapping = {};
-    res.rows.forEach(row => {
-      if (tripsMapping[row.tid]) {
-        tripsMapping[row.tid].stops.push(
-          new Stop(row.min_price, row.address, row.tid)
-        );
-      } else {
-        const trip = new Trip(
-          row.tid,
-          row.license,
-          row.status,
-          row.origin,
-          row.seats,
-          row.departing_on,
-          row.created_on,
-          row.updated_on
-        );
-        trip.stops = [new Stop(row.min_price, row.address, row.tid)];
-        tripsMapping[row.tid] = trip;
-      }
-    });
-    return Object.values(tripsMapping);
-  }
-
-  static async findByTidAndStopAddress(tid, address) {
-    const res = await makeSingleQuery({
-      text: /* sql */ `
-      SELECT  T.tid, T.license, T.status, T.origin, T.seats,
-        T.departing_on, T.created_on, T.updated_on, S.min_price, S.address
-      FROM    Trips T
-      JOIN    Stops S ON T.tid = S.tid
-      WHERE   T.tid = $1 AND (LOWER(S.address) LIKE $2 OR LOWER(T.origin) LIKE $2)
-      `,
-      values: [tid, '%' + address.toLowerCase() + '%'],
-    });
-    if (res.rows.length >= 1) {
-      const row = res.rows[0];
-      const trip = new Trip(
-        row.tid,
-        row.license,
-        row.status,
-        row.origin,
-        row.seats,
-        row.departing_on,
-        row.created_on,
-        row.updated_on
-      );
-      trip.stops = [];
-      res.rows.forEach(row => {
-        trip.stops.push(new Stop(row.min_price, row.address, row.tid));
-      });
-      return trip;
+    let hasNextPage;
+    if (res.rows.length === limit + 1) {
+      hasNextPage = true;
     } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      tripsWithStops: await Promise.all(
+        res.rows.slice(0, limit).map(async row => {
+          const trip = new Trip(
+            row.tid,
+            row.license,
+            row.status,
+            row.origin,
+            row.seats,
+            row.departing_on,
+            row.created_on,
+            row.updated_on
+          );
+          const stops = await Stop.findAllByTid(row.tid);
+          trip.stops = stops;
+          return trip;
+        })
+      ),
+    };
+  }
+
+  static async findByTidWithStops(tid) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+      SELECT  tid, license, status, origin, seats, departing_on, created_on, updated_on,
+              min_price, address
+      FROM    Trips
+      NATURAL JOIN Stops
+      WHERE   tid = $1
+      `,
+      values: [tid],
+    });
+    if (res.rows.length < 1) {
       return null;
     }
+    let trip = new Trip(
+      res.rows[0].tid,
+      res.rows[0].license,
+      res.rows[0].status,
+      res.rows[0].origin,
+      res.rows[0].seats,
+      res.rows[0].departing_on,
+      res.rows[0].createdOn,
+      res.rows[0].updatedOn
+    );
+    trip.stops = res.rows.map(
+      row => new Stop(row.min_price, row.address, trip.tid)
+    );
+    return trip;
   }
 }
 

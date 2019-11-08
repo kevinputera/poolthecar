@@ -2,6 +2,6 @@
   margin: 0 -5px;
 }
 
-.link-table-row {
-  cursor: pointer;
+.app-table-control-column-header {
+  width: 200px;
 }
