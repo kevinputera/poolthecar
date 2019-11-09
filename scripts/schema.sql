@@ -186,13 +186,13 @@ FOR EACH ROW
 EXECUTE PROCEDURE no_bid_below_min_price();
 
 -- Trigger to enforce valid trip status when updating
--- i.e., a trip can only be updated if it has a 'created' status
+-- i.e., a trip can only be updated if it is not in 'finished' status
 CREATE OR REPLACE FUNCTION only_created_trip_update()
 RETURNS TRIGGER AS $$ BEGIN
-  IF (OLD.status = 'created')
+  IF (OLD.status <> 'finished')
     THEN RETURN NEW;
   ELSE
-    RAISE EXCEPTION 'Trip is not in created status, cannot update';
+    RAISE EXCEPTION 'Trip is in finished status, cannot update';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
