@@ -147,10 +147,10 @@ EXECUTE PROCEDURE no_trip_seats_more_than_car_seats();
 CREATE OR REPLACE FUNCTION no_self_bid()
 RETURNS TRIGGER AS $$ DECLARE driver_email varchar(255);
 BEGIN 
-  SELECT C.email
+  SELECT DCT.driver_email
   INTO driver_email
-  FROM Cars C JOIN Trips T ON C.license = T.license
-  WHERE T.tid = NEW.tid;
+  FROM DriversCarsTrips DCT
+  WHERE DCT.trip_tid = NEW.tid;
   IF driver_email <> NEW.email  
     THEN RETURN NEW;
   ELSE  
