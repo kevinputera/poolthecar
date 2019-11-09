@@ -1,34 +1,39 @@
-extends layouts/bidForm.pug
+extends ../layouts/appForm.pug
 
 append scripts
   script.
     const newBidTid = !{tripWithDriverAndStops.tid}
   script(src="/scripts/newBid.js")
 
-block bidFormTitle
+block form
+  include mixins/driverInfo.pug
+
   h4.mb-3 New bid
 
-block bidFormContent
+  section.mb-4
+    h5.mb-3 Driver info
+    +driverInfo(tripWithDriverAndStops.driver, driverOverallRating)
+
+  section.mb-3
+    h5 Trip info
+    .form-group
+      label(for="trip-origin") Origin
+      input(
+        id="trip-origin"
+        class="form-control"
+        disabled
+        value=tripWithDriverAndStops.origin
+      )
+    .form-group
+      label(for="trip-departing-on") Departure time
+      input(
+        id="trip-departing-on"
+        class="form-control"
+        disabled
+        value=new Date(tripWithDriverAndStops.departingOn).toLocaleString()
+      )
+
   form#new-bid-form
-    section.mb-3
-      h5 Trip info
-      .form-group
-        label(for="trip-origin") Origin
-        input(
-          id="trip-origin"
-          class="form-control"
-          disabled
-          value=tripWithDriverAndStops.origin
-        )
-      .form-group
-        label(for="trip-departing-on") Departure time
-        input(
-          id="trip-departing-on"
-          class="form-control"
-          disabled
-          value=new Date(tripWithDriverAndStops.departingOn).toLocaleString()
-        )
-    
     section.mb-3
       h5 Bid
       .form-group
@@ -61,4 +66,3 @@ block bidFormContent
         class="ml-1 btn btn-secondary"
         role="button"
       ) Back
-

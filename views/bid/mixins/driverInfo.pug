@@ -1,0 +1,33 @@
+mixin driverInfo(driver, rating)
+  style.
+    .driver-info-profile-photo {
+      width: 160px;
+      height: 160px;
+      border-radius: 80px;
+      object-position: 50% 50%;
+      object-fit: cover;
+    }
+
+    .driver-info-details-container {
+      display: flex;
+      margin-left: 15px;
+      align-items: center;
+      height: 100%;
+    }
+
+    .driver-info-text {
+      margin-top: 5px;
+      font-size: 20px;
+    }
+
+  div(class="d-flex align-items-center")
+    img(
+      class="driver-info-profile-photo"
+      src=tripWithDriverAndStops.driver.profilePhotoUrl
+      alt="Driver profile photo"
+    )
+    .driver-info-details-container
+      div(class="d-flex flex-column")
+        .driver-info-text &#011088; #{driverOverallRating}/5
+        .driver-info-text &#128100; #{tripWithDriverAndStops.driver.name}
+        .driver-info-text &#128222; #{tripWithDriverAndStops.driver.phone}
