@@ -118,7 +118,7 @@ router.get('/:tid/bids/detail', async (req, res) => {
     email
   );
 
-  const driverRating = await Driver.getOverallRating(email);
+  const driverRating = await Driver.getOverallRating(driver.email);
 
   res.render('bid/bidDetail', {
     title: 'Bid detail',
