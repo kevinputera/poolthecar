@@ -30,11 +30,11 @@ CREATE TABLE Bookmarks (
 
 CREATE TABLE Messages (
   mid serial PRIMARY KEY,
-  sender varchar(255) REFERENCES Users(email) 
+  sender varchar(255) NOT NULL REFERENCES Users(email) 
     ON DELETE CASCADE ON UPDATE CASCADE,
-  receiver varchar(255) REFERENCES Users(email)
+  receiver varchar(255) NOT NULL REFERENCES Users(email)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  content varchar(255),
+  content text,
   sent_on timestamptz NOT NULL DEFAULT NOW()
 );
 
@@ -45,8 +45,8 @@ CREATE TABLE Drivers (
 
 CREATE TABLE Cars (
   license varchar(255) PRIMARY KEY,
-  email varchar(255) REFERENCES Drivers(email)
-    ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+  email varchar(255) NOT NULL REFERENCES Drivers(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   model varchar(255) NOT NULL,
   seats integer NOT NULL CHECK (seats > 0),
   manufactured_on integer NOT NULL
@@ -60,7 +60,8 @@ CREATE TYPE trip_status as ENUM (
 
 CREATE TABLE Trips (
   tid serial PRIMARY KEY,
-  license varchar(255) NOT NULL REFERENCES Cars(license),
+  license varchar(255) NOT NULL REFERENCES Cars(license)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
   seats integer NOT NULL CHECK (seats > 0),
@@ -70,10 +71,10 @@ CREATE TABLE Trips (
 );
 
 CREATE TABLE Stops (
-  min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
-  address varchar(255),
   tid integer REFERENCES Trips(tid)
     ON DELETE CASCADE ON UPDATE CASCADE,
+  address varchar(255),
+  min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
   PRIMARY KEY(tid, address)
 );
 
@@ -84,7 +85,8 @@ CREATE TYPE bid_status AS ENUM (
 );
 
 CREATE TABLE Bids (
-  email varchar(255) REFERENCES Users(email),
+  email varchar(255) REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   tid integer,
   address varchar(255),
   status bid_status NOT NULL DEFAULT 'pending',
@@ -93,11 +95,13 @@ CREATE TABLE Bids (
   updated_on timestamptz NOT NULL DEFAULT NOW(),
   PRIMARY KEY (email, tid, address),
   FOREIGN KEY (tid, address) REFERENCES Stops(tid, address)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Reviews (
   email varchar(255) REFERENCES Users(email),
-  tid integer REFERENCES Trips(tid),
+  tid integer REFERENCES Trips(tid)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
   content text,
   created_on timestamptz NOT NULL DEFAULT NOW(),
@@ -117,6 +121,7 @@ CREATE VIEW DriversCarsTrips (
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;
 
+-- Trigger to enforce trip seats count <= car seats count
 CREATE OR REPLACE FUNCTION no_trip_seats_more_than_car_seats()
 RETURNS TRIGGER AS $$ DECLARE car_seats INTEGER;
 BEGIN 
@@ -127,7 +132,7 @@ BEGIN
   IF NEW.seats <= car_seats 
     THEN RETURN NEW;
   ELSE  
-    RAISE EXCEPTION 'trip seats more than car seats';
+    RAISE EXCEPTION 'Trip seats more than car seats';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
@@ -136,6 +141,8 @@ BEFORE INSERT OR UPDATE ON Trips
 FOR EACH ROW
 EXECUTE PROCEDURE no_trip_seats_more_than_car_seats();
 
+-- Trigger to enforce no self bidding
+-- i.e. a user cannot bid for his own trip
 CREATE OR REPLACE FUNCTION no_self_bid()
 RETURNS TRIGGER AS $$ DECLARE driver_email varchar(255);
 BEGIN 
@@ -155,6 +162,8 @@ BEFORE INSERT OR UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_bid();
 
+-- Trigger to enforce no self messaging
+-- i.e. a user cannot message himself/herself
 CREATE OR REPLACE FUNCTION no_self_message()
 RETURNS TRIGGER AS $$ BEGIN 
   IF NEW.sender <> NEW.receiver
@@ -169,12 +178,14 @@ BEFORE INSERT OR UPDATE ON Messages
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_message();
 
+-- Trigger to enforce valid trip updates
+-- i.e., a trip can only be updated if it has a 'created' status
 CREATE OR REPLACE FUNCTION no_invalid_trip_update()
 RETURNS TRIGGER AS $$ BEGIN
-  IF (OLD.status <> 'finished')
+  IF (OLD.status = 'created')
     THEN RETURN NEW;
   ELSE
-    RAISE EXCEPTION 'Trip is in finished status, cannot change status.';
+    RAISE EXCEPTION 'Trip is not in created status, cannot update';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
@@ -183,12 +194,14 @@ BEFORE UPDATE ON Trips
 FOR EACH ROW
 EXECUTE PROCEDURE no_invalid_trip_update();
 
+-- Trigger to enforce valid bid updates
+-- i.e., a bid can only be updated if it has a 'pending' status
 CREATE OR REPLACE FUNCTION no_invalid_bid_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status = 'pending')
     THEN RETURN NEW;
   ELSE
-    RAISE EXCEPTION 'Bid is not in pending status, cannot change status.';
+    RAISE EXCEPTION 'Bid is not in pending status, cannot update';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
