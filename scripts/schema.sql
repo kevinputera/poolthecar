@@ -163,6 +163,28 @@ BEFORE INSERT OR UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_bid();
 
+-- Trigger to enforce that bids must have value above
+-- the minimum price set for the trip & stop it is bidding for
+CREATE OR REPLACE FUNCTION no_bid_below_min_price()
+RETURNS TRIGGER AS $$ DECLARE stop_min_price numeric;
+BEGIN
+  SELECT S.min_price
+  INTO stop_min_price
+  FROM Stops S
+  WHERE S.tid = NEW.tid
+  AND S.address = NEW.address;
+  IF NEW.value >= stop_min_price
+    THEN RETURN NEW;
+  ELSE
+    RAISE EXCEPTION 'Bid below min price';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_bid_below_min_price_trigger
+BEFORE INSERT OR UPDATE ON Bids
+FOR EACH ROW
+EXECUTE PROCEDURE no_bid_below_min_price();
+
 -- Trigger to enforce valid trip status when updating
 -- i.e., a trip can only be updated if it has a 'created' status
 CREATE OR REPLACE FUNCTION only_created_trip_update()
