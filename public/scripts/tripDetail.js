@@ -25,9 +25,11 @@ window.addEventListener('load', () => {
           window.location.reload();
         } else {
           console.log('Bid acception failed: ', res.json());
+          window.location.reload();
         }
       } catch (error) {
         console.log('Bid acception error: ', error);
+        window.location.reload();
       }
     });
   }
@@ -60,9 +62,11 @@ window.addEventListener('load', () => {
           window.location.reload();
         } else {
           console.log('Stop update failed: ', res);
+          window.location.reload();
         }
       } catch (error) {
         console.log('Stop update error: ', error);
+        window.location.reload();
       }
     });
   }

@@ -63,8 +63,6 @@ router.get('/:tid/detail', async (req, res) => {
     tid
   );
 
-  console.log(tripWithStops);
-
   res.render('trip/tripDetail', {
     title: 'Trip detail',
     isDriver,
@@ -110,7 +108,7 @@ router.get('/:tid/bids/new', async (req, res) => {
 router.get('/:tid/bids/detail', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;
-  const isDriver = checkIsDriver(email);
+  const isDriver = await checkIsDriver(email);
 
   const driver = await Driver.findByTid(tid);
   const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStops(email, tid);
