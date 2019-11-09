@@ -132,12 +132,12 @@ router.post('/:tid/bids', async (req, res) => {
 /**
  * Route to update a bid
  */
-router.put('/:tid/bids/:address', async (req, res) => {
-  const { tid, address } = req.params;
+router.put('/:tid/bids', async (req, res) => {
+  const { tid } = req.params;
   const { value } = req.body;
   const { email } = req.session;
   try {
-    const bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
+    const bid = await Bid.findByEmailAndTid(email, tid);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;
@@ -154,11 +154,11 @@ router.put('/:tid/bids/:address', async (req, res) => {
 /**
  * Route to delete a bid
  */
-router.delete('/:tid/bids/:address', async (req, res) => {
-  const { tid, address } = req.params;
+router.delete('/:tid/bids', async (req, res) => {
+  const { tid } = req.params;
   const { email } = req.session;
   try {
-    const bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
+    const bid = await Bid.findByEmailAndTid(email, tid);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;
