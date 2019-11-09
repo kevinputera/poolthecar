@@ -1,6 +1,5 @@
 window.addEventListener('load', () => {
   const acceptBidButtons = document.getElementsByName('accept-bid-action');
-  // console.log(acceptBidButtons);
   for (let acceptBidButton of acceptBidButtons) {
     acceptBidButton.addEventListener('click', async event => {
       event.preventDefault();
@@ -43,7 +42,6 @@ window.addEventListener('load', () => {
         'stop-update-input-' + address
       );
       const minPrice = stopValueInput.value;
-      console.log(tid, address, minPrice);
       try {
         const res = await fetch(
           `/api/trips/${encodeURIComponent(tid)}/stops/${encodeURIComponent(

@@ -15,7 +15,7 @@ block content
     p.field-title Seats
     p.field-value= tripWithStops.seats
     p.field-title Departing On
-    p.field-value= tripWithStops.departingOn
+    p.field-value= new Date(tripWithStops.departingOn).toLocaleString()
     p.field-title Trip Status
     p.mb-5.field-value= tripWithStops.status
     div

@@ -99,7 +99,6 @@ router.post('/:tid/stops', async (req, res) => {
 router.put('/:tid/stops/:address', async (req, res) => {
   const { tid, address } = req.params;
   const { minPrice } = req.body;
-  console.log(req.body);
   try {
     let stop = await Stop.findByTidAndAddress(tid, address);
     if (!stop) {
@@ -179,7 +178,6 @@ router.put('/:tid/stops/:address/accept', async (req, res) => {
   const { email } = req.body;
   try {
     let bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
-    console.log(bid);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;
