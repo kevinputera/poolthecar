@@ -23,6 +23,7 @@ block table
       th Stop
       th Bid Value
       th Bid Status
+      th Trip Status
       th Departing on
       th.app-table-control-column-header
     tbody
@@ -32,6 +33,7 @@ block table
           td= bidWithTrip.address
           td= `$${bidWithTrip.value}`
           td= bidWithTrip.status
+          td= bidWithTrip.trip.status
           td= new Date(bidWithTrip.trip.departingOn).toLocaleString()
           td
             a(

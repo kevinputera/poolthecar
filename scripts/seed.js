@@ -100,10 +100,10 @@ const seedStops = async () => {
 
 const seedBids = async () => {
   const bids = [
-    new Bid(EMAILS[1], TID[0], 'Kent Ridge', 'pending', 4),
-    new Bid(EMAILS[1], TID[1], 'Somerset', 'won', 1),
-    new Bid(EMAILS[1], TID[1], 'Ang Mo Kio', 'pending', 1),
-    new Bid(EMAILS[1], TID[2], 'Jurong East', 'failed', 7.5),
+    new Bid(EMAILS[1], TID[0], 'Kent Ridge', 'pending', 4.5),
+    new Bid(EMAILS[1], TID[1], 'Somerset', 'won', 6),
+    new Bid(EMAILS[1], TID[1], 'Ang Mo Kio', 'pending', 5.6),
+    new Bid(EMAILS[1], TID[2], 'Jurong East', 'failed', 5),
   ];
   await Promise.all(bids.map(bid => bid.save()));
 };

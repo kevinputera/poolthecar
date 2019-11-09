@@ -30,12 +30,13 @@ CREATE TABLE Bookmarks (
 
 CREATE TABLE Messages (
   mid serial PRIMARY KEY,
-  sender varchar(255) REFERENCES Users(email) 
+  sender varchar(255) NOT NULL REFERENCES Users(email) 
     ON DELETE CASCADE ON UPDATE CASCADE,
-  receiver varchar(255) REFERENCES Users(email)
+  receiver varchar(255) NOT NULL REFERENCES Users(email)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  content varchar(255),
-  sent_on timestamptz NOT NULL DEFAULT NOW()
+  content text,
+  sent_on timestamptz NOT NULL DEFAULT NOW(),
+  CHECK (sender <> receiver)
 );
 
 CREATE TABLE Drivers (
@@ -45,8 +46,8 @@ CREATE TABLE Drivers (
 
 CREATE TABLE Cars (
   license varchar(255) PRIMARY KEY,
-  email varchar(255) REFERENCES Drivers(email)
-    ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+  email varchar(255) NOT NULL REFERENCES Drivers(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   model varchar(255) NOT NULL,
   seats integer NOT NULL CHECK (seats > 0),
   manufactured_on integer NOT NULL
@@ -60,7 +61,8 @@ CREATE TYPE trip_status as ENUM (
 
 CREATE TABLE Trips (
   tid serial PRIMARY KEY,
-  license varchar(255) NOT NULL REFERENCES Cars(license),
+  license varchar(255) NOT NULL REFERENCES Cars(license)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   status trip_status NOT NULL DEFAULT 'created',
   origin varchar(255) NOT NULL,
   seats integer NOT NULL CHECK (seats > 0),
@@ -70,10 +72,10 @@ CREATE TABLE Trips (
 );
 
 CREATE TABLE Stops (
-  min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
-  address varchar(255),
   tid integer REFERENCES Trips(tid)
     ON DELETE CASCADE ON UPDATE CASCADE,
+  address varchar(255),
+  min_price numeric NOT NULL DEFAULT 0 CHECK (min_price >= 0),
   PRIMARY KEY(tid, address)
 );
 
@@ -84,7 +86,8 @@ CREATE TYPE bid_status AS ENUM (
 );
 
 CREATE TABLE Bids (
-  email varchar(255) REFERENCES Users(email),
+  email varchar(255) REFERENCES Users(email)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   tid integer,
   address varchar(255),
   status bid_status NOT NULL DEFAULT 'pending',
@@ -93,11 +96,13 @@ CREATE TABLE Bids (
   updated_on timestamptz NOT NULL DEFAULT NOW(),
   PRIMARY KEY (email, tid, address),
   FOREIGN KEY (tid, address) REFERENCES Stops(tid, address)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Reviews (
   email varchar(255) REFERENCES Users(email),
-  tid integer REFERENCES Trips(tid),
+  tid integer REFERENCES Trips(tid)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   score numeric NOT NULL DEFAULT 5 CHECK (score >= 0 AND score <= 5),
   content text,
   created_on timestamptz NOT NULL DEFAULT NOW(),
@@ -105,12 +110,19 @@ CREATE TABLE Reviews (
   PRIMARY KEY (email, tid)
 );
 
-CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, departing_on, created_on, updated_on) AS
-  SELECT D.email, T.tid, T.license, T.status, T.origin, T.seats, T.departing_on, T.created_on, T.updated_on
+CREATE VIEW DriversCarsTrips (
+  driver_email, car_license, car_model, car_seats, car_manufactured_on,
+  trip_tid, trip_status, trip_origin, trip_seats, trip_departing_on,
+  trip_created_on, trip_updated_on
+) AS
+  SELECT D.email, C.license, C.model, C.seats, C.manufactured_on,
+    T.tid, T.status, T.origin, T.seats, T.departing_on,
+    T.created_on, T.updated_on
   FROM Trips T
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;
 
+-- Trigger to enforce trip seats count <= car seats count
 CREATE OR REPLACE FUNCTION no_trip_seats_more_than_car_seats()
 RETURNS TRIGGER AS $$ DECLARE car_seats INTEGER;
 BEGIN 
@@ -121,7 +133,7 @@ BEGIN
   IF NEW.seats <= car_seats 
     THEN RETURN NEW;
   ELSE  
-    RAISE EXCEPTION 'trip seats more than car seats';
+    RAISE EXCEPTION 'Trip seats more than car seats';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
@@ -130,13 +142,15 @@ BEFORE INSERT OR UPDATE ON Trips
 FOR EACH ROW
 EXECUTE PROCEDURE no_trip_seats_more_than_car_seats();
 
+-- Trigger to enforce no self bidding
+-- i.e. a user cannot bid for his own trip
 CREATE OR REPLACE FUNCTION no_self_bid()
 RETURNS TRIGGER AS $$ DECLARE driver_email varchar(255);
 BEGIN 
-  SELECT C.email
+  SELECT DCT.driver_email
   INTO driver_email
-  FROM Cars C JOIN Trips T ON C.license = T.license
-  WHERE T.tid = NEW.tid;
+  FROM DriversCarsTrips DCT
+  WHERE DCT.trip_tid = NEW.tid;
   IF driver_email <> NEW.email  
     THEN RETURN NEW;
   ELSE  
@@ -149,44 +163,56 @@ BEFORE INSERT OR UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_bid();
 
-CREATE OR REPLACE FUNCTION no_self_message()
-RETURNS TRIGGER AS $$ BEGIN 
-  IF NEW.sender <> NEW.receiver
-    THEN RETURN NEW;
-  ELSE  
-    RAISE EXCEPTION 'Messaged self';
-  END IF;
-END; $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER no_self_message_trigger
-BEFORE INSERT OR UPDATE ON Messages
-FOR EACH ROW
-EXECUTE PROCEDURE no_self_message();
-
-CREATE OR REPLACE FUNCTION no_invalid_trip_update()
-RETURNS TRIGGER AS $$ BEGIN
-  IF (OLD.status <> 'finished')
+-- Trigger to enforce that bids must have value above
+-- the minimum price set for the trip & stop it is bidding for
+CREATE OR REPLACE FUNCTION no_bid_below_min_price()
+RETURNS TRIGGER AS $$ DECLARE stop_min_price numeric;
+BEGIN
+  SELECT S.min_price
+  INTO stop_min_price
+  FROM Stops S
+  WHERE S.tid = NEW.tid
+  AND S.address = NEW.address;
+  IF NEW.value >= stop_min_price
     THEN RETURN NEW;
   ELSE
-    RAISE EXCEPTION 'Trip is in finished status, cannot change status.';
+    RAISE EXCEPTION 'Bid below min price';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER no_invalid_trip_update_trigger
+CREATE TRIGGER no_bid_below_min_price_trigger
+BEFORE INSERT OR UPDATE ON Bids
+FOR EACH ROW
+EXECUTE PROCEDURE no_bid_below_min_price();
+
+-- Trigger to enforce valid trip status when updating
+-- i.e., a trip can only be updated if it has a 'created' status
+CREATE OR REPLACE FUNCTION only_created_trip_update()
+RETURNS TRIGGER AS $$ BEGIN
+  IF (OLD.status = 'created')
+    THEN RETURN NEW;
+  ELSE
+    RAISE EXCEPTION 'Trip is not in created status, cannot update';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER only_created_trip_update_trigger
 BEFORE UPDATE ON Trips
 FOR EACH ROW
-EXECUTE PROCEDURE no_invalid_trip_update();
+EXECUTE PROCEDURE only_created_trip_update();
 
-CREATE OR REPLACE FUNCTION no_invalid_bid_update()
+-- Trigger to enforce valid bid status when updating
+-- i.e., a bid can only be updated if it has a 'pending' status
+CREATE OR REPLACE FUNCTION only_pending_bid_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status = 'pending')
     THEN RETURN NEW;
   ELSE
-    RAISE EXCEPTION 'Bid is not in pending status, cannot change status.';
+    RAISE EXCEPTION 'Bid is not in pending status, cannot update';
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER no_invalid_bid_update_trigger
+CREATE TRIGGER only_pending_update_trigger
 BEFORE UPDATE ON Bids
 FOR EACH ROW
-EXECUTE PROCEDURE no_invalid_bid_update();
+EXECUTE PROCEDURE only_pending_bid_update();
