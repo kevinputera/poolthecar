@@ -26,8 +26,8 @@ After that, running the app should be straightforward:
 
 ## Directory structure
 
-- `models`: IMPORTANT. All SQL queries are located here. Mappings from js classes <-> db entities.
-- `scripts`: IMPORTANT. `schema.sql` is located here. Includes table.js and seed.js to create and populate db.
+- `models`: _IMPORTANT_ All _SQL queries_ are located here. Mappings from js classes <-> db entities.
+- `scripts`: _IMPORTANT_ _schema.sql_ is located here. Includes table.js and seed.js to create and populate db.
 - `routes`: API and page routes
 - `views`: `pug` view templates
 - `middlewares`: Express middlewares
