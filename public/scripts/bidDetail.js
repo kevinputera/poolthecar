@@ -13,7 +13,7 @@ window.addEventListener('load', () => {
           const res = await fetch(
             `/api/trips/${encodeURIComponent(
               tid
-            )}/bidding/stop/${encodeURIComponent(address)}`,
+            )}/bidding/stops/${encodeURIComponent(address)}`,
             {
               method: method,
               headers: {

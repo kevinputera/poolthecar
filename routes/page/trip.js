@@ -63,6 +63,8 @@ router.get('/:tid/detail', async (req, res) => {
     tid
   );
 
+  console.log(tripWithStops);
+
   res.render('trip/tripDetail', {
     title: 'Trip detail',
     isDriver,

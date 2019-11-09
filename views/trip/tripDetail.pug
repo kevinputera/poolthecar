@@ -28,22 +28,22 @@ block content
         thead.thead-light
           th Destination
           th Min. Price
-          th Action
+          //- th Action
         each stop in tripWithStops.stops
           tr
             td= stop.address
-            td
-              input(
-                id= "stop-update-input-" + stop.address,
-                disabled= tripWithStops.status !== 'created',
-                value= stop.min_price
-              )
-            td(
-              name= "update-stop-action",
-              class= "table-cell-action",
-              address= stop.address,
-              tid = tripWithStops.tid
-            )= tripWithStops.status === 'created' ? "Update" : ""
+            td= stop.minPrice
+              //- input(
+              //-   id= "stop-update-input-" + stop.address,
+              //-   disabled= tripWithStops.status !== 'created',
+              //-   value= stop.minPrice
+              //- )
+            //- td(
+            //-   name= "update-stop-action",
+            //-   class= "table-cell-action",
+            //-   address= stop.address,
+            //-   tid = tripWithStops.tid
+            //- )= tripWithStops.status === 'created' ? "Update" : ""
     div
       h5.section-title Bids
       table.table.table-hover.table-bordered.table-striped#bid-table
@@ -60,7 +60,7 @@ block content
             each bid in bidsWithStopsAndCustomerAndReview
               tr
                 td= bid.stop.address
-                td= bid.stop.min_price
+                td= bid.stop.minPrice
                 td= bid.value
                 td= bid.status
                 td(

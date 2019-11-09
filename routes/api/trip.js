@@ -99,6 +99,7 @@ router.post('/:tid/stops', async (req, res) => {
 router.put('/:tid/stops/:address', async (req, res) => {
   const { tid, address } = req.params;
   const { minPrice } = req.body;
+  console.log(req.body);
   try {
     let stop = await Stop.findByTidAndAddress(tid, address);
     if (!stop) {

@@ -9,7 +9,7 @@ window.addEventListener('load', () => {
       let email = acceptBidButton.getAttribute('email');
       try {
         const res = await fetch(
-          `/api/trips/${encodeURIComponent(tid)}/stop/${encodeURIComponent(
+          `/api/trips/${encodeURIComponent(tid)}/stops/${encodeURIComponent(
             address
           )}/accept`,
           {
@@ -40,11 +40,11 @@ window.addEventListener('load', () => {
       const stopValueInput = document.getElementById(
         'stop-update-input-' + address
       );
-      const min_price = stopValueInput.value;
-      console.log(tid, address, min_price);
+      const minPrice = stopValueInput.value;
+      console.log(tid, address, minPrice);
       try {
         const res = await fetch(
-          `/api/trips/${encodeURIComponent(tid)}/stop/${encodeURIComponent(
+          `/api/trips/${encodeURIComponent(tid)}/stops/${encodeURIComponent(
             address
           )}`,
           {
@@ -52,7 +52,7 @@ window.addEventListener('load', () => {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ min_price: min_price }),
+            body: JSON.stringify({ minPrice: minPrice }),
           }
         );
         if (res.ok) {
