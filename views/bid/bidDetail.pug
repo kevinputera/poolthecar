@@ -9,12 +9,12 @@ append scripts
 block content
   .detail-content
   div.container
-    h3.page-title Bidding
+    h3.page-title Bid detail
     div.row
       div.col-md
         img(
           class="user-profile-photo"
-          src='https://avatars2.githubusercontent.com/u/46835051?s=460&v=4'
+          src= driver.profilePhotoUrl
           alt="User profile photo"
         )
         div.field-inline-container
@@ -22,14 +22,14 @@ block content
           p.field-value-inline= driver.name
         div.field-inline-container
           p.field-title-inline Driver Rating: 
-          p.field-value-inline 5
+          p.field-value-inline= driverRating
       div.col-md
         p.field-title Origin
         p.field-value= tripWithStops.origin
         p.field-title Seats
         p.field-value= tripWithStops.seats
         p.field-title Departing On
-        p.field-value= tripWithStops.departingOn
+        p.field-value= new Date(tripWithStops.departingOn).toLocaleString()
         p.field-title Trip Status
         p.field-value= tripWithStops.status
     div
@@ -45,14 +45,14 @@ block content
           each stop in tripWithStops.stops
             tr
               td= stop.address
-              td= stop.min_price
+              td= stop.minPrice
               td(
                 name= "bid-action",
                 class= "table-cell-action",
                 tid= tripWithStops.tid,
                 address= stop.address
-                action= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : "Bid"
-              )= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : "Bid"
+                action= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : ""
+              )= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : ""
               td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status : ""
               td
                 input(

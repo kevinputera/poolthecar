@@ -9,41 +9,37 @@ append scripts
 block content
   .detail-content
   div.container
-    h3.page-title Bidding
-    div.row
-      div.col-md
-        p placeholder for some interesting query stuff
-      div.col-md
-        p.field-title Origin
-        p.field-value= tripWithStops.origin
-        p.field-title Seats
-        p.field-value= tripWithStops.seats
-        p.field-title Departing On
-        p.field-value= tripWithStops.departingOn
-        p.field-title Trip Status
-        p.field-value= tripWithStops.status
+    h3.page-title Trip detail
+    p.field-title Origin
+    p.field-value= tripWithStops.origin
+    p.field-title Seats
+    p.field-value= tripWithStops.seats
+    p.field-title Departing On
+    p.field-value= new Date(tripWithStops.departingOn).toLocaleString()
+    p.field-title Trip Status
+    p.mb-5.field-value= tripWithStops.status
     div
       h5.section-tile Stops
       table.table.table-hover.table-bordered.table-striped#stop-table
         thead.thead-light
           th Destination
           th Min. Price
-          th Action
+          //- th Action
         each stop in tripWithStops.stops
           tr
             td= stop.address
-            td
-              input(
-                id= "stop-update-input-" + stop.address,
-                disabled= tripWithStops.status !== 'created',
-                value= stop.min_price
-              )
-            td(
-              name= "update-stop-action",
-              class= "table-cell-action",
-              address= stop.address,
-              tid = tripWithStops.tid
-            )= tripWithStops.status === 'created' ? "Update" : ""
+            td= stop.minPrice
+              //- input(
+              //-   id= "stop-update-input-" + stop.address,
+              //-   disabled= tripWithStops.status !== 'created',
+              //-   value= stop.minPrice
+              //- )
+            //- td(
+            //-   name= "update-stop-action",
+            //-   class= "table-cell-action",
+            //-   address= stop.address,
+            //-   tid = tripWithStops.tid
+            //- )= tripWithStops.status === 'created' ? "Update" : ""
     div
       h5.section-title Bids
       table.table.table-hover.table-bordered.table-striped#bid-table
@@ -60,7 +56,7 @@ block content
             each bid in bidsWithStopsAndCustomerAndReview
               tr
                 td= bid.stop.address
-                td= bid.stop.min_price
+                td= bid.stop.minPrice
                 td= bid.value
                 td= bid.status
                 td(

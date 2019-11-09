@@ -11,9 +11,9 @@ window.addEventListener('load', () => {
       try {
         if (action === 'Update') {
           const res = await fetch(
-            `/api/trips/${encodeURIComponent(
-              tid
-            )}/bidding/stop/${encodeURIComponent(address)}`,
+            `/api/trips/${encodeURIComponent(tid)}/bids/${encodeURIComponent(
+              address
+            )}`,
             {
               method: method,
               headers: {
@@ -31,10 +31,12 @@ window.addEventListener('load', () => {
             }
           } else {
             console.log('Bid update failed: ', res);
+            window.location.reload();
           }
         }
       } catch (error) {
         console.log('Bid update error: ', error);
+        window.location.reload();
       }
     });
   }
@@ -71,9 +73,11 @@ window.addEventListener('load', () => {
           window.location.reload();
         } else {
           console.log('Review update/create failed: ', res);
+          window.location.reload();
         }
       } catch (error) {
         console.log('Review update/create error: ', error);
+        window.location.reload();
       }
     });
   }

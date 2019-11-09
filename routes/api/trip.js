@@ -171,6 +171,31 @@ router.delete('/:tid/bids', async (req, res) => {
 });
 
 /**
+ * Route to accept a bid
+ */
+router.put('/:tid/stops/:address/accept', async (req, res) => {
+  const { tid, address } = req.params;
+  const { email } = req.body;
+  try {
+    let bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
+    if (!bid) {
+      badRequestMessage(res, 'Bid does not exist');
+      return;
+    }
+    if (bid.status !== 'pending') {
+      badRequestMessage(res, 'Bid not in pending stage');
+      return;
+    }
+    bid.status = 'won';
+    const updatedBid = await bid.update();
+    ok(res, updatedBid);
+  } catch (error) {
+    console.log(error);
+    internalError(res, error);
+  }
+});
+
+/**
  * Route to create a new review
  */
 router.post('/:tid/reviews', async (req, res) => {

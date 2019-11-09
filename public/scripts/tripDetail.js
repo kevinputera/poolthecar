@@ -1,6 +1,5 @@
 window.addEventListener('load', () => {
   const acceptBidButtons = document.getElementsByName('accept-bid-action');
-  // console.log(acceptBidButtons);
   for (let acceptBidButton of acceptBidButtons) {
     acceptBidButton.addEventListener('click', async event => {
       event.preventDefault();
@@ -9,7 +8,7 @@ window.addEventListener('load', () => {
       let email = acceptBidButton.getAttribute('email');
       try {
         const res = await fetch(
-          `/api/trips/${encodeURIComponent(tid)}/stop/${encodeURIComponent(
+          `/api/trips/${encodeURIComponent(tid)}/stops/${encodeURIComponent(
             address
           )}/accept`,
           {
@@ -25,9 +24,11 @@ window.addEventListener('load', () => {
           window.location.reload();
         } else {
           console.log('Bid acception failed: ', res.json());
+          window.location.reload();
         }
       } catch (error) {
         console.log('Bid acception error: ', error);
+        window.location.reload();
       }
     });
   }
@@ -40,11 +41,10 @@ window.addEventListener('load', () => {
       const stopValueInput = document.getElementById(
         'stop-update-input-' + address
       );
-      const min_price = stopValueInput.value;
-      console.log(tid, address, min_price);
+      const minPrice = stopValueInput.value;
       try {
         const res = await fetch(
-          `/api/trips/${encodeURIComponent(tid)}/stop/${encodeURIComponent(
+          `/api/trips/${encodeURIComponent(tid)}/stops/${encodeURIComponent(
             address
           )}`,
           {
@@ -52,7 +52,7 @@ window.addEventListener('load', () => {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ min_price: min_price }),
+            body: JSON.stringify({ minPrice: minPrice }),
           }
         );
         if (res.ok) {
@@ -60,9 +60,11 @@ window.addEventListener('load', () => {
           window.location.reload();
         } else {
           console.log('Stop update failed: ', res);
+          window.location.reload();
         }
       } catch (error) {
         console.log('Stop update error: ', error);
+        window.location.reload();
       }
     });
   }
