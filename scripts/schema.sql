@@ -35,7 +35,8 @@ CREATE TABLE Messages (
   receiver varchar(255) NOT NULL REFERENCES Users(email)
     ON DELETE CASCADE ON UPDATE CASCADE,
   content text,
-  sent_on timestamptz NOT NULL DEFAULT NOW()
+  sent_on timestamptz NOT NULL DEFAULT NOW(),
+  CHECK (sender <> receiver)
 );
 
 CREATE TABLE Drivers (
@@ -162,25 +163,9 @@ BEFORE INSERT OR UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE no_self_bid();
 
--- Trigger to enforce no self messaging
--- i.e. a user cannot message himself/herself
-CREATE OR REPLACE FUNCTION no_self_message()
-RETURNS TRIGGER AS $$ BEGIN 
-  IF NEW.sender <> NEW.receiver
-    THEN RETURN NEW;
-  ELSE  
-    RAISE EXCEPTION 'Messaged self';
-  END IF;
-END; $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER no_self_message_trigger
-BEFORE INSERT OR UPDATE ON Messages
-FOR EACH ROW
-EXECUTE PROCEDURE no_self_message();
-
--- Trigger to enforce valid trip updates
+-- Trigger to enforce valid trip status when updating
 -- i.e., a trip can only be updated if it has a 'created' status
-CREATE OR REPLACE FUNCTION no_invalid_trip_update()
+CREATE OR REPLACE FUNCTION only_created_trip_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status = 'created')
     THEN RETURN NEW;
@@ -189,14 +174,14 @@ RETURNS TRIGGER AS $$ BEGIN
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER no_invalid_trip_update_trigger
+CREATE TRIGGER only_created_trip_update_trigger
 BEFORE UPDATE ON Trips
 FOR EACH ROW
-EXECUTE PROCEDURE no_invalid_trip_update();
+EXECUTE PROCEDURE only_created_trip_update();
 
--- Trigger to enforce valid bid updates
+-- Trigger to enforce valid bid status when updating
 -- i.e., a bid can only be updated if it has a 'pending' status
-CREATE OR REPLACE FUNCTION no_invalid_bid_update()
+CREATE OR REPLACE FUNCTION only_pending_bid_update()
 RETURNS TRIGGER AS $$ BEGIN
   IF (OLD.status = 'pending')
     THEN RETURN NEW;
@@ -205,7 +190,7 @@ RETURNS TRIGGER AS $$ BEGIN
   END IF;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER no_invalid_bid_update_trigger
+CREATE TRIGGER only_pending_update_trigger
 BEFORE UPDATE ON Bids
 FOR EACH ROW
-EXECUTE PROCEDURE no_invalid_bid_update();
+EXECUTE PROCEDURE only_pending_bid_update();
