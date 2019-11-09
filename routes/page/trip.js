@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
 router.get('/:tid/detail', async (req, res) => {
   const { tid } = req.params;
   const { email } = req.session;
-  const isDriver = checkIsDriver(email);
+  const isDriver = await checkIsDriver(email);
 
   const tripWithStops = await Trip.findByTidWithStops(tid);
   const bidsWithStopsAndCustomerAndReview = await Bid.findAllByTidWithStopsAndCustomerAndReview(
@@ -108,7 +108,7 @@ router.get('/:tid/bids/new', async (req, res) => {
 router.get('/:tid/bids/detail', async (req, res) => {
   const { email } = req.session;
   const { tid } = req.params;
-  const isDriver = checkIsDriver(email);
+  const isDriver = await checkIsDriver(email);
 
   const driver = await Driver.findByTid(tid);
   const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStops(email, tid);
