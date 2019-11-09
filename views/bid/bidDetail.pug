@@ -51,8 +51,8 @@ block content
                 class= "table-cell-action",
                 tid= tripWithStops.tid,
                 address= stop.address
-                action= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : "Bid"
-              )= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : "Bid"
+                action= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : ""
+              )= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status === "pending" ? "Update" : "" : ""
               td= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].status : ""
               td
                 input(
