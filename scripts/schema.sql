@@ -216,3 +216,30 @@ CREATE TRIGGER only_pending_update_trigger
 BEFORE UPDATE ON Bids
 FOR EACH ROW
 EXECUTE PROCEDURE only_pending_bid_update();
+
+-- Trigger to enforce that there is only one active trip for each driver
+CREATE OR REPLACE FUNCTION only_one_active_trip()
+RETURNS TRIGGER AS $$ DECLARE active_trip_count numeric; new_driver_email varchar(255);
+BEGIN
+  SELECT DCT.driver_email
+  INTO new_driver_email
+  FROM DriversCarsTrips DCT
+  WHERE DCT.trip_tid = NEW.tid;
+
+  SELECT count(DCT.trip_status)
+  INTO active_trip_count
+  FROM DriversCarsTrips DCT
+  WHERE DCT.driver_email = new_driver_email
+  AND   DCT.trip_status = 'ongoing';
+
+  IF (active_trip_count = 0) 
+    THEN RETURN NEW;
+  ELSE 
+    RAISE EXCEPTION 'More than one ongoing trip.';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER only_one_active_trip_trigger
+BEFORE UPDATE ON Trips
+FOR EACH ROW WHEN (NEW.status = 'ongoing')
+EXECUTE PROCEDURE only_one_active_trip();
