@@ -100,19 +100,24 @@ const seedStops = async () => {
 
 const seedBids = async () => {
   const bids = [
-    new Bid(EMAILS[1], TID[0], 'Kent Ridge', 'pending', 4.5),
-    new Bid(EMAILS[1], TID[1], 'Somerset', 'won', 6),
-    new Bid(EMAILS[1], TID[1], 'Ang Mo Kio', 'pending', 5.6),
-    new Bid(EMAILS[1], TID[2], 'Jurong East', 'failed', 5),
+    new Bid(EMAILS[1], TID[0], 'Kent Ridge', undefined, 4.5),
+    new Bid(EMAILS[1], TID[1], 'Somerset', undefined, 6),
+    new Bid(EMAILS[1], TID[2], 'Jurong East', undefined, 5),
   ];
-  await Promise.all(bids.map(bid => bid.save()));
+
+  const savedBids = await Promise.all(bids.map(bid => bid.save()));
+
+  const trip2 = savedBids[1];
+  trip2.status = 'won';
+  await trip2.update();
+
+  const trip3 = savedBids[2];
+  trip3.status = 'failed';
+  await trip3.update();
 };
 
 const seedReviews = async () => {
-  const reviews = [
-    new Review(EMAILS[1], TID[2], 4.5, 'Good ride!'),
-    new Review(EMAILS[1], TID[1], 4.9, 'Awesome driver!'),
-  ];
+  const reviews = [new Review(EMAILS[1], TID[1], 4.9, 'Awesome driver!')];
   await Promise.all(reviews.map(review => review.save()));
 };
 

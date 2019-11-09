@@ -33,10 +33,10 @@ class Bid {
   async update() {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-        UPDATE Bids SET status = $4, value = $5, updated_on = NOW()
+        UPDATE Bids
+        SET address = $3, status = $4, value = $5, updated_on = NOW()
         WHERE email = $1
         AND tid = $2
-        AND address = $3
         RETURNING created_on, updated_on
       `,
       values: [this.email, this.tid, this.address, this.status, this.value],
@@ -51,7 +51,6 @@ class Bid {
         DELETE FROM Bids
         WHERE email = $1
         AND tid = $2
-        AND address = $3
       `,
       values: [this.email, this.tid, this.address],
     });
@@ -118,48 +117,49 @@ class Bid {
     };
   }
 
-  static async findAllByTidAndCustomerWithStops(email, tid) {
+  static async findByTidAndCustomerWithStop(email, tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-      SELECT  B.email, B.status, B.value, B.created_on, B.updated_on,
-              S.min_price, S.address
-      FROM Bids B
-      JOIN Stops S
-      ON B.tid = S.tid AND B.address = S.address
-      WHERE B.email = $1 AND B.tid = $2
+        SELECT  B.email, B.tid, B.status, B.value, B.created_on, B.updated_on,
+                S.min_price, S.address
+        FROM Bids B
+        JOIN Stops S
+        ON B.tid = S.tid AND B.address = S.address
+        WHERE B.email = $1 AND B.tid = $2
       `,
       values: [email, tid],
     });
+
     if (res.rows.length < 1) {
       return null;
     }
-    let bidMapWithStop = {};
-    res.rows.forEach(row => {
-      let bid = new Bid(
-        row.email,
-        row.tid,
-        row.address,
-        row.status,
-        row.value,
-        row.created_on,
-        row.updated_on
-      );
-      let stop = new Stop(row.min_price, row.address, tid);
-      bid.stop = stop;
-      bidMapWithStop[row.address] = bid;
-    });
-    return bidMapWithStop;
+
+    const bidWithStop = new Bid(
+      res.rows[0].email,
+      res.rows[0].tid,
+      res.rows[0].address,
+      res.rows[0].status,
+      res.rows[0].value,
+      res.rows[0].created_on,
+      res.rows[0].updated_on
+    );
+    bidWithStop.stop = new Stop(
+      res.rows[0].min_price,
+      res.rows[0].address,
+      res.rows[0].tid
+    );
+    return bidWithStop;
   }
 
   static async findWonBidByTidAndCustomerWithReview(tid, email) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
-      SELECT  Bids.email, Bids.tid, address, status, value, 
-              Bids.created_on, Bids.updated_on, Reviews.score, Reviews.content
-      FROM    Bids
-      LEFT JOIN Reviews
-      ON      Bids.tid = Reviews.tid AND Bids.email = Reviews.email
-      WHERE   Bids.tid = $1 AND Bids.email = $2 AND status = 'won'
+        SELECT  B.email, B.tid, B.address, B.status, B.value, 
+                B.created_on, B.updated_on, Reviews.score, Reviews.content
+        FROM    Bids B
+        LEFT JOIN Reviews R
+        ON      B.tid = R.tid AND B.email = R.email
+        WHERE   B.tid = $1 AND B.email = $2 AND B.status = 'won'
       `,
       values: [tid, email],
     });
@@ -172,7 +172,7 @@ class Bid {
       bids.rows[0].score,
       bids.rows[0].content
     );
-    let bid = new Bid(
+    const bid = new Bid(
       bids.rows[0].email,
       bids.rows[0].tid,
       bids.rows[0].address,
@@ -188,24 +188,20 @@ class Bid {
   static async findAllByTidWithStopsAndCustomerAndReview(tid) {
     const bidsWithStops = await makeSingleQuery({
       text: /* sql */ `
-      SELECT  Bids.email, Bids.tid, address, status, value, Bids.created_on, Bids.updated_on,
-              min_price, name, phone, profile_photo_url, Reviews.score, Reviews.content
-      FROM Bids NATURAL JOIN Stops
-      JOIN Users 
-      ON      Users.email = Bids.email
-      LEFT JOIN Reviews
-      ON      Bids.email = Reviews.email AND Bids.tid = Reviews.tid
-              AND Bids.status = 'won'
-      WHERE   Bids.tid = $1
-      ORDER BY address ASC
+        SELECT  B.email, B.tid, B.address, B.status, B.value, B.created_on, B.updated_on,
+                S.min_price, U.name, U.phone, U.profile_photo_url, R.score, R.content
+        FROM    Bids B NATURAL JOIN Stops S
+        JOIN    Users U
+        ON      U.email = B.email
+        LEFT JOIN Reviews R
+        ON      B.email = R.email AND B.tid = R.tid AND B.status = 'won'
+        WHERE   B.tid = $1
+        ORDER BY address ASC
       `,
       values: [tid],
     });
-    if (bidsWithStops.rows.length < 1) {
-      return null;
-    }
     return bidsWithStops.rows.map(row => {
-      let bid = new Bid(
+      const bid = new Bid(
         row.email,
         row.tid,
         row.address,
@@ -233,14 +229,14 @@ class Bid {
     });
   }
 
-  static async findByEmailAndTidAndAddress(email, tid, address) {
+  static async findByEmailAndTid(email, tid) {
     const bids = await makeSingleQuery({
       text: /* sql */ `
         SELECT email, tid, address, status, value, created_on, updated_on
         FROM Bids
-        WHERE email = $1 AND tid = $2 AND address = $3
+        WHERE email = $1 AND tid = $2
       `,
-      values: [email, tid, address],
+      values: [email, tid],
     });
     if (bids.rows.length < 1) {
       return null;
