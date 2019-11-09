@@ -62,11 +62,11 @@ class Driver extends User {
   static async findByTid(tid) {
     const drivers = await makeSingleQuery({
       text: /* sql */ `
-      SELECT  T.driver_email, U.secret, U.name, U.gender, U.phone,
+      SELECT  DCT.driver_email, U.secret, U.name, U.gender, U.phone,
               U.profile_photo_url, U.created_on, U.updated_on
-      FROM DriverTrips T
-      JOIN Users U ON T.driver_email = U.email
-      WHERE T.tid = $1
+      FROM DriversCarsTrips DCT
+      JOIN Users U ON DCT.driver_email = U.email
+      WHERE DCT.trip_tid = $1
       `,
       values: [tid],
     });
@@ -90,10 +90,11 @@ class Driver extends User {
     const totalIncome = await makeSingleQuery({
       text: /* sql */ `
         SELECT SUM(B.value) AS total_income
-        FROM DriverTrips DT JOIN Bids B ON B.tid = DT.tid
+        FROM DriversCarsTrips DCT
+        JOIN Bids B ON B.tid = DCT.trip_tid
         WHERE B.status = 'won'
-        AND DT.status = 'finished'
-        AND DT.driver_email = $1
+        AND DCT.trip_status = 'finished'
+        AND DCT.driver_email = $1
         `,
       values: [email],
     });
@@ -108,12 +109,13 @@ class Driver extends User {
       text: /* sql */ `
         SELECT monthly_income 
         FROM (SELECT SUM(B.value) AS monthly_income,
-                EXTRACT(MONTH FROM DT.departing_on) AS month,
-                EXTRACT(YEAR FROM DT.departing_on) AS year
-              FROM DriverTrips DT JOIN Bids B on B.tid = D.tid
+                EXTRACT(MONTH FROM DCT.trip_departing_on) AS month,
+                EXTRACT(YEAR FROM DCT.trip_departing_on) AS year
+              FROM DriversCarsTrips DCT
+              JOIN Bids B ON B.tid = DCT.trip_tid
               WHERE B.status = 'won'
-              AND DT.status = 'finished'
-              AND DT.driver_email = $1
+              AND DCT.trip_status = 'finished'
+              AND DCT.driver_email = $1
               GROUP BY(month,year)) AS monthly_incomes
         WHERE monthly_incomes.month = $2 AND monthly_incomes.year = $3
         `,
@@ -130,14 +132,14 @@ class Driver extends User {
     const consecutiveTrips = await makeSingleQuery({
       text: /* sql */ `
         WITH DistinctDates(date) AS (
-          SELECT DISTINCT CAST(departing_on AS DATE)
-          FROM DriverTrips DT
-          WHERE DT.driver_email = $1
-          AND DT.status = 'finished'
+          SELECT DISTINCT CAST(trip_departing_on AS DATE)
+          FROM DriversCarsTrips
+          WHERE driver_email = $1
+          AND trip_status = 'finished'
         ),
         ConsecutiveDates AS (
           SELECT ROW_NUMBER() OVER (ORDER by date) AS row_number,
-            date - ROW_NUMBER() OVER (ORDER by date) * INTERVAL '1 day' AS single_group,date
+            date - ROW_NUMBER() OVER (ORDER by date) * INTERVAL '1 day' AS single_group, date
           FROM DistinctDates
         )
         SELECT MIN(date) AS start_date, MAX(date) AS end_date, COUNT(*) AS num_dates
@@ -172,9 +174,10 @@ class Driver extends User {
     const averageRating = await makeSingleQuery({
       text: /* sql */ `
         SELECT ROUND(AVG(R.score), 1) AS rating
-        FROM DriverTrips DT JOIN Reviews R ON DT.tid = R.tid
-        WHERE DT.status = 'finished'
-        AND DT.driver_email = $1
+        FROM DriversCarsTrips DCT
+        JOIN Reviews R ON DCT.trip_tid = R.tid
+        WHERE DCT.trip_status = 'finished'
+        AND DCT.driver_email = $1
       `,
       values: [email],
     });

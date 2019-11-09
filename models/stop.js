@@ -29,17 +29,6 @@ class Stop {
     return this;
   }
 
-  async delete() {
-    await makeSingleQuery({
-      text: /* sql */ `
-        DELETE FROM Stops
-        WHERE address = $2 AND tid = $3
-      `,
-      values: [this.address, this.tid],
-    });
-    return this;
-  }
-
   static async findByTidAndAddress(tid, address) {
     const stops = await makeSingleQuery({
       text: /* sql */ `

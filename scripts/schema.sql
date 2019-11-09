@@ -105,8 +105,14 @@ CREATE TABLE Reviews (
   PRIMARY KEY (email, tid)
 );
 
-CREATE VIEW DriverTrips(driver_email, tid, license, status, origin, seats, departing_on, created_on, updated_on) AS
-  SELECT D.email, T.tid, T.license, T.status, T.origin, T.seats, T.departing_on, T.created_on, T.updated_on
+CREATE VIEW DriversCarsTrips (
+  driver_email, car_license, car_model, car_seats, car_manufactured_on,
+  trip_tid, trip_status, trip_origin, trip_seats, trip_departing_on,
+  trip_created_on, trip_updated_on
+) AS
+  SELECT D.email, C.license, C.model, C.seats, C.manufactured_on,
+    T.tid, T.status, T.origin, T.seats, T.departing_on,
+    T.created_on, T.updated_on
   FROM Trips T
   JOIN Cars C ON T.license = C.license
   JOIN Drivers D ON C.email = D.email;

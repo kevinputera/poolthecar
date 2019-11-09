@@ -44,21 +44,14 @@ class Trip {
     const res = await makeSingleQuery({
       text: /*sql*/ `
         UPDATE  Trips 
-        SET     status = $2,
-                origin = $3,
+        SET     license = $2,
+                status = $3,
                 seats = $4,
-                departing_on = $5,
                 updated_on = NOW()
         WHERE   tid = $1
         RETURNING updated_on
         `,
-      values: [
-        this.tid,
-        this.status,
-        this.origin,
-        this.seats,
-        this.departingOn,
-      ],
+      values: [this.tid, this.license, this.status, this.seats],
     });
     this.updatedOn = res.rows[0].updated_on;
     return this;
@@ -103,12 +96,13 @@ class Trip {
   static async findByTidWithDriverAndStops(tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-        SELECT DT.tid, DT.license, DT.status, DT.origin, DT.seats, DT.departing_on,
-          DT.created_on AS trip_created_on, DT.updated_on AS trip_updated_on,
+        SELECT DCT.trip_tid, DCT.car_license, DCT.trip_status, DCT.trip_origin,
+          DCT.trip_seats, DCT.trip_departing_on, DCT.trip_created_on, DCT.trip_updated_on,
           U.email, U.secret, U.name, U.gender, U.phone, U.profile_photo_url,
           U.created_on AS driver_created_on, U.updated_on AS driver_updated_on
-        FROM DriverTrips DT JOIN Users U ON DT.driver_email = U.email
-        WHERE tid = $1
+        FROM DriversCarsTrips DCT
+        JOIN Users U ON DCT.driver_email = U.email
+        WHERE DCT.trip_tid = $1
       `,
       values: [tid],
     });
@@ -116,12 +110,12 @@ class Trip {
       return null;
     }
     const tripWithDriverAndStops = new Trip(
-      res.rows[0].tid,
-      res.rows[0].license,
-      res.rows[0].status,
-      res.rows[0].origin,
-      res.rows[0].seats,
-      res.rows[0].departing_on,
+      res.rows[0].trip_tid,
+      res.rows[0].car_license,
+      res.rows[0].trip_status,
+      res.rows[0].trip_origin,
+      res.rows[0].trip_seats,
+      res.rows[0].trip_departing_on,
       res.rows[0].trip_created_on,
       res.rows[0].trip_updated_on
     );
@@ -142,8 +136,9 @@ class Trip {
   static async findAllByDriverEmail(driverEmail) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-      SELECT tid, license, status, origin, seats, departing_on, created_on, updated_on
-      FROM DriverTrips
+      SELECT trip_tid, car_license, trip_status, trip_origin, trip_seats,
+        trip_departing_on, trip_created_on, trip_updated_on
+      FROM DriversCarsTrips
       WHERE driver_email = $1
       `,
       values: [driverEmail],
@@ -154,14 +149,14 @@ class Trip {
     return res.rows.map(
       row =>
         new Trip(
-          row.tid,
-          row.license,
-          row.status,
-          row.origin,
-          row.seats,
-          row.departing_on,
-          row.created_on,
-          row.updated_on
+          row.trip_tid,
+          row.car_license,
+          row.trip_status,
+          row.trip_origin,
+          row.trip_seats,
+          row.trip_departing_on,
+          row.trip_created_on,
+          row.trip_updated_on
         )
     );
   }
@@ -224,15 +219,16 @@ class Trip {
   ) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-        SELECT DT.tid, DT.license, DT.status, DT.origin, DT.seats,
-          DT.departing_on, DT.created_on, DT.updated_on
-        FROM DriverTrips DT
-        WHERE DT.driver_email = $1
-        AND (LOWER(DT.origin) LIKE $2
+        SELECT DCT.trip_tid, DCT.car_license, DCT.trip_status, DCT.trip_origin,
+          DCT.trip_seats, DCT.trip_departing_on, DCT.trip_created_on,
+          DCT.trip_updated_on
+        FROM DriversCarsTrips DCT
+        WHERE DCT.driver_email = $1
+        AND (LOWER(DCT.trip_origin) LIKE $2
           OR EXISTS (
             SELECT 1
             FROM Stops S
-            WHERE S.tid = DT.tid
+            WHERE S.tid = DCT.trip_tid
             AND LOWER(S.address) LIKE $2
           )
         )
@@ -259,16 +255,16 @@ class Trip {
       tripsWithStops: await Promise.all(
         res.rows.slice(0, limit).map(async row => {
           const trip = new Trip(
-            row.tid,
-            row.license,
-            row.status,
-            row.origin,
-            row.seats,
-            row.departing_on,
-            row.created_on,
-            row.updated_on
+            row.trip_tid,
+            row.car_license,
+            row.trip_status,
+            row.trip_origin,
+            row.trip_seats,
+            row.trip_departing_on,
+            row.trip_created_on,
+            row.trip_updated_on
           );
-          const stops = await Stop.findAllByTid(row.tid);
+          const stops = await Stop.findAllByTid(row.trip_tid);
           trip.stops = stops;
           return trip;
         })
