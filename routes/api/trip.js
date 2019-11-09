@@ -174,10 +174,10 @@ router.delete('/:tid/bids', async (req, res) => {
  * Route to accept a bid
  */
 router.put('/:tid/stops/:address/accept', async (req, res) => {
-  const { tid, address } = req.params;
+  const { tid } = req.params;
   const { email } = req.body;
   try {
-    let bid = await Bid.findByEmailAndTidAndAddress(email, tid, address);
+    let bid = await Bid.findByEmailAndTid(email, tid);
     if (!bid) {
       badRequestMessage(res, 'Bid does not exist');
       return;

@@ -155,7 +155,7 @@ class Bid {
     const bids = await makeSingleQuery({
       text: /* sql */ `
         SELECT  B.email, B.tid, B.address, B.status, B.value, 
-                B.created_on, B.updated_on, Reviews.score, Reviews.content
+                B.created_on, B.updated_on, R.score, R.content
         FROM    Bids B
         LEFT JOIN Reviews R
         ON      B.tid = R.tid AND B.email = R.email
