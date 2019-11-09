@@ -117,7 +117,7 @@ class Bid {
     };
   }
 
-  static async findAllByTidAndCustomerWithStop(email, tid) {
+  static async findByTidAndCustomerWithStop(email, tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
         SELECT  B.email, B.tid, B.status, B.value, B.created_on, B.updated_on,

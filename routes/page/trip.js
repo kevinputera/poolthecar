@@ -111,7 +111,7 @@ router.get('/:tid/bids/detail', async (req, res) => {
   const isDriver = await checkIsDriver(email);
 
   const driver = await Driver.findByTid(tid);
-  const bidMapWithStop = await Bid.findAllByTidAndCustomerWithStop(email, tid);
+  const bidMapWithStop = await Bid.findByTidAndCustomerWithStop(email, tid);
   const tripWithStops = await Trip.findByTidWithStops(tid);
   const wonBidWithReview = await Bid.findWonBidByTidAndCustomerWithReview(
     tid,
