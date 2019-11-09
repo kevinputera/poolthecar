@@ -143,9 +143,6 @@ class Trip {
       `,
       values: [driverEmail],
     });
-    if (res.rows.length < 1) {
-      return null;
-    }
     return res.rows.map(
       row =>
         new Trip(
