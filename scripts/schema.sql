@@ -243,3 +243,34 @@ CREATE TRIGGER only_one_active_trip_trigger
 BEFORE UPDATE ON Trips
 FOR EACH ROW WHEN (NEW.status = 'ongoing')
 EXECUTE PROCEDURE only_one_active_trip();
+
+-- Trigger to enforce the reviewer had a successful bid and trip was finished
+CREATE OR REPLACE FUNCTION valid_reviewer()
+RETURNS TRIGGER AS $$ DECLARE new_trip_status trip_status; new_bid_status bid_status; 
+BEGIN
+  SELECT T.status
+  INTO new_trip_status
+  FROM Trips T
+  WHERE T.tid = NEW.tid;
+
+  IF (new_trip_status <> 'finished')
+    THEN RAISE EXCEPTION 'Cannot review unfinished trips.';
+  END IF;
+
+  SELECT B.status
+  INTO new_bid_status
+  FROM Bids B
+  WHERE B.email = NEW.email
+  AND B.tid = NEW.tid;
+
+  IF (new_bid_status = 'won')
+    THEN RETURN NEW;
+  ELSE
+    RAISE EXCEPTION 'The user is ineligible to review this trip.';
+  END IF;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER valid_reviewer_trigger
+BEFORE INSERT ON Reviews
+FOR EACH ROW
+EXECUTE PROCEDURE valid_reviewer();
