@@ -8,17 +8,6 @@ const {
 
 const router = express.Router();
 
-// TODO: Remove this
-router.get('/', async (req, res) => {
-  const { user1, user2, page, limit } = req.query;
-  try {
-    const messages = await Message.findByUsers(user1, user2, page, limit);
-    ok(res, messages);
-  } catch (error) {
-    internalError(res, error);
-  }
-});
-
 router.post('/', async (req, res) => {
   const { sender, receiver, content } = req.body;
   const message = new Message(null, sender, receiver, content, null);
