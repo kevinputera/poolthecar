@@ -54,7 +54,7 @@ class Message {
   }
 
   static async findByUsers(user1, user2, page, limit) {
-    const messages = makeSingleQuery({
+    const messages = await makeSingleQuery({
       text: /* sql */ `
         SELECT mid, sender, receiver, content, sent_on
         FROM Messages
@@ -64,18 +64,75 @@ class Message {
         LIMIT   $3
         OFFSET  $4
       `,
-      values: [user1, user2, limit, (page - 1) * limit],
+      values: [user1, user2, limit + 1, (page - 1) * limit],
     });
-    return messages.rows.map(
-      message =>
-        new Message(
-          message.mid,
-          message.sender,
-          message.receiver,
-          message.content,
-          message.sent_on
+
+    let hasNextPage;
+    if (messages.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      messages: messages.rows
+        .slice(0, limit)
+        .map(
+          message =>
+            new Message(
+              message.mid,
+              message.sender,
+              message.receiver,
+              message.content,
+              message.sent_on
+            )
+        ),
+    };
+  }
+
+  static async getUserChatList(email, page, limit) {
+    const res = await makeSingleQuery({
+      text: /* sql */ `
+        WITH DistinctUserEmails(email) AS (
+          SELECT DISTINCT
+            CASE
+              WHEN sender = $1 THEN receiver
+              ELSE sender
+            END
+          FROM Messages
+          WHERE sender = $1
+          OR receiver = $1
         )
-    );
+        SELECT email, (
+          SELECT sent_on
+          FROM Messages
+          WHERE (sender = email AND receiver = $1)
+          OR (sender = $1 AND receiver = email)
+          ORDER BY sent_on DESC
+          LIMIT 1
+        ) AS last_contacted_on
+        FROM DistinctUserEmails
+        LIMIT $2
+        OFFSET $3
+      `,
+      values: [email, limit + 1, (page - 1) * limit],
+    });
+
+    let hasNextPage;
+    if (messages.rows.length === limit + 1) {
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    return {
+      hasNextPage,
+      userChatList: res.rows.slice(0, limit).map(row => ({
+        email: row.email,
+        lastContactedOn: row.last_contacted_on,
+      })),
+    };
   }
 }
 
