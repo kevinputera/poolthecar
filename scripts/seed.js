@@ -1,3 +1,5 @@
+const faker = require('faker');
+
 const { User } = require('../models/user');
 const { Bookmark } = require('../models/bookmark');
 const { Message } = require('../models/message');
@@ -8,82 +10,266 @@ const { Stop } = require('../models/stop');
 const { Bid } = require('../models/bid');
 const { Review } = require('../models/review');
 
-const EMAILS = ['admin@poolthecar.com', 'member@poolthecar.com'];
-const LICENSES = ['A12345', 'B54321', 'C10000'];
-const TID = Array(3).fill(0);
+const USER_COUNT = 100;
+
+const BOOKMARK_PER_USER_LOWER_BOUND = 5;
+const BOOKMARK_PER_USER_UPPER_BOUND = 15;
+
+const MESSAGE_PER_USER_LOWER_BOUND = 50;
+const MESSAGE_PER_USER_UPPER_BOUND = 100;
+
+const DRIVER_PROBABILITY = 0.5;
+
+const CAR_PER_DRIVER_LOWER_BOUND = 1;
+const CAR_PER_DRIVER_UPPER_BOUND = 5;
+
+const TRIP_PER_DRIVER_LOWER_BOUND = 10;
+const TRIP_PER_DRIVER_UPPER_BOUND = 30;
+
+// Users
+// { email: string, password: string }[]
+const USERS = [];
+
+// Driver emails
+// string[]
+const DRIVERS = [];
+
+// Driver emails to cars mapping
+// { driver: { license: string, seats: number }[] }
+const DRIVERS_TO_CARS = [];
+
+// Trips
+// { tid: number, status: string }[]
+const TRIPS = [];
+
+const getRandomArrayElement = array => {
+  const random = Math.random();
+  const index = Math.floor(random * array.length);
+  return array[index];
+};
+
+const getRandomBetweenBounds = (lowerBound, upperBound) => {
+  const numbers = Array(upperBound - lowerBound + 1)
+    .fill(0)
+    .map((_, index) => index + lowerBound);
+  return getRandomArrayElement(numbers);
+};
+
+const getRandomGender = () => {
+  const genders = ['male', 'female', 'non binary'];
+  return getRandomArrayElement(genders);
+};
+
+const getRandomTripStatus = () => {
+  const tripStatus = ['created', 'ongoing', 'finished'];
+  return getRandomArrayElement(tripStatus);
+};
+
+const getRandomUserEmail = () => {
+  return getRandomArrayElement(USERS.map(user => user.email));
+};
+
+const getRandomCarByDriver = driver => {
+  return getRandomArrayElement(DRIVERS_TO_CARS[driver]);
+};
+
+const getRandomLicense = () => {
+  return Array(8)
+    .fill(0)
+    .map(() => faker.random.alphaNumeric())
+    .join('')
+    .toUpperCase();
+};
+
+const getRandomYear = () => {
+  const years = Array(50)
+    .fill(0)
+    .map((_, index) => index + 1960);
+  return getRandomArrayElement(years);
+};
 
 const seedUsers = async () => {
-  const users = [
-    new User(
-      EMAILS[0],
-      'password',
-      'Bob',
-      'male',
-      12345678,
-      'https://avatars2.githubusercontent.com/u/46835051?s=460&v=4'
-    ),
-    new User(
-      EMAILS[1],
-      'password',
-      'Alice',
-      'female',
-      87654321,
-      'https://avatars2.githubusercontent.com/u/46835051?s=460&v=4'
-    ),
-  ];
+  console.log('Seeding users...');
+
+  const users = Array(USER_COUNT)
+    .fill(0)
+    .map(() => {
+      const email = faker.internet.email();
+      const password = faker.internet.password();
+      USERS.push({ email, password });
+
+      return new User(
+        email,
+        password,
+        faker.name.findName(),
+        getRandomGender(),
+        faker.phone.phoneNumber(),
+        faker.image.avatar()
+      );
+    });
+
   await Promise.all(users.map(user => user.save()));
 };
 
 const seedBookmarks = async () => {
-  const bookmarks = [
-    new Bookmark(EMAILS[0], 'Home', 'College Ave'),
-    new Bookmark(EMAILS[0], 'Work', 'Clementi West'),
-    new Bookmark(EMAILS[1], 'School', 'Bugis'),
-  ];
+  console.log('Seeding bookmarks...');
+
+  const bookmarks = [];
+
+  USERS.forEach(user => {
+    const names = new Set();
+
+    Array(
+      getRandomBetweenBounds(
+        BOOKMARK_PER_USER_LOWER_BOUND,
+        BOOKMARK_PER_USER_UPPER_BOUND
+      )
+    )
+      .fill(0)
+      .forEach(() => {
+        let name = faker.random.word();
+        while (names.has(name)) {
+          name = faker.random.word();
+        }
+        names.add(name);
+
+        bookmarks.push(
+          new Bookmark(user.email, name, faker.address.streetAddress())
+        );
+      });
+  });
+
   await Promise.all(bookmarks.map(bookmark => bookmark.save()));
 };
 
 const seedMessages = async () => {
-  const messages = [
-    new Message(undefined, EMAILS[0], EMAILS[1], 'Hello there!'),
-    new Message(undefined, EMAILS[0], EMAILS[1], 'How are you doing?'),
-    new Message(undefined, EMAILS[1], EMAILS[0], 'Hello back!'),
-  ];
+  console.log('Seeding messages...');
+
+  const messages = [];
+
+  USERS.forEach(user => {
+    Array(
+      getRandomBetweenBounds(
+        MESSAGE_PER_USER_LOWER_BOUND,
+        MESSAGE_PER_USER_UPPER_BOUND
+      )
+    )
+      .fill(0)
+      .forEach(() => {
+        let receiverEmail = getRandomUserEmail();
+        while (receiverEmail === user.email) {
+          receiverEmail = getRandomUserEmail();
+        }
+
+        messages.push(
+          new Message(
+            undefined,
+            user.email,
+            receiverEmail,
+            faker.lorem.sentence()
+          )
+        );
+      });
+  });
+
   await Promise.all(messages.map(message => message.save()));
 };
 
 const seedDrivers = async () => {
-  await Driver.register(EMAILS[0]);
+  console.log('Seeding drivers...');
+
+  await Promise.all(
+    USERS.map(async user => {
+      const random = Math.random();
+      if (random < DRIVER_PROBABILITY) {
+        DRIVERS.push(user.email);
+        await Driver.register(user.email);
+      }
+    })
+  );
 };
 
 const seedCars = async () => {
-  const cars = [
-    new Car(LICENSES[0], EMAILS[0], 'Nissan GTR', 3, 2014),
-    new Car(LICENSES[1], EMAILS[0], 'Ford Mustang', 2, 2009),
-    new Car(LICENSES[2], EMAILS[0], 'Toyota Innova', 6, 2015),
-  ];
+  console.log('Seeding cars...');
+
+  const cars = [];
+
+  DRIVERS.forEach(driver => {
+    Array(
+      getRandomBetweenBounds(
+        CAR_PER_DRIVER_LOWER_BOUND,
+        CAR_PER_DRIVER_UPPER_BOUND
+      )
+    )
+      .fill(0)
+      .forEach(() => {
+        const license = getRandomLicense();
+        const seats = getRandomBetweenBounds(4, 9);
+        if (driver in DRIVERS_TO_CARS) {
+          DRIVERS_TO_CARS[driver] = [
+            ...DRIVERS_TO_CARS[driver],
+            { license, seats },
+          ];
+        } else {
+          DRIVERS_TO_CARS[driver] = [{ license, seats }];
+        }
+
+        cars.push(
+          new Car(
+            license,
+            driver,
+            faker.commerce.productName(),
+            seats,
+            getRandomYear()
+          )
+        );
+      });
+  });
+
   await Promise.all(cars.map(car => car.save()));
 };
 
 const seedTrips = async () => {
-  const trips = [
-    new Trip(undefined, LICENSES[0], undefined, 'College Ave', 2, new Date()),
-    new Trip(undefined, LICENSES[0], undefined, 'Bugis', 3, new Date()),
-    new Trip(undefined, LICENSES[1], undefined, 'Clementi East', 2, new Date()),
-  ];
+  console.log('Seeding trips...');
 
-  const savedTrips = await Promise.all(trips.map(trip => trip.save()));
-  savedTrips.forEach((trip, index) => {
-    TID[index] = trip.tid;
+  const trips = [];
+
+  // Create trips
+  DRIVERS.forEach(driver => {
+    Array(
+      getRandomBetweenBounds(
+        TRIP_PER_DRIVER_LOWER_BOUND,
+        TRIP_PER_DRIVER_UPPER_BOUND
+      )
+    )
+      .fill(0)
+      .forEach(() => {
+        const car = getRandomCarByDriver(driver);
+        const seats = getRandomBetweenBounds(1, car.seats);
+        trips.push(
+          new Trip(
+            undefined,
+            car.license,
+            undefined,
+            faker.address.streetAddress(),
+            seats,
+            faker.date.between('2019-01-01', '2019-12-31')
+          )
+        );
+      });
   });
+  const savedTrips = await Promise.all(trips.map(trip => trip.save()));
 
-  const trip2 = savedTrips[1];
-  trip2.status = 'finished';
-  await trip2.update();
+  // Update trip status
+  // await Promise.all(
+  //   savedTrips.map(trip => {
+  //     const status = getRandomTripStatus();
+  //     trip.status = status;
+  //     TRIPS.push({ tid: trip.tid, status });
 
-  const trip3 = savedTrips[2];
-  trip3.status = 'finished';
-  await trip3.update();
+  //     return trip.update();
+  //   })
+  // );
 };
 
 const seedStops = async () => {
@@ -128,9 +314,9 @@ const seedTables = async () => {
   await seedDrivers();
   await seedCars();
   await seedTrips();
-  await seedStops();
-  await seedBids();
-  await seedReviews();
+  // await seedStops();
+  // await seedBids();
+  // await seedReviews();
 };
 
 seedTables()
