@@ -68,4 +68,40 @@ window.addEventListener('load', () => {
       }
     });
   }
+
+  const updateTripStatusButton = document.getElementById('update-trip-status');
+  updateTripStatusButton.addEventListener('click', async () => {
+    const tid = updateTripStatusButton.getAttribute('tid');
+    const status = updateTripStatusButton.getAttribute('status');
+    const origin = updateTripStatusButton.getAttribute('origin');
+    const seats = updateTripStatusButton.getAttribute('seats');
+    const departingOn = updateTripStatusButton.getAttribute('departingOn');
+    try {
+      const res = await fetch(`/api/trips/${encodeURIComponent(tid)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: status,
+          origin: origin,
+          seats: seats,
+          departingOn: departingOn,
+        }),
+      });
+      if (res.ok) {
+        console.log('Update trip status successful');
+        window.location.reload();
+      } else {
+        console.log('Update trip status failed');
+        let error = await res.json();
+        alert(`Update trip status failed:\n${prettyFormatJSON(error)}`);
+        // window.location.reload();
+      }
+    } catch (error) {
+      console.log('Trip status update error: ', error);
+      alert(`Update trip status failed:\n${prettyFormatJSON(error)}`);
+      // window.location.reload();
+    }
+  });
 });

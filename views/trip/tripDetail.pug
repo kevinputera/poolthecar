@@ -17,7 +17,18 @@ block content
     p.field-title Departing On
     p.field-value= new Date(tripWithStops.departingOn).toLocaleString()
     p.field-title Trip Status
-    p.mb-5.field-value= tripWithStops.status
+    p.field-value= tripWithStops.status
+    if (!!nextStatus)
+      p(
+        id= "update-trip-status"
+        class= "field-value table-cell-action",
+        tid= tripWithStops.tid,
+        status= nextStatus,
+        origin= tripWithStops.origin,
+        seats= tripWithStops.seats,
+        departingOn= tripWithStops.departingOn
+      )= "update trip status to: " + nextStatus
+
     div
       h5.section-tile Stops
       table.table.table-hover.table-bordered.table-striped#stop-table
@@ -29,17 +40,6 @@ block content
           tr
             td= stop.address
             td= stop.minPrice
-              //- input(
-              //-   id= "stop-update-input-" + stop.address,
-              //-   disabled= tripWithStops.status !== 'created',
-              //-   value= stop.minPrice
-              //- )
-            //- td(
-            //-   name= "update-stop-action",
-            //-   class= "table-cell-action",
-            //-   address= stop.address,
-            //-   tid = tripWithStops.tid
-            //- )= tripWithStops.status === 'created' ? "Update" : ""
     div
       h5.section-title Bids
       table.table.table-hover.table-bordered.table-striped#bid-table
@@ -58,13 +58,13 @@ block content
                 td= bid.stop.address
                 td= bid.stop.minPrice
                 td= bid.value
-                td= bid.status
+                td= (bid.status === "pending" && tripWithStops.status !== "created") ? "failed" : bid.status
                 td(
                     name= "accept-bid-action",
                     class= "table-cell-action",
                     tid= bid.tid,
                     address= bid.address,
                     email= bid.email
-                )= bid.status === 'pending' ? "Accept" : ""
+                )= bid.status === 'pending' && tripWithStops.status === "created" ? "Accept" : ""
                 td= bid.review.score
                 td= bid.review.content

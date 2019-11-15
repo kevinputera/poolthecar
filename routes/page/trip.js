@@ -63,11 +63,20 @@ router.get('/:tid/detail', async (req, res) => {
     tid
   );
 
+  let nextStatus;
+  if (tripWithStops.status === 'created') {
+    nextStatus = 'ongoing';
+  }
+  if (tripWithStops.status === 'ongoing') {
+    nextStatus = 'finished';
+  }
+
   res.render('trip/tripDetail', {
     title: 'Trip detail',
     isDriver,
     tripWithStops,
     bidsWithStopsAndCustomerAndReview,
+    nextStatus,
   });
 });
 
