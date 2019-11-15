@@ -120,35 +120,34 @@ class Bid {
   static async findByTidAndCustomerWithStop(email, tid) {
     const res = await makeSingleQuery({
       text: /* sql */ `
-        SELECT  B.email, B.tid, B.status, B.value, B.created_on, B.updated_on,
-                S.min_price, S.address
-        FROM Bids B
-        JOIN Stops S
-        ON B.tid = S.tid AND B.address = S.address
-        WHERE B.email = $1 AND B.tid = $2
+      SELECT  B.email, B.status, B.value, B.created_on, B.updated_on,
+              S.min_price, S.address
+      FROM Bids B
+      JOIN Stops S
+      ON B.tid = S.tid AND B.address = S.address
+      WHERE B.email = $1 AND B.tid = $2
       `,
       values: [email, tid],
     });
-
     if (res.rows.length < 1) {
       return null;
     }
-
-    const bidWithStop = new Bid(
-      res.rows[0].email,
-      res.rows[0].tid,
-      res.rows[0].address,
-      res.rows[0].status,
-      res.rows[0].value,
-      res.rows[0].created_on,
-      res.rows[0].updated_on
-    );
-    bidWithStop.stop = new Stop(
-      res.rows[0].min_price,
-      res.rows[0].address,
-      res.rows[0].tid
-    );
-    return bidWithStop;
+    let bidMapWithStop = {};
+    res.rows.forEach(row => {
+      let bid = new Bid(
+        row.email,
+        row.tid,
+        row.address,
+        row.status,
+        row.value,
+        row.created_on,
+        row.updated_on
+      );
+      let stop = new Stop(row.min_price, row.address, tid);
+      bid.stop = stop;
+      bidMapWithStop[row.address] = bid;
+    });
+    return bidMapWithStop;
   }
 
   static async findWonBidByTidAndCustomerWithReview(tid, email) {
