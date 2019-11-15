@@ -47,11 +47,18 @@ class User {
     const res = await makeSingleQuery({
       text: /* sql */ `
         UPDATE Users
-        SET name = $1, gender = $2,
-          phone = $3, profile_photo_url = $4, updated_on = NOW()
+        SET name = $2, gender = $3,
+          phone = $4, profile_photo_url = $5, updated_on = NOW()
+        WHERE email = $1
         RETURNING updated_on
       `,
-      values: [this.name, this.gender, this.phone, this.profilePhotoUrl],
+      values: [
+        this.email,
+        this.name,
+        this.gender,
+        this.phone,
+        this.profilePhotoUrl,
+      ],
     });
     this.updatedOn = res.rows[0].updated_on;
     return this;
