@@ -47,6 +47,7 @@ router.put('/:tid', async (req, res) => {
       badRequestMessage(res, 'Trip does not exist');
       return;
     }
+    console.log(req.body);
 
     trip.status = status;
     trip.origin = origin;
@@ -56,6 +57,7 @@ router.put('/:tid', async (req, res) => {
 
     ok(res, updatedTrip);
   } catch (error) {
+    console.log('Update trip error: ', error);
     internalError(res, error);
   }
 });

@@ -23,9 +23,9 @@ block content
         id= "update-trip-status"
         class= "field-value table-cell-action",
         tid= tripWithStops.tid,
-        status= tripWithStops.status,
+        status= nextStatus,
         origin= tripWithStops.origin,
-        seats= tripWithStops.origin,
+        seats= tripWithStops.seats,
         departingOn= tripWithStops.departingOn
       )= "update trip status to: " + nextStatus
 
@@ -58,13 +58,13 @@ block content
                 td= bid.stop.address
                 td= bid.stop.minPrice
                 td= bid.value
-                td= bid.status
+                td= (bid.status === "pending" && tripWithStops.status !== "created") ? "failed" : bid.status
                 td(
                     name= "accept-bid-action",
                     class= "table-cell-action",
                     tid= bid.tid,
                     address= bid.address,
                     email= bid.email
-                )= bid.status === 'pending' ? "Accept" : ""
+                )= bid.status === 'pending' && tripWithStops.status === "created" ? "Accept" : ""
                 td= bid.review.score
                 td= bid.review.content
