@@ -20,7 +20,7 @@ class Bid {
       text: /* sql */ `
         INSERT INTO Bids (email, tid, address, value)
         VALUES ($1, $2, $3, $4)
-        RETURNING created_on, updated_on
+        RETURNING status, created_on, updated_on
       `,
       values: [this.email, this.tid, this.address, this.value],
     });
