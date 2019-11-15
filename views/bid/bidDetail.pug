@@ -61,7 +61,7 @@ block content
                   disabled= !bidMapWithStop[stop.address] || (bidMapWithStop[stop.address].status !== "pending") || (tripWithStops.status === "finished")
                   value= bidMapWithStop[stop.address] ? bidMapWithStop[stop.address].value : ""
                 )
-    if(wonBidWithReview)
+    if(wonBidWithReview && (tripWithStops.status === "finished"))
       div
         h5.section-title Review
         div.input-group.mb-3
