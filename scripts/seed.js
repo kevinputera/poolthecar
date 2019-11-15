@@ -371,7 +371,13 @@ const writeUserDataToFile = () => {
   writeFileSync(
     path,
     JSON.stringify(
-      USERS.map(user => ({ email: user.email, secret: user.secret }))
+      USERS.map(user => ({
+        name: user.name,
+        email: user.email,
+        secret: user.secret,
+      })),
+      undefined,
+      2
     )
   );
 
