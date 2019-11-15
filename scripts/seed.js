@@ -16,17 +16,21 @@ const MESSAGE_COUNT = 10000;
 const CAR_COUNT = 500;
 const TRIP_COUNT = 1000;
 const STOP_COUNT = 3000;
-const BID_COUNT = 1000;
+const BID_COUNT = 3000;
 
 const DRIVER_PROBABILITY = 0.5;
 const ONGOING_TRIP_PROBABILITY = 0.05;
 const FINISHED_TRIP_PROBABILITY = 0.8;
+const FAILED_BID_PROBABILITY = 0.3;
+const WON_BID_PROBABILITY = 0.5;
+const REVIEW_PROBABILITY = 0.5;
 
 const USERS = [];
 const DRIVER_EMAILS = [];
 const CARS = [];
 const TRIPS = [];
 const STOPS = [];
+const BIDS = [];
 
 const getRandomArrayElement = array => {
   const random = Math.random();
@@ -285,17 +289,26 @@ const seedStops = async () => {
 const seedBids = async () => {
   console.log('Seeding bids...');
 
+  const bidPrimaryKeySet = new Set();
+
   const bids = Array(BID_COUNT)
     .fill(0)
     .map(() => {
-      const trip = getRandomTrip();
-      const stop = getRandomStopFromTid(trip.tid);
-
-      const driverEmail = CARS.find(car => car.license === trip.license).email;
+      // Ensure every bid created uphold pk uniqueness
+      let trip = getRandomTrip();
       let email = getRandomUserEmail();
-      while (email === driverEmail) {
+      let driverEmail = CARS.find(car => car.license === trip.license).email;
+      while (
+        email === driverEmail ||
+        bidPrimaryKeySet.has(JSON.stringify([trip.tid, email]))
+      ) {
+        trip = getRandomTrip();
         email = getRandomUserEmail();
+        driverEmail = CARS.find(car => car.license === trip.license).email;
       }
+      bidPrimaryKeySet.add(JSON.stringify([trip.tid, email]));
+
+      const stop = getRandomStopFromTid(trip.tid);
 
       return new Bid(
         email,
@@ -308,17 +321,41 @@ const seedBids = async () => {
 
   const savedBids = await Promise.all(bids.map(bid => bid.save()));
 
-  // const trip2 = savedBids[1];
-  // trip2.status = 'won';
-  // await trip2.update();
+  // Update bid status
+  const statusUpdatedBids = await Promise.all(
+    savedBids.map(bid => {
+      const random = Math.random();
+      if (random < WON_BID_PROBABILITY) {
+        bid.status = 'won';
+      } else if (random < WON_BID_PROBABILITY + FAILED_BID_PROBABILITY) {
+        bid.status = 'failed';
+      }
+      return bid.update();
+    })
+  );
 
-  // const trip3 = savedBids[2];
-  // trip3.status = 'failed';
-  // await trip3.update();
+  statusUpdatedBids.forEach(bid => BIDS.push(bid));
 };
 
 const seedReviews = async () => {
-  const reviews = [new Review(EMAILS[1], TID[1], 4.9, 'Awesome driver!')];
+  console.log('Seeding reviews...');
+
+  const reviews = [];
+
+  BIDS.filter(bid => bid.status === 'won').forEach(wonBid => {
+    const trip = TRIPS.find(trip => trip.tid === wonBid.tid);
+    if (trip.status === 'finished' && Math.random() < REVIEW_PROBABILITY) {
+      reviews.push(
+        new Review(
+          wonBid.email,
+          trip.tid,
+          getRandomFloatBetweenBounds(0, 5),
+          faker.lorem.lines()
+        )
+      );
+    }
+  });
+
   await Promise.all(reviews.map(review => review.save()));
 };
 
@@ -331,7 +368,7 @@ const seedTables = async () => {
   await seedTrips();
   await seedStops();
   await seedBids();
-  // await seedReviews();
+  await seedReviews();
 };
 
 seedTables()
