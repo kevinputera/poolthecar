@@ -1,4 +1,6 @@
 const faker = require('faker');
+const { writeFileSync } = require('fs');
+const { join } = require('path');
 
 const { User } = require('../models/user');
 const { Bookmark } = require('../models/bookmark');
@@ -31,6 +33,8 @@ const CARS = [];
 const TRIPS = [];
 const STOPS = [];
 const BIDS = [];
+
+const USERS_OUTPUT_FILENAME = 'users.json';
 
 const getRandomArrayElement = array => {
   const random = Math.random();
@@ -359,6 +363,21 @@ const seedReviews = async () => {
   await Promise.all(reviews.map(review => review.save()));
 };
 
+const writeUserDataToFile = () => {
+  const path = join(__dirname, `./${USERS_OUTPUT_FILENAME}`);
+
+  console.log(`Storing generated user data at ${path}`);
+
+  writeFileSync(
+    path,
+    JSON.stringify(
+      USERS.map(user => ({ email: user.email, secret: user.secret }))
+    )
+  );
+
+  console.log(`Generated user data is stored at ${path}`);
+};
+
 const seedTables = async () => {
   await seedUsers();
   await seedBookmarks();
@@ -369,6 +388,9 @@ const seedTables = async () => {
   await seedStops();
   await seedBids();
   await seedReviews();
+
+  // Save users data in a file for login purposes
+  writeUserDataToFile();
 };
 
 seedTables()
